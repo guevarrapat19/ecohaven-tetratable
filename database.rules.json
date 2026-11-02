@@ -38,7 +38,7 @@
       "$uid": {
         ".read": true,
         ".write": "auth != null ? (auth.uid === $uid || root.child('users/' + auth.uid + '/role').val() === 'admin' || root.child('users/' + auth.uid + '/role').val() === 'seller') : true",
-        ".validate": "newData.hasChildren(['email', 'fullName']) || !newData.exists()"
+        ".validate": "newData.hasChildren(['email']) && (newData.child('displayName').exists() || newData.child('fullName').exists()) || !newData.exists()"
       }
     }
   }

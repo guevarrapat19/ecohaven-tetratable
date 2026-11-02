@@ -387,13 +387,28 @@
 
       // 2. Hash password with SHA-256
       const passwordHash = await sha256Hex(password);
-      const newUid = generateUid();
+      let newUid = generateUid();
       const now = new Date().toISOString();
+
+      // 2.5. Dual-Layer: Attempt Firebase Auth SDK creation to get synchronized auth.uid
+      if (window.ecoHavenAuth) {
+        try {
+          const userCred = await window.ecoHavenAuth.createUserWithEmailAndPassword(email, password);
+          if (userCred && userCred.user) {
+            newUid = userCred.user.uid;
+            await userCred.user.updateProfile({ displayName: name });
+            console.log('🟢 Firebase Auth SDK: Created verified user', newUid);
+          }
+        } catch (fbAuthErr) {
+          console.warn('Firebase Auth SDK registration notice:', fbAuthErr.code, fbAuthErr.message);
+        }
+      }
 
       // 3. Construct user record with role strictly stored under users node
       const newUser = {
         uid: newUid,
         displayName: name,
+        fullName: name,
         email: email,
         phone: phone,
         role: 'customer', // Determined on the backend / field under users node (no UI selection)
@@ -403,19 +418,6 @@
         createdAt: now,
         lastLoginAt: now
       };
-
-      // 3.5. Dual-Layer: Attempt Firebase Auth SDK creation
-      if (window.ecoHavenAuth) {
-        try {
-          const userCred = await window.ecoHavenAuth.createUserWithEmailAndPassword(email, password);
-          if (userCred && userCred.user) {
-            await userCred.user.updateProfile({ displayName: name });
-            console.log('🟢 Firebase Auth SDK: Created verified user', userCred.user.uid);
-          }
-        } catch (fbAuthErr) {
-          console.warn('Firebase Auth SDK registration notice:', fbAuthErr.code, fbAuthErr.message);
-        }
-      }
 
       // 4. Save to Firebase Realtime Database
       if (window.ecoHavenDb) {
