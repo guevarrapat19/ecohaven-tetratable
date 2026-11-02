@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>EcoHaven Furniture — Candaba Workshop Direct | Live Smarter. Make Room for More.</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#86450D",
+            "primary-container": "#A45D25",
+            "on-primary": "#FFFFFF",
+            secondary: "#7D562D",
+            "secondary-container": "#FFCA98",
+            tertiary: "#415D42",
+            "tertiary-fixed": "#CAEBC8",
+            surface: "#FFF8F5",
+            "surface-container": "#FFEADE",
+            "surface-container-low": "#FFF1EA",
+            "surface-container-lowest": "#FFFFFF",
+            "on-surface": "#26190F",
+            "on-surface-variant": "#53443A",
+            "inverse-surface": "#25170E",
+            "inverse-on-surface": "#FFF1E9",
+            outline: "#867368",
+            "outline-variant": "#D9C2B5"
+          },
+          fontFamily: {
+            headline: ["Playfair Display", "serif"],
+            body: ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @layer base {
+      html { scroll-behavior: smooth; }
+      body { overscroll-behavior: none; }
+    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #FFF1EA; }
+    ::-webkit-scrollbar-thumb { background: #D9C2B5; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #86450D; }
+
+    /* ========================================================
+       3D BOOK PAGE-FLIP ENGINE FOR SHOWROOM
+       ======================================================== */
+    .book-stage {
+      perspective: 2500px;
+      perspective-origin: center;
+    }
+
+    .book-frame {
+      position: relative;
+      transform-style: preserve-3d;
+      border-radius: 20px;
+      box-shadow: 
+        0 30px 60px -15px rgba(27, 16, 9, 0.45),
+        0 0 0 1px rgba(255, 255, 255, 0.15),
+        -15px 0 35px rgba(0, 0, 0, 0.35);
+      background: #1B1009;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Left Spine Leather Binding Crease */
+    .book-spine-crease {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 40px;
+      background: linear-gradient(to right, rgba(0,0,0,0.55), rgba(0,0,0,0.2) 45%, transparent);
+      z-index: 45;
+      border-top-left-radius: 20px;
+      border-bottom-left-radius: 20px;
+      pointer-events: none;
+    }
+
+    /* Right Paper Stack Thickness */
+    .book-edge-stack {
+      position: absolute;
+      right: -10px;
+      top: 12px;
+      bottom: 12px;
+      width: 12px;
+      background: repeating-linear-gradient(to bottom, #F9F5F0, #F9F5F0 2px, #D5C8B8 2px, #D5C8B8 4px);
+      border-radius: 0 4px 4px 0;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.35);
+      z-index: 5;
+    }
+
+    /* 3D Flipping Page Sheet */
+    .flipping-page {
+      position: absolute;
+      inset: 0;
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      border-radius: 20px;
+      z-index: 30;
+      transition: transform 0.75s cubic-bezier(0.45, 0.05, 0.25, 1);
+      will-change: transform;
+    }
+
+    .flipping-page.flip-forward {
+      transform: rotateY(-180deg);
+    }
+
+    .flipping-page.flip-backward {
+      transform: rotateY(0deg);
+    }
+
+    .page-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .page-face.front {
+      z-index: 2;
+    }
+
+    .page-face.back {
+      transform: rotateY(180deg);
+      z-index: 1;
+    }
+
+    /* Shading overlay during flip */
+    .page-shadow-sweep {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(to right, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 30%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.75s ease;
+    }
+
+    .flipping-page.flip-forward .page-shadow-sweep {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased selection:bg-secondary-container selection:text-on-surface">
+
+  <!-- TOP ANNOUNCEMENT BAR -->
+  <div class="w-full bg-inverse-surface text-inverse-on-surface text-xs py-2 px-4 border-b border-white/10">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>Candaba, Pampanga Woodworking Atelier • Est. 2026</span>
+        <span class="hidden md:inline text-white/40">|</span>
+        <span class="hidden md:inline text-inverse-on-surface/80">🇵🇭 Free Delivery in Pampanga • 50% Downpayment Available</span>
+      </div>
+      <div class="flex items-center gap-4 text-inverse-on-surface/80">
+        <span class="hidden sm:inline">DTI Reg. #4918230</span>
+        <span class="hidden sm:inline">•</span>
+        <a href="tel:+639812558028" class="hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">call</span>
+          <span>+63 981 255 8028</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION HEADER (NO SEARCH INPUT ON TOP) -->
+  <header class="sticky top-0 z-50 bg-surface/95 backdrop-blur-md border-b border-outline-variant/30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
+      <!-- Brand Logo -->
+      <a href="index.html" class="flex items-center gap-3 flex-shrink-0 group">
+        <img src="assets/images/logo.avif" alt="EcoHaven Emblem" class="w-10 h-10 object-contain transition-transform group-hover:scale-105"/>
+        <div class="flex flex-col leading-none">
+          <span class="font-headline text-xl font-bold tracking-tight text-on-surface">EcoHaven</span>
+          <span class="text-[10px] uppercase font-bold tracking-widest text-primary mt-0.5">Candaba Workshop</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden lg:flex items-center gap-1 bg-surface-container-low p-1.5 rounded-full border border-outline-variant/30">
+        <a href="index.html" class="px-4 py-2 rounded-full text-sm font-semibold bg-primary text-white shadow-sm">Home</a>
+        <a href="pages/tetratable.html" class="px-4 py-2 rounded-full text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">TetraTable 4-in-1</a>
+        <a href="pages/shop.html" class="px-4 py-2 rounded-full text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">Shop Collection</a>
+        <a href="pages/about.html" class="px-4 py-2 rounded-full text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">About Us</a>
+        <a href="pages/contact.html" class="px-4 py-2 rounded-full text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">Contact</a>
+      </nav>
+
+      <!-- Right Header Actions (Alert, User, Cart, CTA) -->
+      <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+  <!-- 1. Inventory of Products (Seller Only, before Notification) -->
+  <a href="pages/seller.html#inventory" id="headerInventoryBtn" class="hidden relative w-10 h-10 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-all shadow-sm active:scale-95" aria-label="Workshop Inventory & Products" title="Workshop Inventory & Products">
+    <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+    <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-600 rounded-full ring-2 ring-surface"></span>
+  </a>
+
+  <!-- 2. Notification Bell -->
+  <button type="button" id="headerAlertBtn" onclick="handleHeaderAlertClick()" class="relative w-10 h-10 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-all shadow-sm active:scale-95" aria-label="Notifications & Order Updates" title="Notifications & Order Updates">
+    <span class="material-symbols-outlined text-[20px]">notifications</span>
+    <span id="headerAlertBadge" class="header-alert-badge absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-[#BA1A1A] text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-surface shadow-xs hidden">0</span>
+  </button>
+
+  <!-- 3. Orders Dashboard (In between Notification and User Icon, when user is logged in) -->
+  <a href="pages/dashboard.html" id="headerOrdersBtn" class="hidden relative w-10 h-10 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-all shadow-sm active:scale-95" aria-label="Orders Dashboard" title="Orders Dashboard">
+    <span class="material-symbols-outlined text-[20px]">receipt_long</span>
+    <span id="headerOrdersBadge" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-surface shadow-xs leading-none">1</span>
+  </a>
+
+  <!-- 4. User Account Icon -->
+  <button type="button" id="headerUserBtn" onclick="handleHeaderUserClick()" class="w-10 h-10 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-all shadow-sm active:scale-95" aria-label="EcoHaven Account" title="EcoHaven Account">
+    <span class="material-symbols-outlined text-[20px]">person</span>
+  </button>
+
+  <!-- 5. Cart / Order Queue -->
+  <button type="button" id="headerCartBtn" onclick="openCartDrawer()" class="relative w-10 h-10 rounded-full bg-secondary-container text-on-surface hover:bg-primary hover:text-white transition-all shadow-sm flex items-center justify-center active:scale-95" aria-label="View Shopping Cart" title="View Order Queue">
+    <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+    <span id="cartBadge" class="cart-count-badge absolute -top-1 -right-1 min-w-[20px] h-5 px-1 bg-primary text-white text-[11px] font-bold rounded-full flex items-center justify-center border-2 border-surface">0</span>
+  </button>
+  <a href="pages/tetratable.html" class="hidden sm:inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full bg-primary text-white text-xs font-bold hover:bg-primary-container transition-all shadow-sm">
+    <span>Order TetraTable</span>
+    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+  </a>
+</div>
+    </div>
+  </header>
+
+  <main class="w-full">
+
+    <!-- ======================================================== -->
+    <!-- SECTION 1: HERO (ELEGANT EDITORIAL & PRODUCT STORY) -->
+    <!-- ======================================================== -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 py-10 lg:py-16">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+        
+        <!-- Left Column: Story, Pricing & Actions -->
+        <div class="lg:col-span-7 space-y-6 text-left">
+          
+          <!-- Candaba Workshop Badge -->
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-secondary-container text-on-surface text-xs font-bold uppercase tracking-wider shadow-sm">
+            <span class="material-symbols-outlined text-[16px] text-tertiary">eco</span>
+            <span>100% Solid Philippine Mahogany • Candaba, Pampanga</span>
+          </div>
+
+          <!-- Headline & Punchline from eProduct.docx -->
+          <h1 class="font-headline text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-on-surface leading-[1.12]">
+            Live Smarter. <br/>
+            <span class="text-primary italic">Make Room for More.</span>
+          </h1>
+
+          <!-- Product Story & Ad Copy -->
+          <p class="text-base sm:text-lg text-on-surface-variant leading-relaxed max-w-xl">
+            Why settle for ordinary furniture when you can have a table that transforms into four separate chairs? Discover <strong>TetraTable</strong> by EcoHaven Furniture — an innovative, multifunctional space-saving solution designed to maximize limited spaces while providing everyday convenience.
+          </p>
+
+          <!-- Direct Workshop Pricing & Reservation Card -->
+          <div class="max-w-md p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-outline-variant/40 flex items-center justify-between gap-4 shadow-sm text-left">
+            <div>
+              <span class="text-[11px] uppercase tracking-wider text-on-surface-variant font-bold block">Direct Workshop Price</span>
+              <div class="flex items-baseline gap-2">
+                <span class="font-headline text-3xl font-bold text-primary">₱6,934.00</span>
+                <span class="text-xs text-on-surface-variant">Includes 4 chairs + table</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+                50% DP: ₱3,467.00
+              </span>
+              <span class="block text-[11px] text-on-surface-variant mt-0.5">Pay balance upon delivery</span>
+            </div>
+          </div>
+
+          <!-- Direct CTA Buttons -->
+          <div class="flex flex-wrap items-center gap-3 pt-1">
+            <button type="button" onclick="quickAddTetraTable()" class="px-7 py-3.5 rounded-full bg-primary text-white font-bold hover:bg-primary-container transition-all shadow-lg hover:shadow-xl flex items-center gap-2 text-sm sm:text-base active:scale-95">
+              <span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+              <span>Add to Cart — ₱6,934</span>
+            </button>
+            <a href="#showroom" class="px-6 py-3.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-semibold transition-all border border-outline-variant/40 text-sm flex items-center gap-1.5">
+              <span>Explore Living Showroom</span>
+              <span class="material-symbols-outlined text-[18px]">menu_book</span>
+            </a>
+          </div>
+
+          <!-- Trust Highlights -->
+          <div class="flex flex-wrap items-center gap-x-5 gap-y-2.5 pt-5 border-t border-outline-variant/30 text-xs text-on-surface-variant">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-primary">straighten</span>
+              <span class="font-medium">Ø 38 cm × 50 cm</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-primary">chair</span>
+              <span class="font-medium">4 Sturdy Chairs</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-tertiary">local_shipping</span>
+              <span class="font-medium">Free Pampanga Delivery</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-tertiary">verified</span>
+              <span class="font-medium">DTI Registered (2026)</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Product Image Beside the Text -->
+        <div class="lg:col-span-5 flex justify-center">
+          <div class="relative w-full max-w-sm sm:max-w-md rounded-3xl overflow-hidden bg-gradient-to-b from-[#2B1B12] to-[#1A0F0A] p-2.5 sm:p-3 shadow-2xl border border-white/10 group">
+            
+            <!-- Top Badges inside frame -->
+            <div class="absolute top-5 left-5 right-5 z-20 flex items-center justify-between pointer-events-none">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[11px] font-bold text-white border border-white/15">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Flagship TetraTable</span>
+              </span>
+              <span class="text-[10px] uppercase font-mono tracking-wider px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-md text-amber-200 border border-white/10">
+                Candaba Kiln Stabilized
+              </span>
+            </div>
+
+            <!-- Image Frame -->
+            <div class="relative w-full aspect-[3/4] rounded-2xl overflow-hidden bg-black/40">
+              <img src="assets/images/product_in_use_hd.png" 
+                   alt="TetraTable 4-in-1 Solid Mahogany In-Use Living Room Setup" 
+                   class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 select-none"/>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+              
+              <!-- Bottom Pill on Image -->
+              <div class="absolute bottom-3 left-3 right-3 z-20 px-3.5 py-2 rounded-xl bg-black/70 backdrop-blur-md border border-white/15 text-white flex items-center justify-between pointer-events-none">
+                <div>
+                  <span class="text-[11px] font-semibold text-amber-200 block">Living Room In-Use Setup</span>
+                  <span class="text-[10px] text-white/80">Ø 38 cm • 50 cm H</span>
+                </div>
+                <a href="pages/tetratable.html" class="pointer-events-auto text-[11px] font-bold text-white bg-primary hover:bg-primary-container px-3 py-1 rounded-lg transition-colors flex items-center gap-1">
+                  <span>Specs</span>
+                  <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Footer Caption Bar below photo in frame -->
+            <div class="pt-2.5 px-2 pb-0.5 flex items-center justify-between text-[11px] text-stone-300">
+              <span class="font-medium">Handcrafted Philippine Mahogany</span>
+              <a href="pages/tetratable.html" class="text-amber-300 hover:text-white font-semibold transition-colors flex items-center gap-1">
+                <span>View Full 4-in-1 Details</span>
+                <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+              </a>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 2: THE MAIN SHOWROOM — 3D BOOK PAGE-FLIP LOOKBOOK -->
+    <!-- ======================================================== -->
+    <section id="showroom" class="w-full bg-surface-container-low py-16 lg:py-24 border-y border-outline-variant/30 scroll-mt-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        
+        <!-- Showroom Header (Product Advertising Quotes) -->
+        <div class="text-center max-w-3xl mx-auto mb-10">
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-secondary-container text-on-surface text-xs font-bold uppercase tracking-wider mb-3">
+            <span class="material-symbols-outlined text-[16px] text-primary">auto_stories</span>
+            <span>The Candaba Living Lookbook</span>
+          </span>
+          <h2 class="font-headline text-3xl sm:text-5xl font-bold text-on-surface tracking-tight">
+            The Interactive Living Showroom
+          </h2>
+          <p class="font-headline italic text-lg sm:text-xl text-primary mt-3 max-w-2xl mx-auto leading-relaxed">
+            “Why settle for ordinary furniture when you can have a table that transforms into four separate chairs?”
+          </p>
+          <p class="text-xs sm:text-sm text-on-surface-variant mt-2 tracking-wide font-medium">
+            Smart Design • Space-Saving • Functional Living
+          </p>
+        </div>
+
+        <!-- 3D Book Showroom Canvas -->
+        <div class="max-w-5xl mx-auto book-stage">
+          <div class="relative">
+            
+            <!-- Book Edge Paper Stack Simulation (Depth Effect) -->
+            <div class="book-edge-stack"></div>
+
+            <!-- Main Interactive Book Container -->
+            <div id="showroomBook" onclick="turnBookPage(1)" class="book-frame aspect-[4/3] sm:aspect-[16/10] max-h-[580px] w-full overflow-hidden relative group cursor-pointer">
+              
+              <!-- Left Spine Leather Binding Crease -->
+              <div class="book-spine-crease"></div>
+
+              <!-- BASE UNDERLAYER: The Next Page Waiting to be Revealed -->
+              <div class="absolute inset-0 z-10 overflow-hidden bg-[#1B1009]">
+                <img id="bookUnderlayerImg" 
+                     src="assets/images/showroom/showroom_2.jpg" 
+                     alt="Next Showroom View" 
+                     class="w-full h-full object-cover select-none"/>
+              </div>
+
+              <!-- 3D FLIPPING SHEET LEAF -->
+              <div id="flippingLeaf" class="flipping-page">
+                <!-- FRONT OF LEAF: The Current Visible Page -->
+                <div class="page-face front bg-[#1B1009]">
+                  <img id="bookCurrentImg" 
+                       src="assets/images/showroom/showroom_1.jpg" 
+                       alt="Active Showroom View" 
+                       class="w-full h-full object-cover select-none"/>
+                  <div class="page-shadow-sweep"></div>
+                </div>
+
+                <!-- BACK OF LEAF: Backside paper as it flips over -->
+                <div class="page-face back bg-[#25170E] flex items-center justify-center border-l-2 border-[#1B1009]">
+                  <img id="bookBacksideImg" 
+                       src="assets/images/showroom/showroom_2.jpg" 
+                       alt="Backside Page" 
+                       class="w-full h-full object-cover opacity-80 blur-[1px]"/>
+                  <div class="absolute inset-0 bg-black/40"></div>
+                </div>
+              </div>
+
+              <!-- Floating Top Compact Caption Bar (Unblocks Product View Below) -->
+              <div class="absolute top-3 sm:top-4 left-3 right-3 sm:left-6 sm:right-6 z-40 py-2 sm:py-2.5 px-3.5 sm:px-5 rounded-2xl sm:rounded-full bg-black/75 backdrop-blur-md text-white border border-white/15 flex items-center justify-between gap-3 shadow-xl pointer-events-none">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-[11px] font-bold font-mono flex-shrink-0" id="showroomPageNumberBadge">
+                    01
+                  </span>
+                  <div class="flex items-center gap-2 truncate">
+                    <span id="showroomTagline" class="hidden sm:inline-block text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-white/15 text-amber-200 flex-shrink-0">
+                      Multifunctional Table &amp; Seating
+                    </span>
+                    <p id="showroomQuote" class="font-headline italic text-xs sm:text-sm text-white/95 truncate">
+                      “Why settle for ordinary furniture when you can have a table that transforms into four separate chairs?”
+                    </p>
+                  </div>
+                  <!-- Hidden elements for DOM parity -->
+                  <span id="showroomTitle" class="hidden"></span>
+                  <span id="showroomSubtitle" class="hidden"></span>
+                </div>
+
+                <div class="pointer-events-auto flex items-center gap-2 flex-shrink-0">
+                  <button type="button" onclick="event.stopPropagation(); quickAddTetraTable();" class="px-3.5 py-1.5 rounded-full bg-primary hover:bg-primary-container text-white text-[11px] font-bold transition-all shadow-md flex items-center gap-1 active:scale-95 whitespace-nowrap">
+                    <span class="material-symbols-outlined text-[14px]">shopping_cart</span>
+                    <span>Order — ₱6,934</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- External Navigation Arrows (Desktop overlay) -->
+            <button type="button" onclick="event.stopPropagation(); turnBookPage(-1);" aria-label="Previous Showroom Page" class="absolute -left-4 sm:-left-6 top-1/2 -translate-y-1/2 z-50 w-12 h-12 rounded-full bg-surface-container-lowest/90 hover:bg-primary hover:text-white text-on-surface shadow-xl flex items-center justify-center transition-all border border-outline-variant/40 active:scale-90">
+              <span class="material-symbols-outlined text-[24px]">chevron_left</span>
+            </button>
+
+            <button type="button" onclick="event.stopPropagation(); turnBookPage(1);" aria-label="Next Showroom Page" class="absolute -right-4 sm:-right-6 top-1/2 -translate-y-1/2 z-50 w-12 h-12 rounded-full bg-surface-container-lowest/90 hover:bg-primary hover:text-white text-on-surface shadow-xl flex items-center justify-center transition-all border border-outline-variant/40 active:scale-90">
+              <span class="material-symbols-outlined text-[24px]">chevron_right</span>
+            </button>
+
+          </div>
+
+          <!-- Bottom Book Pagination & Spread Selector -->
+          <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            
+            <!-- Direct Clickable Spread Dots -->
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" onclick="goToBookPage(0)" id="spreadBtn0" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-primary text-white shadow-sm">
+                01 • 4-in-1 Design
+              </button>
+              <button type="button" onclick="goToBookPage(1)" id="spreadBtn1" class="px-3.5 py-1.5 rounded-full text-xs font-medium transition-all bg-surface-container hover:bg-surface-container-high text-on-surface-variant">
+                02 • Space-Saving
+              </button>
+              <button type="button" onclick="goToBookPage(2)" id="spreadBtn2" class="px-3.5 py-1.5 rounded-full text-xs font-medium transition-all bg-surface-container hover:bg-surface-container-high text-on-surface-variant">
+                03 • Condo Living
+              </button>
+              <button type="button" onclick="goToBookPage(3)" id="spreadBtn3" class="px-3.5 py-1.5 rounded-full text-xs font-medium transition-all bg-surface-container hover:bg-surface-container-high text-on-surface-variant">
+                04 • Kiln Hardwood
+              </button>
+              <button type="button" onclick="goToBookPage(4)" id="spreadBtn4" class="px-3.5 py-1.5 rounded-full text-xs font-medium transition-all bg-surface-container hover:bg-surface-container-high text-on-surface-variant">
+                05 • Guest Seating
+              </button>
+            </div>
+
+            <!-- Page Counter Display -->
+            <div class="flex items-center gap-3">
+              <span id="bookPageCounter" class="text-xs font-mono font-bold text-on-surface-variant">
+                PAGE 1 OF 5
+              </span>
+              <a href="pages/shop.html" class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+                <span>View Collection Prices →</span>
+              </a>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 4: ARTISANAL HERITAGE SNIPPET (CONNECT TO ABOUT) -->
+    <!-- ======================================================== -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 py-10 lg:py-16">
+      <div class="rounded-3xl bg-inverse-surface text-inverse-on-surface p-8 sm:p-12 relative overflow-hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+          
+          <div class="lg:col-span-7 space-y-4">
+            <span class="inline-block px-3 py-1 rounded-full bg-primary text-white text-xs font-bold uppercase tracking-wider">
+              Candaba Woodworking Workshop
+            </span>
+            <h2 class="font-headline text-3xl sm:text-4xl font-bold text-white leading-tight">
+              Crafted in Candaba, Pampanga. <br/>
+              Built for Generations.
+            </h2>
+            <p class="text-sm sm:text-base text-inverse-on-surface/85 leading-relaxed">
+              Every EcoHaven piece begins with sustainably sourced Philippine Mahogany. Our artisans stabilize each timber batch in controlled kilns to an exact <strong>11.4% moisture content</strong>, preventing splitting or warping in tropical climates.
+            </p>
+            <div class="pt-2 flex flex-wrap items-center gap-4">
+              <a href="pages/about.html" class="px-6 py-3 rounded-full bg-primary text-white font-bold hover:bg-primary-container transition-all shadow-md flex items-center gap-2 text-sm">
+                <span>Read Our Full Story</span>
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </a>
+              <a href="pages/contact.html" class="px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white font-medium transition-all text-sm">
+                Visit Our Workshop
+              </a>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 flex justify-center">
+            <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20">
+              <img src="assets/images/Picture7.png" alt="Artisan white-glove inspection" class="w-full h-[280px] sm:h-[320px] object-cover"/>
+              <div class="absolute bottom-2 left-2 right-2 p-2 rounded-xl bg-black/60 backdrop-blur-md text-white text-[11px] flex items-center justify-between">
+                <span>White-Glove Quality Inspection</span>
+                <span class="text-amber-300 font-bold">100% Inspected</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 5: CUSTOMER REVIEWS (AUTHENTIC SOCIAL PROOF) -->
+    <!-- ======================================================== -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+      <div class="text-center max-w-xl mx-auto mb-10">
+        <span class="text-xs font-bold uppercase tracking-wider text-primary block mb-1">Real Homeowners</span>
+        <h2 class="font-headline text-2xl sm:text-3xl font-bold text-on-surface">Loved in Condos & Homes</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Review 1 -->
+        <div class="p-6 rounded-3xl bg-surface-container-low border border-outline-variant/30 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center text-amber-500">
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+            </div>
+            <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+              "We live in a 36-sqm modern condo in Angeles City. The TetraTable looks like an expensive designer side table during weekdays, and when our barkada comes over on weekends, we instantly have 4 sturdy seats."
+            </p>
+          </div>
+          <div class="mt-4 pt-4 border-t border-outline-variant/30 flex items-center justify-between text-xs">
+            <span class="font-bold text-on-surface">Patricia M.</span>
+            <span class="text-on-surface-variant">Angeles City, Pampanga</span>
+          </div>
+        </div>
+
+        <!-- Review 2 -->
+        <div class="p-6 rounded-3xl bg-surface-container-low border border-outline-variant/30 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center text-amber-500">
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+            </div>
+            <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+              "You can really feel that it's genuine Philippine Mahogany. The wood grain is gorgeous, edges are smooth, and the 50% reservation downpayment made it super accessible."
+            </p>
+          </div>
+          <div class="mt-4 pt-4 border-t border-outline-variant/30 flex items-center justify-between text-xs">
+            <span class="font-bold text-on-surface">Rafael D.</span>
+            <span class="text-on-surface-variant">San Fernando, Pampanga</span>
+          </div>
+        </div>
+
+        <!-- Review 3 -->
+        <div class="p-6 rounded-3xl bg-surface-container-low border border-outline-variant/30 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center text-amber-500">
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+            </div>
+            <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+              "Customer service was so responsive via mobile. The Candaba logistics team delivered it directly to our doorstep in Guagua, Pampanga with white-glove unboxing."
+            </p>
+          </div>
+          <div class="mt-4 pt-4 border-t border-outline-variant/30 flex items-center justify-between text-xs">
+            <span class="font-bold text-on-surface">Camille T.</span>
+            <span class="text-on-surface-variant">Guagua, Pampanga</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- FOOTER (WITH VERIFIED SOCIAL CHANNELS FROM E-marketing.docx) -->
+  <!-- ======================================================== -->
+  <footer class="w-full bg-inverse-surface text-inverse-on-surface pt-12 pb-8 border-t border-white/10 mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-10">
+        
+        <!-- Col 1: Brand -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2">
+            <img src="assets/images/logo.avif" alt="EcoHaven Logo" class="h-8 w-8 object-contain"/>
+            <span class="font-headline text-xl font-bold text-white">EcoHaven</span>
+          </div>
+          <p class="text-xs text-inverse-on-surface/80 leading-relaxed">
+            Live Smarter. Make Room for More. Space-saving furniture handcrafted from solid Philippine Mahogany in Candaba, Pampanga.
+          </p>
+          <div class="text-xs text-primary-fixed">
+            <span>DTI Reg. #4918230 • Est. 2026</span>
+          </div>
+        </div>
+
+        <!-- Col 2: Direct Contact from Contact Us.docx -->
+        <div class="space-y-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-primary-fixed">Direct Contact</span>
+          <p class="text-xs text-inverse-on-surface/80 flex items-start gap-2">
+            <span class="material-symbols-outlined text-[16px] text-primary-fixed">location_on</span>
+            <span>Candaba, Pampanga, Philippines</span>
+          </p>
+          <p class="text-xs text-inverse-on-surface/80 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px] text-primary-fixed">call</span>
+            <a href="tel:+639812558028" class="hover:underline">+63 981 255 8028</a>
+          </p>
+          <p class="text-xs text-inverse-on-surface/80 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px] text-primary-fixed">mail</span>
+            <a href="mailto:ecohavenfurniture@gmail.com" class="hover:underline">ecohavenfurniture@gmail.com</a>
+          </p>
+        </div>
+
+        <!-- Col 3: Navigation Links -->
+        <div class="space-y-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-primary-fixed">Navigation</span>
+          <div class="flex flex-col gap-2 text-xs text-inverse-on-surface/80">
+            <a href="index.html" class="hover:text-white transition-colors font-bold text-white">Home Storefront</a>
+            <a href="pages/tetratable.html" class="hover:text-white transition-colors">TetraTable 4-in-1</a>
+            <a href="pages/shop.html" class="hover:text-white transition-colors">Shop All Products</a>
+            <a href="pages/about.html" class="hover:text-white transition-colors">About Us</a>
+            <a href="pages/contact.html" class="hover:text-white transition-colors">Contact Us</a>
+          </div>
+        </div>
+
+        <!-- Col 4: Verified Social Media Channels from E-marketing.docx -->
+        <div class="space-y-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-primary-fixed">Follow Our Craft</span>
+          <p class="text-xs text-inverse-on-surface/75">
+            Connect with us on official channels for workshop updates, customer photos, and videos.
+          </p>
+          <div class="flex items-center gap-3 pt-2">
+            <!-- Facebook -->
+            <a href="https://www.facebook.com/profile.php?id=61588914923992&rdid=JkQTafkpCiS2BW1d&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1CBMxNxPbk%2F#" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#1877F2] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Facebook">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            <!-- TikTok -->
+            <a href="https://www.tiktok.com/@ecohavenfurnitureph" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-black hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="TikTok (@ecohavenfurnitureph)">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.97v7.54c.03 2.5-1.28 4.9-3.4 6.13-2.15 1.25-4.94 1.19-7.03-.15-2.07-1.32-3.13-3.76-2.69-6.17.43-2.39 2.37-4.27 4.79-4.67.65-.11 1.31-.1 1.96.01v4.06c-.46-.17-.97-.2-1.45-.1-.99.2-1.77.96-1.99 1.94-.22.98.15 2.02.94 2.63.78.61 1.86.68 2.7.18.84-.49 1.34-1.41 1.32-2.38V.02h-.01z"/></svg>
+            </a>
+            <!-- Instagram -->
+            <a href="https://www.instagram.com/ecohavenfuniture?psln=bHN3dzI4dW1oMnY3" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#E4405F] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Instagram (@ecohavenfuniture)">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-inverse-on-surface/60 gap-4">
+        <p>© 2026 EcoHaven Furniture. All rights reserved. Dalan Batu, Pasig, Candaba, Pampanga.</p>
+        <p>Live Smarter. Make Room for More.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ======================================================== -->
+  <!-- CART DRAWER & CHECKOUT SLIDEOUT -->
+  <!-- ======================================================== -->
+  <div id="cartDrawerBackdrop" onclick="closeCartDrawer()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+  <div id="cartDrawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-surface z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col justify-between border-l border-outline-variant/40">
+    <!-- Drawer Header -->
+    <div class="p-4 sm:p-6 border-b border-outline-variant/30 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[24px]">shopping_bag</span>
+        <h3 class="font-headline text-xl font-bold text-on-surface">Your Shopping Cart</h3>
+      </div>
+      <button type="button" onclick="closeCartDrawer()" class="p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors" aria-label="Close cart">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <!-- Drawer Body -->
+    <div class="p-4 sm:p-6 flex-1 overflow-y-auto space-y-4">
+      <div id="cartDrawerItemsList" class="space-y-3">
+        <!-- Populated dynamically via store.js -->
+      </div>
+
+      <!-- Payment Modality Selector (50% Downpayment vs 100% Full) -->
+      <div class="p-4 rounded-2xl bg-surface-container border border-outline-variant/40 space-y-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant block">Payment Settlement Option</span>
+        
+        <label class="flex items-center justify-between p-3 rounded-xl bg-surface-container-lowest cursor-pointer border border-primary/30">
+          <div class="flex items-center gap-2.5">
+            <input type="radio" name="indexPaymentOption" value="fifty" checked onchange="window.ecohaven ? window.ecohaven.setDrawerPaymentMode('fifty') : null" class="accent-primary w-4 h-4"/>
+            <div>
+              <span class="text-xs font-bold text-on-surface block">50% Reservation Downpayment</span>
+              <span class="text-[11px] text-on-surface-variant">Pay balance upon Candaba delivery</span>
+            </div>
+          </div>
+          <span class="text-xs font-bold text-primary" id="drawerHalfAmountDisplay">₱3,467.00</span>
+        </label>
+
+        <label class="flex items-center justify-between p-3 rounded-xl bg-surface-container-lowest cursor-pointer border border-outline-variant/30">
+          <div class="flex items-center gap-2.5">
+            <input type="radio" name="indexPaymentOption" value="full" onchange="window.ecohaven ? window.ecohaven.setDrawerPaymentMode('full') : null" class="accent-primary w-4 h-4"/>
+            <div>
+              <span class="text-xs font-bold text-on-surface block">100% Full Payment</span>
+              <span class="text-[11px] text-on-surface-variant">Immediate workshop queue priority</span>
+            </div>
+          </div>
+          <span class="text-xs font-bold text-on-surface" id="drawerFullAmountDisplay">₱6,934.00</span>
+        </label>
+      </div>
+
+      <!-- Guarantees -->
+      <div class="p-3 rounded-xl bg-surface-container-low text-[11px] text-on-surface-variant space-y-1">
+        <p class="flex items-center gap-1.5 font-medium">
+          <span class="material-symbols-outlined text-primary text-[15px]">verified</span>
+          <span>DTI Registered Enterprise #4918230</span>
+        </p>
+        <p class="flex items-center gap-1.5 font-medium">
+          <span class="material-symbols-outlined text-tertiary text-[15px]">local_shipping</span>
+          <span>Fast Direct Delivery to Pampanga, Bulacan, & NCR</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="p-4 sm:p-6 bg-surface-container-low border-t border-outline-variant/30 space-y-3">
+      <div class="flex items-baseline justify-between">
+        <span class="text-xs font-medium text-on-surface-variant">Amount Due Today:</span>
+        <span id="drawerDueAmount" class="font-headline text-2xl font-bold text-primary">₱3,467.00</span>
+      </div>
+      <a href="pages/checkout.html" class="w-full py-3.5 px-4 rounded-full bg-primary hover:bg-primary-container text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-95">
+        <span class="material-symbols-outlined text-[18px]">lock</span>
+        <span>Proceed to Checkout →</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- FIREBASE & STORE SCRIPTS -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/store.js"></script>
+
+  <!-- ======================================================== -->
+  <!-- 3D BOOK FLIPPING SCRIPT ENGINE -->
+  <!-- ======================================================== -->
+  <script>
+    // Showroom Gallery Dataset from "Showroom Images on Home"
+    // Advertising descriptions & quotes curated directly from eProduct.docx & About Us.docx
+    const SHOWROOM_DATA = [
+      {
+        src: "assets/images/showroom/showroom_1.jpg",
+        quote: "“Why settle for ordinary furniture when you can have a table that transforms into four separate chairs?”",
+        tagline: "Multifunctional Table & Seating",
+        title: "Smart Design. Space-Saving. Functional Living.",
+        subtitle: "TetraTable by EcoHaven Furniture is an innovative, multifunctional solution designed to maximize limited spaces while providing everyday convenience."
+      },
+      {
+        src: "assets/images/showroom/showroom_2.jpg",
+        quote: "“Live Smarter. Make Room for More.”",
+        tagline: "Condo & Compact Living",
+        title: "More Space. More Comfort. Smarter Living.",
+        subtitle: "Perfect for small homes, apartments, condominiums, and modern living spaces—combining functionality and style in one space-saving design."
+      },
+      {
+        src: "assets/images/showroom/showroom_3.jpg",
+        quote: "“Make Every Space Count.”",
+        tagline: "Interlocking Architecture",
+        title: "A Table and Four Chairs in One Space-Saving Solution",
+        subtitle: "Unique interlocking design allows the pieces to fit together as a compact side table and separate into four individual chairs whenever needed."
+      },
+      {
+        src: "assets/images/showroom/showroom_4.jpg",
+        quote: "“Thoughtful Design. Quality Workmanship. Responsible Materials.”",
+        tagline: "Candaba Kiln-Stabilized",
+        title: "100% Solid Hardwood Craftsmanship",
+        subtitle: "Carefully selected Candaba kiln-cured mahogany (11.4% moisture content) with hand-sanded smooth edges and durable wooden slats."
+      },
+      {
+        src: "assets/images/showroom/showroom_5.jpg",
+        quote: "“Practical, durable, and attractive furniture for everyday Philippine living.”",
+        tagline: "Hospitality & Daily Comfort",
+        title: "Convenient & Versatile Seating Solution",
+        subtitle: "Suitable for morning coffee, small gatherings, and welcoming family and visitors without cluttering your floor plan."
+      }
+    ];
+
+    let currentBookIndex = 0;
+    let isFlipping = false;
+
+    function updateShowroomUI(index) {
+      const data = SHOWROOM_DATA[index];
+      const quoteEl = document.getElementById('showroomQuote');
+      const tagEl = document.getElementById('showroomTagline');
+      const titleEl = document.getElementById('showroomTitle');
+      const subEl = document.getElementById('showroomSubtitle');
+      const badgeEl = document.getElementById('showroomPageNumberBadge');
+      const counterEl = document.getElementById('bookPageCounter');
+
+      if (quoteEl) quoteEl.innerText = data.quote;
+      if (tagEl) tagEl.innerText = data.tagline;
+      if (titleEl) titleEl.innerText = data.title;
+      if (subEl) subEl.innerText = data.subtitle;
+      if (badgeEl) badgeEl.innerText = String(index + 1).padStart(2, '0');
+      if (counterEl) counterEl.innerText = `PAGE ${index + 1} OF ${SHOWROOM_DATA.length}`;
+
+      // Update spread pills
+      for (let i = 0; i < SHOWROOM_DATA.length; i++) {
+        const btn = document.getElementById('spreadBtn' + i);
+        if (btn) {
+          if (i === index) {
+            btn.className = "px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-primary text-white shadow-sm";
+          } else {
+            btn.className = "px-3.5 py-1.5 rounded-full text-xs font-medium transition-all bg-surface-container hover:bg-surface-container-high text-on-surface-variant";
+          }
+        }
+      }
+    }
+
+    function turnBookPage(direction) {
+      if (isFlipping) return;
+      isFlipping = true;
+
+      const leaf = document.getElementById('flippingLeaf');
+      const currImg = document.getElementById('bookCurrentImg');
+      const underImg = document.getElementById('bookUnderlayerImg');
+      const backImg = document.getElementById('bookBacksideImg');
+
+      let nextIndex = currentBookIndex + direction;
+      if (nextIndex >= SHOWROOM_DATA.length) nextIndex = 0;
+      if (nextIndex < 0) nextIndex = SHOWROOM_DATA.length - 1;
+
+      // Prepare images for 3D flip
+      underImg.src = SHOWROOM_DATA[nextIndex].src;
+      currImg.src = SHOWROOM_DATA[currentBookIndex].src;
+      backImg.src = SHOWROOM_DATA[nextIndex].src;
+
+      // Reset transforms
+      leaf.style.transition = 'none';
+      if (direction > 0) {
+        // Forward flip: start at 0deg, rotate to -180deg
+        leaf.classList.remove('flip-forward', 'flip-backward');
+        void leaf.offsetWidth; // Force reflow
+        leaf.style.transition = 'transform 0.75s cubic-bezier(0.45, 0.05, 0.25, 1)';
+        leaf.classList.add('flip-forward');
+      } else {
+        // Backward flip: start at -180deg with next image, rotate to 0deg
+        currImg.src = SHOWROOM_DATA[nextIndex].src;
+        backImg.src = SHOWROOM_DATA[currentBookIndex].src;
+        underImg.src = SHOWROOM_DATA[nextIndex].src;
+        leaf.classList.add('flip-forward');
+        void leaf.offsetWidth;
+        leaf.style.transition = 'transform 0.75s cubic-bezier(0.45, 0.05, 0.25, 1)';
+        leaf.classList.remove('flip-forward');
+      }
+
+      setTimeout(() => {
+        currentBookIndex = nextIndex;
+        currImg.src = SHOWROOM_DATA[currentBookIndex].src;
+        leaf.style.transition = 'none';
+        leaf.classList.remove('flip-forward', 'flip-backward');
+        updateShowroomUI(currentBookIndex);
+        isFlipping = false;
+      }, 760);
+    }
+
+    function goToBookPage(index) {
+      if (index === currentBookIndex || isFlipping) return;
+      const dir = index > currentBookIndex ? 1 : -1;
+      currentBookIndex = (dir > 0 ? index - 1 : index + 1);
+      if (currentBookIndex < 0) currentBookIndex = SHOWROOM_DATA.length - 1;
+      if (currentBookIndex >= SHOWROOM_DATA.length) currentBookIndex = 0;
+      turnBookPage(dir);
+    }
+
+    // General Store Interactions
+        function handleHeaderAlertClick() {
+      if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast("🔔 Workshop Notifications: You're all caught up! Order & milestone alerts will appear here.", 'info');
+      } else {
+        alert("🔔 Notifications: You're all caught up! Workshop updates & announcements will appear here.");
+      }
+    }
+
+    function handleHeaderUserClick() {
+      const userStr = localStorage.getItem('ecohaven_user');
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          if (u.role === 'seller') {
+            window.location.href = 'pages/seller.html';
+            return;
+          } else {
+            window.location.href = 'pages/dashboard.html';
+            return;
+          }
+        } catch(e) {}
+      }
+      if (typeof openAuthModal === 'function') {
+        openAuthModal('login');
+      } else if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast("👤 Opening EcoHaven Account Portal...", 'info');
+      } else {
+        alert("👤 Customer Portal: Account login & member dashboard coming soon. Use Track Order for active orders.");
+      }
+    }
+
+    function openCartDrawer() {
+      const drawer = document.getElementById('cartDrawer');
+      const backdrop = document.getElementById('cartDrawerBackdrop');
+      if (backdrop) {
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        backdrop.classList.add('opacity-100');
+      }
+      if (drawer) {
+        drawer.classList.remove('translate-x-full');
+        drawer.classList.add('translate-x-0');
+      }
+      if (window.ecohaven && typeof window.ecohaven.renderCartDrawer === 'function') {
+        window.ecohaven.renderCartDrawer();
+      }
+    }
+
+    function closeCartDrawer() {
+      const drawer = document.getElementById('cartDrawer');
+      const backdrop = document.getElementById('cartDrawerBackdrop');
+      if (backdrop) {
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        backdrop.classList.remove('opacity-100');
+      }
+      if (drawer) {
+        drawer.classList.add('translate-x-full');
+        drawer.classList.remove('translate-x-0');
+      }
+    }
+
+    function quickAddTetraTable() {
+      if (window.ecohaven && typeof window.ecohaven.addToCart === 'function') {
+        window.ecohaven.addToCart('tetratable_4in1');
+      }
+      openCartDrawer();
+    }
+
+    function addAccessoryToCart(itemId) {
+      if (window.ecohaven && typeof window.ecohaven.addToCart === 'function') {
+        window.ecohaven.addToCart(itemId);
+      }
+      openCartDrawer();
+    }
+  </script>
+
+  <script src="assets/notifications.js"></script>
+  <script src="assets/auth-modal.js"></script>
+</body>
+</html>

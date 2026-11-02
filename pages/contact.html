@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Contact Us — EcoHaven Furniture | Candaba, Pampanga</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#86450D",
+            "primary-container": "#A45D25",
+            "on-primary": "#FFFFFF",
+            secondary: "#7D562D",
+            "secondary-container": "#FFCA98",
+            tertiary: "#415D42",
+            "tertiary-fixed": "#CAEBC8",
+            surface: "#FFF8F5",
+            "surface-container": "#FFEADE",
+            "surface-container-low": "#FFF1EA",
+            "surface-container-lowest": "#FFFFFF",
+            "on-surface": "#26190F",
+            "on-surface-variant": "#53443A",
+            "inverse-surface": "#25170E",
+            "inverse-on-surface": "#FFF1E9",
+            outline: "#867368",
+            "outline-variant": "#D9C2B5"
+          },
+          fontFamily: {
+            headline: ["Playfair Display", "serif"],
+            body: ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased selection:bg-secondary-container selection:text-on-surface">
+
+  <!-- TOP ANNOUNCEMENT BAR -->
+  <div class="w-full bg-inverse-surface text-inverse-on-surface text-xs py-2 px-4 border-b border-white/10">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span>Candaba, Pampanga Woodworking Atelier • Est. 2026</span>
+      </div>
+      <div class="hidden sm:flex items-center gap-4 text-inverse-on-surface/80">
+        <span>🇵🇭 DTI Reg. #4918230</span>
+        <span>•</span>
+        <span>Customer Support: +63 981 255 8028</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION BAR -->
+  <header class="sticky top-0 z-50 bg-surface/95 backdrop-blur-md border-b border-outline-variant/30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+      <a href="../index.html" class="flex items-center gap-3 group">
+        <img src="../assets/images/logo.avif" alt="EcoHaven Emblem" class="w-10 h-10 object-contain transition-transform group-hover:scale-105"/>
+        <div class="flex flex-col">
+          <span class="font-headline text-xl font-bold tracking-tight text-on-surface">EcoHaven</span>
+          <span class="text-[10px] uppercase font-bold tracking-widest text-primary">Candaba Workshop</span>
+        </div>
+      </a>
+
+      <nav class="hidden md:flex items-center gap-1 bg-surface-container-low p-1.5 rounded-full border border-outline-variant/30">
+        <a href="../index.html" class="px-4 py-2 rounded-full text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">Home</a>
+        <a href="tetratable.html" class="px-4 py-2 rounded-full text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">TetraTable 4-in-1</a>
+        <a href="shop.html" class="px-4 py-2 rounded-full text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">Shop Collection</a>
+        <a href="about.html" class="px-4 py-2 rounded-full text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">About Us</a>
+        <a href="contact.html" class="px-4 py-2 rounded-full text-sm font-semibold bg-primary text-white shadow-sm">Contact</a>
+      </nav>
+
+      <div class="flex items-center gap-space-xs sm:gap-space-sm flex-shrink-0">
+  <!-- 1. Inventory of Products (Seller Only, before Notification) -->
+  <a href="seller.html#inventory" id="headerInventoryBtn" class="hidden relative w-10 h-10 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-all shadow-xs active:scale-95" aria-label="Workshop Inventory & Products" title="Workshop Inventory & Products">
+    <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+    <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-600 rounded-full border border-surface"></span>
+  </a>
+
+  <!-- 2. Notification Bell -->
+  <button type="button" id="headerAlertBtn" onclick="handleHeaderAlertClick()" class="relative w-10 h-10 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-all shadow-xs active:scale-95" aria-label="Notifications & Order Updates" title="Notifications & Order Updates">
+    <span class="material-symbols-outlined text-[20px]">notifications</span>
+    <span id="headerAlertBadge" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs border border-surface leading-none">2</span>
+  </button>
+
+  <!-- 3. Orders Dashboard (In between Notification and User Icon, when user is logged in) -->
+  <a href="dashboard.html" id="headerOrdersBtn" class="hidden relative w-10 h-10 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-all shadow-xs active:scale-95" aria-label="Orders Dashboard" title="Orders Dashboard">
+    <span class="material-symbols-outlined text-[20px]">receipt_long</span>
+    <span id="headerOrdersBadge" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs border border-surface leading-none">1</span>
+  </a>
+
+  <!-- 4. User Account Icon -->
+  <button type="button" id="headerUserBtn" onclick="handleHeaderUserClick()" class="w-10 h-10 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-all shadow-xs active:scale-95" aria-label="Account & Workshop Portal" title="Account & Workshop Portal">
+    <span class="material-symbols-outlined text-[20px]">person</span>
+  </button>
+
+  <!-- 5. Cart / Order Queue -->
+  <button type="button" onclick="window.ecohaven ? window.ecohaven.openCartDrawer() : (typeof openCartDrawer === 'function' ? openCartDrawer() : null)" class="relative w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container hover:bg-secondary-fixed hover:scale-105 active:scale-95 transition-all flex items-center justify-center shadow-sm" aria-label="View Order Queue" title="View Order Queue">
+    <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+    <span id="cartBadge" class="cart-count-badge absolute -top-1 -right-1 min-w-[20px] h-5 px-1 bg-primary text-white text-[11px] font-bold rounded-full flex items-center justify-center shadow-sm border border-surface leading-none">1</span>
+  </button>
+</div></div></div></header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-12 lg:py-16">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-xs text-on-surface-variant mb-6">
+      <a href="../index.html" class="hover:underline">Home</a>
+      <span>/</span>
+      <span class="text-primary font-semibold">Contact Us</span>
+    </div>
+
+    <!-- Header Section -->
+    <div class="max-w-3xl mb-12">
+      <span class="inline-block px-3 py-1 rounded-full bg-secondary-container text-on-surface text-xs font-bold uppercase tracking-wider mb-4">
+        We'd Love to Hear From You
+      </span>
+      <h1 class="font-headline text-3xl sm:text-5xl font-bold tracking-tight text-on-surface leading-tight mb-4">
+        More Space. More Comfort. <span class="text-primary italic">Smarter Living.</span>
+      </h1>
+      <p class="text-lg text-on-surface-variant leading-relaxed">
+        Whether you have questions about our <strong>TetraTable</strong> dimensions, custom Philippine Mahogany finishes, or shipping across Pampanga and Metro Manila, our Candaba artisan team is here to help.
+      </p>
+    </div>
+
+    <!-- 2-Column Contact Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      
+      <!-- Left Column: Contact Cards -->
+      <div class="lg:col-span-5 space-y-6">
+        
+        <!-- Atelier Location Card -->
+        <div class="p-6 rounded-3xl bg-surface-container-low border border-outline-variant/30 flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-[26px]">location_on</span>
+          </div>
+          <div>
+            <h3 class="font-headline text-lg font-bold text-on-surface">Company & Workshop</h3>
+            <p class="text-sm font-semibold text-primary mt-0.5">EcoHaven Furniture</p>
+            <p class="text-sm text-on-surface-variant mt-1 leading-relaxed">
+              Dalan Batu, Pasig, Candaba, Pampanga, Philippines
+            </p>
+            <span class="inline-block mt-2 px-2.5 py-1 rounded bg-surface-container text-[11px] font-bold text-on-surface-variant">
+              Central Luzon Showroom
+            </span>
+          </div>
+        </div>
+
+        <!-- Phone & Viber Card -->
+        <div class="p-6 rounded-3xl bg-surface-container-low border border-outline-variant/30 flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-tertiary/10 text-tertiary flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-[26px]">call</span>
+          </div>
+          <div>
+            <h3 class="font-headline text-lg font-bold text-on-surface">Direct Phone & WhatsApp</h3>
+            <a href="tel:+639812558028" class="text-base font-bold text-primary hover:underline block mt-0.5">
+              +63 981 255 8028
+            </a>
+            <p class="text-xs text-on-surface-variant mt-1">
+              Monday to Sunday: 8:00 AM – 5:00 PM PHT
+            </p>
+          </div>
+        </div>
+
+        <!-- Email Card -->
+        <div class="p-6 rounded-3xl bg-surface-container-low border border-outline-variant/30 flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-secondary-container text-on-surface flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-[26px]">mail</span>
+          </div>
+          <div>
+            <h3 class="font-headline text-lg font-bold text-on-surface">Customer Inquiries</h3>
+            <a href="mailto:ecohavenfurniture@gmail.com" class="text-sm font-bold text-primary hover:underline block mt-0.5">
+              ecohavenfurniture@gmail.com
+            </a>
+            <p class="text-xs text-on-surface-variant mt-1">
+              We respond to all orders and inquiries within 24 hours.
+            </p>
+          </div>
+        </div>
+
+        <!-- Social Channels Card -->
+        <div class="p-6 rounded-3xl bg-surface-container border border-outline-variant/40">
+          <h3 class="font-headline text-base font-bold text-on-surface mb-2">Connect on Social Media</h3>
+          <p class="text-xs text-on-surface-variant mb-4">
+            Watch real unboxing videos, customer reviews, and woodworking behind-the-scenes.
+          </p>
+          <div class="flex items-center gap-3">
+            <a href="https://www.facebook.com/profile.php?id=61588914923992&rdid=JkQTafkpCiS2BW1d&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1CBMxNxPbk%2F#" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-white shadow-sm border border-outline-variant/30 text-xs font-semibold text-[#1877F2] hover:bg-[#1877F2] hover:text-white transition-all flex items-center gap-2">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              <span>Facebook</span>
+            </a>
+            <a href="https://www.tiktok.com/@ecohavenfurnitureph" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-white shadow-sm border border-outline-variant/30 text-xs font-semibold text-black hover:bg-black hover:text-white transition-all flex items-center gap-2">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.97v7.54c.03 2.5-1.28 4.9-3.4 6.13-2.15 1.25-4.94 1.19-7.03-.15-2.07-1.32-3.13-3.76-2.69-6.17.43-2.39 2.37-4.27 4.79-4.67.65-.11 1.31-.1 1.96.01v4.06c-.46-.17-.97-.2-1.45-.1-.99.2-1.77.96-1.99 1.94-.22.98.15 2.02.94 2.63.78.61 1.86.68 2.7.18.84-.49 1.34-1.41 1.32-2.38V.02h-.01z"/></svg>
+              <span>TikTok</span>
+            </a>
+            <a href="https://www.instagram.com/ecohavenfuniture?psln=bHN3dzI4dW1oMnY3" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-white shadow-sm border border-outline-variant/30 text-xs font-semibold text-[#E4405F] hover:bg-[#E4405F] hover:text-white transition-all flex items-center gap-2">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+              <span>Instagram</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Interactive Direct Inquiry Form -->
+      <div class="lg:col-span-7">
+        <div class="p-8 sm:p-10 rounded-3xl bg-surface-container-lowest border border-outline-variant/40 shadow-sm">
+          <h2 class="font-headline text-2xl font-bold text-on-surface mb-2">Send an Inquiry to the Workshop</h2>
+          <p class="text-sm text-on-surface-variant mb-6">
+            Leave your details below and our Candaba customer specialist will reach out with stock status, delivery schedules, or bespoke answers.
+          </p>
+
+          <form id="contactForm" onsubmit="event.preventDefault(); handleContactSubmit();" class="space-y-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="userName" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">Full Name *</label>
+                <input type="text" id="userName" required placeholder="Full Name" class="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm text-on-surface"/>
+              </div>
+              <div>
+                <label for="userContact" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">Phone / Mobile *</label>
+                <input type="tel" id="userContact" required inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="09171234567" class="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm text-on-surface"/>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="userEmail" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">Email Address</label>
+                <input type="email" id="userEmail" placeholder="Email Address" class="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm text-on-surface"/>
+              </div>
+              <div>
+                <label for="userProvince" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">Delivery Destination</label>
+                <select id="userProvince" class="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm text-on-surface">
+                  <option value="Pampanga">Pampanga (Free Direct Delivery)</option>
+                  <option value="Metro Manila">Metro Manila (NCR Courier)</option>
+                  <option value="Bulacan">Bulacan</option>
+                  <option value="Tarlac">Tarlac</option>
+                  <option value="Bataan">Bataan</option>
+                  <option value="Other">Other Philippine Provinces</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label for="userMessage" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">Your Message / Order Inquiries *</label>
+              <textarea id="userMessage" required rows="4" placeholder="Ask about TetraTable availability, downpayment terms, or custom delivery requests..." class="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm text-on-surface"></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn" class="w-full py-3.5 rounded-full bg-primary text-white font-bold hover:bg-primary-container transition-all shadow-md flex items-center justify-center gap-2">
+              <span>Send Message to Workshop</span>
+              <span class="material-symbols-outlined text-[18px]">send</span>
+            </button>
+
+            <div id="contactSuccessAlert" class="hidden p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-start gap-3">
+              <span class="material-symbols-outlined text-emerald-600">check_circle</span>
+              <div>
+                <strong class="font-bold">Thank you for your message!</strong>
+                <p class="text-xs text-emerald-700 mt-0.5">Our Candaba team has received your inquiry and will message or call you within 24 hours.</p>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    function handleContactSubmit() {
+      const btn = document.getElementById('submitBtn');
+      const alert = document.getElementById('contactSuccessAlert');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">refresh</span><span>Sending message...</span>';
+      
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Message Sent!</span><span class="material-symbols-outlined text-[18px]">check</span>';
+        alert.classList.remove('hidden');
+        document.getElementById('contactForm').reset();
+      }, 800);
+    }
+  </script>
+
+  <!-- FOOTER -->
+  <footer class="w-full bg-inverse-surface text-inverse-on-surface pt-12 pb-8 border-t border-white/10 mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-10">
+        <!-- Col 1: Brand -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2">
+            <img src="../assets/images/logo.avif" alt="EcoHaven Logo" class="h-8 w-8 object-contain"/>
+            <span class="font-headline text-xl font-bold text-white">EcoHaven</span>
+          </div>
+          <p class="text-xs text-inverse-on-surface/80 leading-relaxed">
+            More Space. More Comfort. Smarter Living. Handcrafted Philippine Mahogany furniture.
+          </p>
+          <div class="text-xs text-primary-fixed">
+            <span>DTI Reg. #4918230 • Candaba, Pampanga</span>
+          </div>
+        </div>
+
+        <!-- Col 2: Contact -->
+        <div class="space-y-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-primary-fixed">Direct Contact</span>
+          <p class="text-xs text-inverse-on-surface/80 flex items-start gap-2">
+            <span class="material-symbols-outlined text-[16px] text-primary-fixed">location_on</span>
+            <span>Candaba, Pampanga, Philippines</span>
+          </p>
+          <p class="text-xs text-inverse-on-surface/80 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px] text-primary-fixed">call</span>
+            <a href="tel:+639812558028" class="hover:underline">+63 981 255 8028</a>
+          </p>
+          <p class="text-xs text-inverse-on-surface/80 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px] text-primary-fixed">mail</span>
+            <a href="mailto:ecohavenfurniture@gmail.com" class="hover:underline">ecohavenfurniture@gmail.com</a>
+          </p>
+        </div>
+
+        <!-- Col 3: Navigation Links -->
+        <div class="space-y-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-primary-fixed">Navigation</span>
+          <div class="flex flex-col gap-2 text-xs text-inverse-on-surface/80">
+            <a href="../index.html" class="hover:text-white transition-colors">Home Storefront</a>
+            <a href="tetratable.html" class="hover:text-white transition-colors">TetraTable 4-in-1</a>
+            <a href="shop.html" class="hover:text-white transition-colors">Shop All Products</a>
+            <a href="about.html" class="hover:text-white transition-colors">About Us</a>
+            <a href="contact.html" class="hover:text-white transition-colors font-bold text-white">Contact Us</a>
+          </div>
+        </div>
+
+        <!-- Col 4: Verified Social Media Channels from E-marketing.docx -->
+        <div class="space-y-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-primary-fixed">Follow Our Craft</span>
+          <p class="text-xs text-inverse-on-surface/75">
+            Connect with us on official channels for workshop updates and live demos.
+          </p>
+          <div class="flex items-center gap-3 pt-2">
+            <a href="https://www.facebook.com/profile.php?id=61588914923992&rdid=JkQTafkpCiS2BW1d&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1CBMxNxPbk%2F#" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#1877F2] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Facebook">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            <a href="https://www.tiktok.com/@ecohavenfurnitureph" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-black hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="TikTok (@ecohavenfurnitureph)">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.97v7.54c.03 2.5-1.28 4.9-3.4 6.13-2.15 1.25-4.94 1.19-7.03-.15-2.07-1.32-3.13-3.76-2.69-6.17.43-2.39 2.37-4.27 4.79-4.67.65-.11 1.31-.1 1.96.01v4.06c-.46-.17-.97-.2-1.45-.1-.99.2-1.77.96-1.99 1.94-.22.98.15 2.02.94 2.63.78.61 1.86.68 2.7.18.84-.49 1.34-1.41 1.32-2.38V.02h-.01z"/></svg>
+            </a>
+            <a href="https://www.instagram.com/ecohavenfuniture?psln=bHN3dzI4dW1oMnY3" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#E4405F] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Instagram (@ecohavenfuniture)">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-inverse-on-surface/60 gap-4">
+        <p>© 2026 EcoHaven Furniture. All rights reserved. Candaba, Pampanga, Philippines.</p>
+        <p>More Space. More Comfort. Smarter Living.</p>
+      </div>
+    </div>
+  </footer>
+
+<script>
+        function handleHeaderAlertClick() {
+      if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast("🔔 Workshop Notifications: You're all caught up! Order & milestone alerts will appear here.", 'info');
+      } else {
+        alert("🔔 Notifications: You're all caught up! Workshop updates & announcements will appear here.");
+      }
+    }
+
+    function handleHeaderUserClick() {
+      const userStr = localStorage.getItem('ecohaven_user');
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          if (u.role === 'seller') {
+            window.location.href = 'seller.html';
+            return;
+          } else {
+            window.location.href = 'dashboard.html';
+            return;
+          }
+        } catch(e) {}
+      }
+      if (typeof openAuthModal === 'function') {
+        openAuthModal('login');
+      } else if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast("👤 Opening EcoHaven Account Portal...", 'info');
+      } else {
+        alert("👤 Customer Portal: Account login & member dashboard coming soon. Use Track Order for active orders.");
+      }
+    }
+  </script>
+  <!-- Firebase Realtime Database SDK (Official CDN - Zero Build Step) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="../js/firebase-config.js"></script>
+  <script src="../assets/notifications.js"></script>
+  <script src="../assets/auth-modal.js"></script>
+</body>
+</html>
+

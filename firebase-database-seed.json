@@ -1,0 +1,377 @@
+{
+  "ecohaven": {
+    "telemetry": {
+      "workshopLocation": "Dalan Batu, Pasig, Candaba, Pampanga, Philippines",
+      "dtiRegistration": "DTI Reg. #4918230",
+      "kilnMoistureContent": "11.4% MC",
+      "timberSpecies": "Solid Philippine Mahogany",
+      "activeCraftsmen": 8,
+      "activeProductionUnits": 18,
+      "workshopStatus": "Operational",
+      "contactPhone": "+639812558028",
+      "contactEmail": "ecohavenfurniture@gmail.com",
+      "socials": {
+        "facebook": "https://www.facebook.com/share/1Jbjk6EM4j/",
+        "tiktok": "https://www.tiktok.com/@ecohavenfurnitureph",
+        "instagram": "https://www.instagram.com/ecohavenfuniture?psln=bHN3dzI4dW1oMnY3"
+      }
+    },
+    "products": {
+      "tetratable-mahogany": {
+        "id": "tetratable-mahogany",
+        "name": "TetraTable Multifunctional 4-in-1 Suite",
+        "category": "Multifunctional 4-in-1",
+        "price": 6934.0,
+        "downPaymentPrice": 3467.0,
+        "isFlagship": true,
+        "woodSpecies": "100% Solid Philippine Mahogany",
+        "moistureRating": "11.4% MC (Kiln Stabilized)",
+        "treatment": "Solignum Deep Anti-Termite & Borer Chemical Barrier",
+        "bonding": "Pioneer High-Strength Epoxy Mortise Joinery",
+        "finish": "Natural Polished Barnis Wood Stain",
+        "availableFinishes": [
+          "Natural Polished Mahogany",
+          "Dark Smoked Walnut",
+          "Warm Golden Teak"
+        ],
+        "staticLoadCapacityPerChairKg": 120,
+        "stowedFootprintM2": 0.3,
+        "dimensionsStowed": {
+          "lengthCm": 45,
+          "widthCm": 45,
+          "heightCm": 50
+        },
+        "conversionSpeedSeconds": 8.5,
+        "componentsCount": 5,
+        "description": "Innovative multifunctional space-saving furniture with precision interlocking mortise joinery that functions as a compact side table and cleanly separates into four (4) standalone dining chairs.",
+        "image": "./assets/images/product pic.png",
+        "lifestyleImage": "./assets/images/tetratable-luxury-pampanga-house.jpg",
+        "stockLevel": 18,
+        "status": "In Stock"
+      },
+      "stool-mahogany": {
+        "id": "stool-mahogany",
+        "name": "Artisan Solid Mahogany Low Stool",
+        "category": "Stools & Seating",
+        "price": 1450.0,
+        "downPaymentPrice": 725.0,
+        "woodSpecies": "Philippine Mahogany",
+        "treatment": "Solignum Treated",
+        "finish": "Natural Polished Barnis",
+        "image": "./assets/images/Picture4.png",
+        "stockLevel": 24,
+        "status": "In Stock"
+      },
+      "cushion-pack-4": {
+        "id": "cushion-pack-4",
+        "name": "Orthopedic High-Density Linen Cushions (Set of 4)",
+        "category": "Add-ons & Accessories",
+        "price": 1250.0,
+        "downPaymentPrice": 625.0,
+        "material": "Breathable Oatmeal Linen with High-Density Foam",
+        "image": "./assets/images/Picture3.png",
+        "stockLevel": 30,
+        "status": "In Stock"
+      },
+      "wood-care-kit": {
+        "id": "wood-care-kit",
+        "name": "Natural Beeswax & Barnis Wood Maintenance Kit",
+        "category": "Wood Care Essentials",
+        "price": 580.0,
+        "downPaymentPrice": 290.0,
+        "includes": "Organic Beeswax Balm, Microfiber Cloth, Barnis Touch-Up Bottle",
+        "image": "./assets/images/candaba-wood-care-kit.jpg",
+        "stockLevel": 45,
+        "status": "In Stock"
+      }
+    },
+    "orders": {
+      "EH-2026-88123": {
+        "orderId": "EH-2026-88123",
+        "customerName": "Juan Dela Cruz",
+        "email": "juan.delacruz@example.ph",
+        "phone": "+639171234567",
+        "address": "Villa 8, Marquee Residences, Pulung Maragul, Angeles City, Pampanga, 2009",
+        "destinationZone": "Zone 1: Candaba / Pampanga Local",
+        "deliveryFee": 250.0,
+        "items": [
+          {
+            "productId": "tetratable-mahogany",
+            "name": "TetraTable 4-in-1 Suite",
+            "finish": "Natural Polished Mahogany",
+            "quantity": 1,
+            "unitPrice": 6934.0,
+            "lineTotal": 6934.0
+          }
+        ],
+        "pricing": {
+          "subtotal": 6934.0,
+          "deliveryFee": 250.0,
+          "discount": 0.0,
+          "totalAmount": 7184.0,
+          "isDownPayment": true,
+          "downPaymentPaid": 3467.0,
+          "balanceDue": 3717.0
+        },
+        "payment": {
+          "method": "GCash",
+          "isAppToAppDeepLinked": true,
+          "reference": "9021-8841-2910",
+          "proofScreenshotUrl": "./assets/images/Screenshot_2026-07-30-16-10-31-954_com.globe.gcash.android.jpg",
+          "verifiedAt": "2026-10-31T14:45:00Z",
+          "status": "Verified"
+        },
+        "stage": 3,
+        "stageName": "Precision Joinery Assembly & Sanding",
+        "orderStatus": "In Production",
+        "courier": {
+          "provider": "EcoHaven Direct Workshop Fleet",
+          "driverName": "Ronaldo Santos",
+          "driverPhone": "+639987654321",
+          "plateNumber": "CBD 4821",
+          "vehicleType": "Mitsubishi L300 Cargo",
+          "trackingNumber": "TRK-EH-88123"
+        },
+        "timeline": [
+          {
+            "stage": 1,
+            "title": "50% Down Payment Verified",
+            "date": "2026-10-31T14:45:00Z",
+            "completed": true,
+            "note": "GCash payment of \u20b13,467.00 verified by Candaba workshop administration."
+          },
+          {
+            "stage": 2,
+            "title": "Mahogany Lumber Cut & Solignum Treated",
+            "date": "2026-11-01T08:15:00Z",
+            "completed": true,
+            "note": "Kiln-dried timber batch #PH-491 selected (11.4% MC) and deep-treated with Solignum."
+          },
+          {
+            "stage": 3,
+            "title": "Precision Joinery Assembly & Sanding",
+            "date": "2026-11-01T10:30:00Z",
+            "completed": false,
+            "active": true,
+            "note": "Interlocking mortise joints assembled with Pioneer epoxy and hand-sanded with 320-grit."
+          },
+          {
+            "stage": 4,
+            "title": "Direct Fleet Dispatch",
+            "completed": false,
+            "active": false,
+            "note": "Awaiting final Barnis topcoat cure and bubble-wrap protective packaging."
+          },
+          {
+            "stage": 5,
+            "title": "White-Glove In-Home Delivery & Inspection",
+            "completed": false,
+            "active": false,
+            "note": "In-home placement and remaining \u20b13,717.00 balance settlement."
+          }
+        ],
+        "createdAt": "2026-10-31T14:40:00Z",
+        "updatedAt": "2026-11-01T10:30:00Z"
+      },
+      "EH-2026-88130": {
+        "orderId": "EH-2026-88130",
+        "customerName": "Teresa Mendoza",
+        "email": "teresa.mendoza@example.ph",
+        "phone": "+639189876543",
+        "address": "Block 4, Lot 12, Villa Gloria, San Fernando, Pampanga",
+        "destinationZone": "Zone 1: Candaba / Pampanga Local",
+        "deliveryFee": 250.0,
+        "items": [
+          {
+            "productId": "tetratable-mahogany",
+            "name": "TetraTable 4-in-1 Suite",
+            "finish": "Natural Polished Mahogany",
+            "quantity": 1,
+            "unitPrice": 6934.0,
+            "lineTotal": 6934.0
+          }
+        ],
+        "pricing": {
+          "subtotal": 6934.0,
+          "deliveryFee": 250.0,
+          "totalAmount": 7184.0,
+          "isDownPayment": true,
+          "downPaymentPaid": 3467.0,
+          "balanceDue": 3717.0
+        },
+        "payment": {
+          "method": "GCash",
+          "reference": "9021-9921-5520",
+          "proofScreenshotUrl": "./assets/images/Screenshot_2026-07-30-16-10-31-954_com.globe.gcash.android.jpg",
+          "status": "Pending Review"
+        },
+        "stage": 1,
+        "stageName": "Awaiting Payment Review",
+        "orderStatus": "Pending Review",
+        "createdAt": "2026-11-01T09:10:00Z",
+        "updatedAt": "2026-11-01T09:10:00Z"
+      },
+      "EH-2026-88099": {
+        "orderId": "EH-2026-88099",
+        "customerName": "Antonio Rivera",
+        "email": "antonio.rivera@example.ph",
+        "phone": "+639201234567",
+        "address": "Unit 402, Clark Hills, Clark Freeport Zone, Pampanga",
+        "destinationZone": "Zone 1: Candaba / Pampanga Local",
+        "deliveryFee": 250.0,
+        "items": [
+          {
+            "productId": "tetratable-mahogany",
+            "name": "TetraTable 4-in-1 Suite",
+            "quantity": 1,
+            "unitPrice": 6934.0
+          }
+        ],
+        "pricing": {
+          "totalAmount": 7184.0,
+          "isDownPayment": true,
+          "downPaymentPaid": 3467.0,
+          "balanceDue": 3717.0
+        },
+        "payment": {
+          "method": "GCash",
+          "reference": "9021-7712-4011",
+          "status": "Verified"
+        },
+        "stage": 2,
+        "stageName": "Mahogany Sourced & Solignum Treated",
+        "orderStatus": "In Production",
+        "createdAt": "2026-10-30T11:00:00Z"
+      }
+    },
+    "inventory": {
+      "timber": {
+        "species": "Philippine Mahogany",
+        "boardFeetAvailable": 1450,
+        "moistureContent": "11.4% MC",
+        "reorderThresholdBf": 500,
+        "status": "Optimal Reserve"
+      },
+      "chemicals": {
+        "solignumLiters": 35,
+        "solignumStatus": "Sufficient",
+        "pioneerEpoxySets": 28,
+        "barnisStainCans": 42
+      },
+      "packaging": {
+        "bubbleWrapRolls": 18,
+        "heavyDutyTransitTapeRolls": 24
+      }
+    },
+    "logisticsZones": {
+      "zone1": {
+        "name": "Zone 1: Candaba Local & Pampanga",
+        "rate": 250.0,
+        "deliveryTime": "1-2 business days",
+        "service": "EcoHaven Direct Workshop Fleet"
+      },
+      "zone2": {
+        "name": "Zone 2: Bulacan, Bataan, Tarlac, Nueva Ecija",
+        "rate": 450.0,
+        "deliveryTime": "2-3 business days",
+        "service": "EcoHaven Regional Transport"
+      },
+      "zone3": {
+        "name": "Zone 3: Subic, Metro Manila & Greater Central Luzon",
+        "rate": 650.0,
+        "deliveryTime": "3-4 business days",
+        "service": "White-Glove In-Home Delivery & Inspection"
+      }
+    },
+    "users": {
+      "cW2rKPXc2FRmzvvljGExOW8RsDJ2": {
+        "uid": "cW2rKPXc2FRmzvvljGExOW8RsDJ2",
+        "email": "paomagisa@gmail.com",
+        "displayName": "Paolo Magisa",
+        "role": "admin",
+        "passwordHash": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+        "age": 24,
+        "address": "Dalan Batu, Pasig, Candaba, Pampanga, 2013, Philippines",
+        "phone": "09812558028",
+        "gender": "Male",
+        "allowedGenderOptions": [
+          "Male",
+          "Female",
+          "Prefer not to say"
+        ],
+        "signInMethods": [
+          "password",
+          "google.com"
+        ],
+        "emailVerified": true,
+        "accountStatus": "Active",
+        "createdAt": "2026-11-01T00:00:00.000Z",
+        "lastLoginAt": "2026-11-01T00:30:00.000Z"
+      }
+    },
+    "addresses": [
+      {
+        "id": "addr-candaba",
+        "label": "Home (Candaba Estate)",
+        "recipientName": "Paolo Magisa",
+        "phone": "09812558028",
+        "email": "paomagisa@gmail.com",
+        "address": "Dalan Batu, Pasig, Candaba, Pampanga, 2013, Philippines",
+        "zone": "Zone 1 - Pampanga Local",
+        "zoneCode": "250",
+        "deliveryFee": 250.0,
+        "isDefault": true
+      },
+      {
+        "id": "addr-clark",
+        "label": "Office (Clark Freeport)",
+        "recipientName": "Paolo Magisa",
+        "phone": "09812558028",
+        "email": "paomagisa@gmail.com",
+        "address": "Bldg 4, Clark Sun Valley Estate, Jose Abad Santos Ave, Clark Freeport Zone, Pampanga, 2023",
+        "zone": "Zone 1 - Pampanga Local",
+        "zoneCode": "250",
+        "deliveryFee": 250.0,
+        "isDefault": false
+      },
+      {
+        "id": "addr-bgc",
+        "label": "Manila Residence",
+        "recipientName": "Paolo Magisa",
+        "phone": "09812558028",
+        "email": "paomagisa@gmail.com",
+        "address": "Unit 24B, Pacific Plaza Towers, 4th Ave, Bonifacio Global City, Taguig, 1634 Metro Manila",
+        "zone": "Zone 3 - Greater Metro Manila",
+        "zoneCode": "650",
+        "deliveryFee": 650.0,
+        "isDefault": false
+      }
+    ]
+  },
+  "users": {
+    "cW2rKPXc2FRmzvvljGExOW8RsDJ2": {
+      "uid": "cW2rKPXc2FRmzvvljGExOW8RsDJ2",
+      "email": "paomagisa@gmail.com",
+      "displayName": "Paolo Magisa",
+      "role": "admin",
+      "passwordHash": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+      "age": 24,
+      "address": "Dalan Batu, Pasig, Candaba, Pampanga, 2013, Philippines",
+      "phone": "09812558028",
+      "gender": "Male",
+      "allowedGenderOptions": [
+        "Male",
+        "Female",
+        "Prefer not to say"
+      ],
+      "signInMethods": [
+        "password",
+        "google.com"
+      ],
+      "emailVerified": true,
+      "accountStatus": "Active",
+      "createdAt": "2026-11-01T00:00:00.000Z",
+      "lastLoginAt": "2026-11-01T00:30:00.000Z"
+    }
+  }
+}
