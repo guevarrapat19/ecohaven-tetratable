@@ -104,8 +104,20 @@
                 Create Password * (At least 6 characters)
               </label>
               <div class="relative">
-                <input type="password" id="regPassword" required minlength="6" placeholder="••••••••" 
+                <input type="password" id="regPassword" required minlength="6" placeholder="••••••••" oninput="checkPasswordStrength(this.value)" 
                        class="w-full px-4 py-2.5 pr-10 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm text-on-surface"/>
+              </div>
+              <!-- Real-time Password Security Meter -->
+              <div class="mt-2 space-y-1" id="regPasswordStrengthBox">
+                <div class="flex items-center justify-between text-[11px]">
+                  <span class="text-on-surface-variant font-medium">Security Check:</span>
+                  <span id="regPasswordStrengthLabel" class="font-bold text-outline">At least 6 characters</span>
+                </div>
+                <div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden flex gap-1">
+                  <div id="pwdBar1" class="h-full w-1/3 bg-transparent rounded-full transition-all duration-300"></div>
+                  <div id="pwdBar2" class="h-full w-1/3 bg-transparent rounded-full transition-all duration-300"></div>
+                  <div id="pwdBar3" class="h-full w-1/3 bg-transparent rounded-full transition-all duration-300"></div>
+                </div>
                 <button type="button" onclick="togglePasswordVisibility('regPassword')" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface text-sm">
                   <span class="material-symbols-outlined text-[18px]">visibility</span>
                 </button>
@@ -176,6 +188,48 @@
 
     document.body.insertAdjacentHTML('beforeend', modalHTML);
   }
+
+  window.checkPasswordStrength = function(val) {
+    const bar1 = document.getElementById('pwdBar1');
+    const bar2 = document.getElementById('pwdBar2');
+    const bar3 = document.getElementById('pwdBar3');
+    const label = document.getElementById('regPasswordStrengthLabel');
+    if (!bar1 || !bar2 || !bar3 || !label) return;
+
+    if (!val || val.length === 0) {
+      bar1.className = 'h-full w-1/3 bg-transparent rounded-full transition-all duration-300';
+      bar2.className = 'h-full w-1/3 bg-transparent rounded-full transition-all duration-300';
+      bar3.className = 'h-full w-1/3 bg-transparent rounded-full transition-all duration-300';
+      label.textContent = 'At least 6 characters';
+      label.className = 'font-bold text-outline';
+      return;
+    }
+
+    let score = 0;
+    if (val.length >= 6) score++;
+    if (val.length >= 8 && /[A-Z]/.test(val) && /[0-9]/.test(val)) score++;
+    if (val.length >= 10 && /[^A-Za-z0-9]/.test(val)) score++;
+
+    if (score === 1 || val.length < 6) {
+      bar1.className = 'h-full w-1/3 bg-amber-500 rounded-full transition-all duration-300';
+      bar2.className = 'h-full w-1/3 bg-transparent rounded-full transition-all duration-300';
+      bar3.className = 'h-full w-1/3 bg-transparent rounded-full transition-all duration-300';
+      label.textContent = val.length < 6 ? 'Too Short' : 'Moderate';
+      label.className = 'font-bold text-amber-600';
+    } else if (score === 2) {
+      bar1.className = 'h-full w-1/3 bg-emerald-500 rounded-full transition-all duration-300';
+      bar2.className = 'h-full w-1/3 bg-emerald-500 rounded-full transition-all duration-300';
+      bar3.className = 'h-full w-1/3 bg-transparent rounded-full transition-all duration-300';
+      label.textContent = 'Good';
+      label.className = 'font-bold text-emerald-600';
+    } else {
+      bar1.className = 'h-full w-1/3 bg-emerald-600 rounded-full transition-all duration-300';
+      bar2.className = 'h-full w-1/3 bg-emerald-600 rounded-full transition-all duration-300';
+      bar3.className = 'h-full w-1/3 bg-emerald-600 rounded-full transition-all duration-300';
+      label.textContent = 'Strong (Protected)';
+      label.className = 'font-bold text-emerald-700';
+    }
+  };
 
   window.togglePasswordVisibility = function(inputId) {
     const el = document.getElementById(inputId);
@@ -330,6 +384,19 @@
         lastLoginAt: now
       };
 
+      // 3.5. Dual-Layer: Attempt Firebase Auth SDK creation
+      if (window.ecoHavenAuth) {
+        try {
+          const userCred = await window.ecoHavenAuth.createUserWithEmailAndPassword(email, password);
+          if (userCred && userCred.user) {
+            await userCred.user.updateProfile({ displayName: name });
+            console.log('🟢 Firebase Auth SDK: Created verified user', userCred.user.uid);
+          }
+        } catch (fbAuthErr) {
+          console.warn('Firebase Auth SDK registration notice:', fbAuthErr.code, fbAuthErr.message);
+        }
+      }
+
       // 4. Save to Firebase Realtime Database
       if (window.ecoHavenDb) {
         await window.ecoHavenDb.ref('users/' + newUid).set(newUser);
@@ -347,6 +414,23 @@
 
       closeAuthModal();
       notify(`Welcome to EcoHaven, ${name}! Your account has been registered.`, 'success');
+
+      // Dispatch simulated Welcome Email & SMS notifications
+      if (typeof window.simulateEmailNotification === 'function') {
+        window.simulateEmailNotification({
+          to: email,
+          subject: 'Welcome to EcoHaven Furniture — Account Verified',
+          body: `Mabuhay ${name}!\n\nYour artisan woodcraft account is active. Explore our sustainable modular collections handcrafted in Candaba, Pampanga.\n\nUse voucher code CANDABA10 for 10% off your initial suite reservation.`,
+          category: 'Welcome'
+        });
+      }
+      if (typeof window.simulateSmsNotification === 'function') {
+        window.simulateSmsNotification({
+          to: phone,
+          message: `[EcoHaven PH] Salamat ${name}! Your account is active. Welcome voucher: CANDABA10 for 10% off your first modular order. Explore: ecohaven.ph`,
+          category: 'Welcome'
+        });
+      }
 
       // 6. Route to customer dashboard
       const isPagesDir = window.location.pathname.includes('/pages/');
@@ -450,11 +534,31 @@
         return;
       }
 
+      // Dual-Layer: Attempt Firebase Auth SDK session authentication if email
+      if (window.ecoHavenAuth && ident.includes('@')) {
+        try {
+          await window.ecoHavenAuth.signInWithEmailAndPassword(ident, password);
+          console.log('🟢 Firebase Auth SDK: Session authenticated');
+        } catch (authErr) {
+          console.warn('Firebase Auth SDK sign-in notice:', authErr.code);
+        }
+      }
+
       // Update lastLoginAt in Firebase
       if (window.ecoHavenDb && matchedUser.uid) {
         try {
           window.ecoHavenDb.ref('users/' + matchedUser.uid + '/lastLoginAt').set(new Date().toISOString());
         } catch(e) {}
+      }
+
+      // Dispatch simulated Security Alert Email
+      if (typeof window.simulateEmailNotification === 'function') {
+        window.simulateEmailNotification({
+          to: matchedUser.email || 'customer@example.ph',
+          subject: 'Security Alert: Sign-in detected on your EcoHaven Account',
+          body: `Hi ${matchedUser.displayName || 'Customer'},\n\nA sign-in was detected on your account at ${new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' })} PHT.\n\nIf this was you, you can safely ignore this alert. Otherwise, please reset your password immediately.`,
+          category: 'Security'
+        });
       }
 
       // Save user session to localStorage

@@ -182,6 +182,11 @@
             </div>
           </div>
           <div class="flex items-center gap-1.5">
+            <button type="button" onclick="window.openSimulatedCommsModal()" class="px-2.5 py-1 rounded-lg text-[11px] font-bold text-sky-800 bg-sky-50 hover:bg-sky-100 transition-colors flex items-center gap-1 border border-sky-200" title="View Simulated Email &amp; SMS Outbox">
+              <span class="material-symbols-outlined text-[13px]">cell_tower</span>
+              <span class="hidden sm:inline">SMS &amp; Email Outbox</span>
+              <span class="sm:hidden">Outbox</span>
+            </button>
             <button type="button" onclick="window.markAllEcoHavenNotificationsRead()" class="px-2.5 py-1 rounded-lg text-[11px] font-bold text-primary hover:bg-primary/10 transition-colors" title="Mark all read">
               Mark all read
             </button>
@@ -215,7 +220,10 @@
             <span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
             Workshop MC: 11.4% Kiln Stabilized
           </span>
-          <span class="font-medium text-outline">Mon–Sun 8AM–5PM</span>
+          <button type="button" onclick="window.openSimulatedCommsModal()" class="font-bold text-primary hover:underline flex items-center gap-1 text-[11px]">
+            <span class="material-symbols-outlined text-[13px]">outgoing_mail</span>
+            <span>Simulated Outbox</span>
+          </button>
         </div>
 
       </div>

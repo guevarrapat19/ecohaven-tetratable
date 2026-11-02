@@ -37,6 +37,25 @@ async function confirmDispatch(event) {
         });
     }
 
+    // Dispatch Simulated Email & SMS Dispatch Alert
+    if (typeof window.simulateEmailNotification === 'function') {
+        window.simulateEmailNotification({
+            to: 'paolo.magisa@gmail.com',
+            subject: `🚚 Out for Delivery: Order #${pendingDispatchOrderId} via Workshop Fleet`,
+            body: `Mabuhay!\n\nYour order #${pendingDispatchOrderId} has passed white-glove quality control and is now in transit with Driver ${driver} (Fleet Plate: ${plate}).\n\nExpected Delivery Window: Today before 5:00 PM PHT. Please prepare the remaining balance upon handover.`,
+            orderId: pendingDispatchOrderId,
+            category: 'Delivery Dispatch'
+        });
+    }
+    if (typeof window.simulateSmsNotification === 'function') {
+        window.simulateSmsNotification({
+            to: '09812558028',
+            message: `[EcoHaven PH] Driver ${driver} (${plate}) is ON THE WAY with Order #${pendingDispatchOrderId}! Please prepare remaining balance upon handover.`,
+            orderId: pendingDispatchOrderId,
+            category: 'Delivery Dispatch'
+        });
+    }
+
     closeCourierModal();
     if (typeof window.showEcoHavenToast === 'function') {
         window.showEcoHavenToast(`🚚 Order #${pendingDispatchOrderId} dispatched! Driver: ${driver} (${plate}) — Customer notified in real-time.`, 'amber');
@@ -77,6 +96,25 @@ async function confirmDispatch(event) {
             orderId: pendingDispatchOrderId,
             icon: 'local_shipping',
             badgeColor: 'bg-amber-100 text-amber-800'
+        });
+    }
+
+    // Dispatch Simulated Email & SMS Dispatch Alert
+    if (typeof window.simulateEmailNotification === 'function') {
+        window.simulateEmailNotification({
+            to: 'paolo.magisa@gmail.com',
+            subject: `🚚 Out for Delivery: Order #${pendingDispatchOrderId} via Workshop Fleet`,
+            body: `Mabuhay!\n\nYour order #${pendingDispatchOrderId} has passed white-glove quality control and is now in transit with Driver ${driver} (Fleet Plate: ${plate}).\n\nExpected Delivery Window: Today before 5:00 PM PHT. Please prepare the remaining balance upon handover.`,
+            orderId: pendingDispatchOrderId,
+            category: 'Delivery Dispatch'
+        });
+    }
+    if (typeof window.simulateSmsNotification === 'function') {
+        window.simulateSmsNotification({
+            to: '09812558028',
+            message: `[EcoHaven PH] Driver ${driver} (${plate}) is ON THE WAY with Order #${pendingDispatchOrderId}! Please prepare remaining balance upon handover.`,
+            orderId: pendingDispatchOrderId,
+            category: 'Delivery Dispatch'
         });
     }
 
@@ -628,6 +666,25 @@ async function approvePayment() {
         });
     }
 
+    // Dispatch Simulated Email & SMS to customer
+    if (typeof window.simulateEmailNotification === 'function') {
+        window.simulateEmailNotification({
+            to: 'paolo.magisa@gmail.com',
+            subject: `✅ Down Payment Verified for Order #${activeVerificationOrderId}`,
+            body: `Mabuhay!\n\nYour 50% reservation payment for Order #${activeVerificationOrderId} has been verified by the Candaba workshop.\n\nSolid Philippine Mahogany batch #PMP-2026-ND-491 (11.4% moisture content) has been allocated and Solignum anti-termite treated. Cutting and joinery are underway.`,
+            orderId: activeVerificationOrderId,
+            category: 'Payment Verified'
+        });
+    }
+    if (typeof window.simulateSmsNotification === 'function') {
+        window.simulateSmsNotification({
+            to: '09812558028',
+            message: `[EcoHaven PH] Payment verified for #${activeVerificationOrderId}! Solid Philippine Mahogany cutting has started in Candaba. Live tracking: ecohaven.ph/track`,
+            orderId: activeVerificationOrderId,
+            category: 'Payment Verified'
+        });
+    }
+
     if (typeof window.showEcoHavenToast === 'function') {
         window.showEcoHavenToast(`✅ Payment approved for #${activeVerificationOrderId}! Customer notified.`, 'success');
     }
@@ -656,6 +713,28 @@ async function advanceToStage(orderId, nextStage, nextStageName) {
             orderId: orderId,
             icon: isCompleted ? 'task_alt' : 'handyman',
             badgeColor: isCompleted ? 'bg-emerald-100 text-emerald-800' : 'bg-primary/10 text-primary'
+        });
+    }
+
+    if (typeof window.simulateSmsNotification === 'function') {
+        const isDone = nextStage === 5;
+        window.simulateSmsNotification({
+            to: '09812558028',
+            message: isDone 
+                ? `[EcoHaven PH] Order #${orderId} fulfilled! Salamat sa pagtitiwala sa Candaba workshop. Lifetime structural warranty active.`
+                : `[EcoHaven PH] Workshop Milestone: Order #${orderId} moved to "${nextStageName}" with lead artisan Mang Ronaldo.`,
+            orderId: orderId,
+            category: isDone ? 'Order Complete' : 'Milestone Update'
+        });
+    }
+
+    if (nextStage === 5 && typeof window.simulateEmailNotification === 'function') {
+        window.simulateEmailNotification({
+            to: 'paolo.magisa@gmail.com',
+            subject: `🎉 Order #${orderId} Delivered — Lifetime Warranty Certificate`,
+            body: `Mabuhay!\n\nYour handcrafted modular suite is now delivered and assembled in your home.\n\nYour DTI-backed Lifetime Structural Joinery Warranty is registered under certificate #EH-W-2026-${orderId.replace('EH-2026-', '')}. Learn how to care for your wood at ecohaven.ph/care.`,
+            orderId: orderId,
+            category: 'Order Complete'
         });
     }
 
@@ -706,6 +785,25 @@ async function confirmDispatch(event) {
         });
     }
 
+    // Dispatch Simulated Email & SMS Dispatch Alert
+    if (typeof window.simulateEmailNotification === 'function') {
+        window.simulateEmailNotification({
+            to: 'paolo.magisa@gmail.com',
+            subject: `🚚 Out for Delivery: Order #${pendingDispatchOrderId} via Workshop Fleet`,
+            body: `Mabuhay!\n\nYour order #${pendingDispatchOrderId} has passed white-glove quality control and is now in transit with Driver ${driver} (Fleet Plate: ${plate}).\n\nExpected Delivery Window: Today before 5:00 PM PHT. Please prepare the remaining balance upon handover.`,
+            orderId: pendingDispatchOrderId,
+            category: 'Delivery Dispatch'
+        });
+    }
+    if (typeof window.simulateSmsNotification === 'function') {
+        window.simulateSmsNotification({
+            to: '09812558028',
+            message: `[EcoHaven PH] Driver ${driver} (${plate}) is ON THE WAY with Order #${pendingDispatchOrderId}! Please prepare remaining balance upon handover.`,
+            orderId: pendingDispatchOrderId,
+            category: 'Delivery Dispatch'
+        });
+    }
+
     closeCourierModal();
     if (typeof window.showEcoHavenToast === 'function') {
         window.showEcoHavenToast(`🚚 Order #${pendingDispatchOrderId} dispatched! Driver: ${driver} (${plate}) — Customer notified in real-time.`, 'amber');
@@ -719,9 +817,11 @@ async function confirmDispatch(event) {
 <!-- Firebase Realtime Database SDK (Official CDN - Zero Build Step) -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="../js/firebase-config.js"></script>
 <script src="../js/store.js"></script>
-<script src="../assets/notifications.js"></script>
+<script src="../assets/simulated-comms.js"></script>
+  <script src="../assets/notifications.js"></script>
   <script src="../assets/auth-modal.js"></script>
 
 <script>
@@ -757,6 +857,25 @@ async function confirmDispatch(event) {
             orderId: pendingDispatchOrderId,
             icon: 'local_shipping',
             badgeColor: 'bg-amber-100 text-amber-800'
+        });
+    }
+
+    // Dispatch Simulated Email & SMS Dispatch Alert
+    if (typeof window.simulateEmailNotification === 'function') {
+        window.simulateEmailNotification({
+            to: 'paolo.magisa@gmail.com',
+            subject: `🚚 Out for Delivery: Order #${pendingDispatchOrderId} via Workshop Fleet`,
+            body: `Mabuhay!\n\nYour order #${pendingDispatchOrderId} has passed white-glove quality control and is now in transit with Driver ${driver} (Fleet Plate: ${plate}).\n\nExpected Delivery Window: Today before 5:00 PM PHT. Please prepare the remaining balance upon handover.`,
+            orderId: pendingDispatchOrderId,
+            category: 'Delivery Dispatch'
+        });
+    }
+    if (typeof window.simulateSmsNotification === 'function') {
+        window.simulateSmsNotification({
+            to: '09812558028',
+            message: `[EcoHaven PH] Driver ${driver} (${plate}) is ON THE WAY with Order #${pendingDispatchOrderId}! Please prepare remaining balance upon handover.`,
+            orderId: pendingDispatchOrderId,
+            category: 'Delivery Dispatch'
         });
     }
 

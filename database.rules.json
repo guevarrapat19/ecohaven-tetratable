@@ -3,45 +3,42 @@
     "ecohaven": {
       ".read": true,
       ".write": true,
-      "users": {
-        ".read": true,
-        ".write": true,
-        "$uid": {
-          ".read": true,
-          ".write": true
-        }
-      },
-      "telemetry": {
-        ".read": true,
-        ".write": true
-      },
       "products": {
         ".read": true,
-        ".write": true
+        ".write": "auth != null && (root.child('users/' + auth.uid + '/role').val() === 'admin' || root.child('users/' + auth.uid + '/role').val() === 'seller' || !data.exists())"
       },
       "inventory": {
         ".read": true,
-        ".write": true
-      },
-      "logisticsZones": {
-        ".read": true,
-        ".write": true
+        ".write": "auth != null && (root.child('users/' + auth.uid + '/role').val() === 'admin' || root.child('users/' + auth.uid + '/role').val() === 'seller' || !data.exists())"
       },
       "orders": {
         ".read": true,
         ".write": true,
         "$orderId": {
           ".read": true,
-          ".write": true
+          ".write": true,
+          ".validate": "newData.hasChildren(['customerName', 'totalAmount']) || !newData.exists()"
         }
+      },
+      "notifications": {
+        ".read": true,
+        ".write": true
+      },
+      "telemetry": {
+        ".read": true,
+        ".write": true
+      },
+      "logisticsZones": {
+        ".read": true,
+        ".write": "auth != null && (root.child('users/' + auth.uid + '/role').val() === 'admin' || !data.exists())"
       }
     },
     "users": {
       ".read": true,
-      ".write": true,
       "$uid": {
         ".read": true,
-        ".write": true
+        ".write": "auth != null ? (auth.uid === $uid || root.child('users/' + auth.uid + '/role').val() === 'admin' || root.child('users/' + auth.uid + '/role').val() === 'seller') : true",
+        ".validate": "newData.hasChildren(['email', 'fullName']) || !newData.exists()"
       }
     }
   }

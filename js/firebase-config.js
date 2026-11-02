@@ -1,4 +1,4 @@
-// EcoHaven Furniture — Firebase Realtime Database SDK Configuration
+// EcoHaven Furniture — Firebase Realtime Database & Auth SDK Configuration
 // Official Cloud Backend for EcoHaven Furniture (Candaba, Pampanga, Philippines)
 
 // Your Live Firebase Web App Configuration
@@ -15,6 +15,7 @@ const firebaseConfig = {
 
 // Singleton Initialization with CDN & Graceful LocalStorage Fallback
 let ecoHavenDb = null;
+let ecoHavenAuth = null;
 
 try {
     if (typeof firebase !== 'undefined' && firebase.initializeApp) {
@@ -24,6 +25,15 @@ try {
         ecoHavenDb = firebase.database();
         console.log("🟢 EcoHaven: Connected to LIVE Firebase Cloud Realtime Database!");
         console.log("📡 Endpoint:", firebaseConfig.databaseURL);
+
+        if (typeof firebase.auth === 'function') {
+            try {
+                ecoHavenAuth = firebase.auth();
+                console.log("🟢 EcoHaven: Connected to LIVE Firebase Auth SDK!");
+            } catch (authErr) {
+                console.warn("🟡 EcoHaven: Firebase Auth init notice:", authErr.message);
+            }
+        }
     } else {
         console.warn("🟡 EcoHaven: Firebase SDK not detected. Operating in LocalStorage Fallback Mode.");
     }
@@ -32,4 +42,5 @@ try {
 }
 
 window.ecoHavenDb = ecoHavenDb;
+window.ecoHavenAuth = ecoHavenAuth;
 window.firebaseConfig = firebaseConfig;
