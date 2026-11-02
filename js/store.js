@@ -1381,6 +1381,107 @@ class EcoHavenStore {
         window.showEcoHavenToast("Delivery address removed.", "info");
     }
 
+    // ==========================================================
+    // 9. SELLER ORDER EDIT, ARCHIVE & SPACE CLEARING (RTDB LIVE)
+    // ==========================================================
+    async updateOrder(orderId, updateFields) {
+        if (!orderId) return null;
+        const ord = this.orders[orderId] || this.getOrder(orderId);
+        if (!ord) {
+            console.warn("Order not found for update:", orderId);
+            return null;
+        }
+
+        const total = (updateFields.totalAmount !== undefined && !isNaN(parseFloat(updateFields.totalAmount)))
+            ? parseFloat(updateFields.totalAmount)
+            : (ord.totalAmount || (ord.pricing && ord.pricing.totalAmount) || 7184.00);
+
+        const paid = (updateFields.downPaymentPaid !== undefined && !isNaN(parseFloat(updateFields.downPaymentPaid)))
+            ? parseFloat(updateFields.downPaymentPaid)
+            : (ord.downPaymentPaid !== undefined ? ord.downPaymentPaid : 3467.00);
+
+        const bal = (updateFields.balanceDue !== undefined && !isNaN(parseFloat(updateFields.balanceDue)))
+            ? parseFloat(updateFields.balanceDue)
+            : (total - paid);
+
+        const updates = {
+            ...updateFields,
+            totalAmount: total,
+            downPaymentPaid: paid,
+            balanceDue: bal,
+            customerName: (updateFields.customerName || ord.customerName || 'Customer').trim(),
+            items: updateFields.items || ord.items || [{ name: "TetraTable 4-in-1 Suite", quantity: 1, unitPrice: total }],
+            updatedAt: new Date().toISOString()
+        };
+
+        if (window.ecoHavenDb) {
+            try {
+                await window.ecoHavenDb.ref('ecohaven/orders/' + orderId).update(updates);
+                console.log("✅ Order", orderId, "successfully updated in Firebase RTDB!");
+            } catch (err) {
+                console.error("Firebase update order error:", err.message);
+            }
+        }
+
+        Object.assign(ord, updates);
+        this.saveLocalBackup('ecohaven_cloud_orders_cache', this.orders);
+        window.dispatchEvent(new CustomEvent('ecohaven_orders_updated', { detail: this.orders }));
+
+        if (typeof window.showEcoHavenToast === 'function') {
+            window.showEcoHavenToast("Order #" + orderId + " details updated!", "success");
+        }
+        return ord;
+    }
+
+    async deleteOrder(orderId) {
+        if (!orderId) return false;
+        if (window.ecoHavenDb) {
+            try {
+                await window.ecoHavenDb.ref('ecohaven/orders/' + orderId).remove();
+                console.log("🗑️ Order", orderId, "permanently removed from Firebase RTDB!");
+            } catch (err) {
+                console.error("Firebase delete order error:", err.message);
+            }
+        }
+
+        if (this.orders && this.orders[orderId]) {
+            delete this.orders[orderId];
+        }
+        this.saveLocalBackup('ecohaven_cloud_orders_cache', this.orders);
+        window.dispatchEvent(new CustomEvent('ecohaven_orders_updated', { detail: this.orders }));
+
+        if (typeof window.showEcoHavenToast === 'function') {
+            window.showEcoHavenToast("Order #" + orderId + " deleted and space cleared.", "info");
+        }
+        return true;
+    }
+
+    async archiveOrder(orderId, isArchived = true) {
+        return this.updateOrder(orderId, {
+            archived: !!isArchived,
+            archivedAt: isArchived ? new Date().toISOString() : null
+        });
+    }
+
+    async archiveAllCompletedOrders() {
+        const completed = Object.values(this.orders || {}).filter(ord => (ord.stage === 5 || ord.orderStatus === 'Delivered & Complete') && !ord.archived);
+        if (completed.length === 0) {
+            if (typeof window.showEcoHavenToast === 'function') {
+                window.showEcoHavenToast("No active fulfilled orders to clear.", "info");
+            }
+            return 0;
+        }
+
+        for (const ord of completed) {
+            await this.archiveOrder(ord.orderId, true);
+        }
+
+        if (typeof window.showEcoHavenToast === 'function') {
+            window.showEcoHavenToast(completed.length + " fulfilled order(s) archived to clear Kanban space.", "success");
+        }
+        return completed.length;
+    }
+
 }
 
 

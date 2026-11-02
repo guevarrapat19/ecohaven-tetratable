@@ -109,7 +109,15 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
             <p class="text-xs text-on-surface-variant hidden sm:block">Compact order cards with collapsible details — space-optimized for high order volumes</p>
         </div>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
+        <button type="button" onclick="toggleArchivedOrdersFilter()" id="btnFilterArchived" class="px-3 py-1.5 rounded-xl border border-outline-variant/50 bg-surface-container-lowest hover:bg-surface-container text-xs font-semibold text-on-surface transition-all flex items-center gap-1.5 shadow-xs active:scale-95" title="Toggle visibility of completed / archived orders to clear space">
+            <span class="material-symbols-outlined text-[16px]" id="iconFilterArchived">visibility_off</span>
+            <span id="textFilterArchived">Hide Archived</span>
+        </button>
+        <button type="button" onclick="handleArchiveAllCompleted()" class="px-3 py-1.5 rounded-xl border border-outline-variant/50 bg-surface-container-lowest hover:bg-surface-container text-xs font-semibold text-tertiary hover:text-tertiary-container transition-all flex items-center gap-1.5 shadow-xs active:scale-95" title="Archive all delivered orders to immediately clear Column 4 space">
+            <span class="material-symbols-outlined text-[16px]">archive</span>
+            <span>Clear Fulfilled</span>
+        </button>
         <button type="button" onclick="toggleAllKanbanDetails()" id="btnToggleAllDetails" class="px-3.5 py-1.5 rounded-xl border border-outline-variant/50 bg-surface-container-lowest hover:bg-surface-container text-xs font-semibold text-on-surface transition-all flex items-center gap-1.5 shadow-xs active:scale-95" title="Expand or collapse details on all Kanban order cards">
             <span class="material-symbols-outlined text-[16px]" id="iconToggleAllDetails">unfold_more</span>
             <span id="textToggleAllDetails">Expand All Cards</span>
@@ -563,6 +571,194 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
     </div>
 </div>
 
+
+<!-- Modal 6: Edit Order & Clear Space (Artisan Full Control) -->
+<div id="editOrderModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-[24px] max-w-xl w-full p-5 sm:p-7 shadow-2xl relative my-auto max-h-[92vh] flex flex-col">
+        <!-- Close button -->
+        <button type="button" onclick="closeEditOrderModal()" class="absolute right-4 top-4 p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors" title="Close">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+
+        <!-- Header -->
+        <div class="flex items-center gap-2 mb-1">
+            <span class="material-symbols-outlined text-primary text-[22px]">edit_note</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-primary">Artisan Order Management</span>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-outline-variant/30">
+            <div>
+                <h3 class="font-headline-sm text-xl text-on-surface font-semibold flex items-center gap-2">
+                    <span>Edit Order</span>
+                    <span id="editModalOrderIdTag" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-primary-container text-on-primary-container">#EH-2026-XXXX</span>
+                </h3>
+                <p class="text-xs text-on-surface-variant">Update stage, modify customer and logistics details, or archive/delete to clear Kanban space.</p>
+            </div>
+        </div>
+
+        <!-- Form body (scrollable) -->
+        <form id="editOrderForm" onsubmit="handleSaveOrderEdit(event)" class="space-y-4 overflow-y-auto pr-1 flex-grow">
+            <input type="hidden" id="editOrderId" value="" />
+
+            <!-- Section 1: Kanban Stage & Status -->
+            <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-primary text-[17px]">timeline</span>
+                        Kanban Production Stage
+                    </span>
+                    <span id="editModalCurrentStageBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-surface text-on-surface border border-outline-variant/30">Stage 1</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[11px] font-bold text-on-surface block mb-1">Target Kanban Stage</label>
+                        <select id="editOrderStage" onchange="onEditStageChange(this.value)" class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs font-medium text-on-surface focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer">
+                            <option value="1">1. Payment Review</option>
+                            <option value="2">2. Lumber & Solignum</option>
+                            <option value="3">3. Joinery & Sanding</option>
+                            <option value="4">4. Fleet & In Transit</option>
+                            <option value="5">5. Delivered & Complete</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-on-surface block mb-1">Order Status Title</label>
+                        <input type="text" id="editOrderStatusName" class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. In Production" />
+                    </div>
+                </div>
+
+                <!-- Archive / Clear from active board toggle -->
+                <div class="pt-2 border-t border-outline-variant/20 flex items-center justify-between">
+                    <div>
+                        <label for="editOrderArchived" class="text-xs font-bold text-on-surface flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" id="editOrderArchived" class="accent-primary w-4 h-4 rounded cursor-pointer" />
+                            <span>Archive Order (Clear from active Kanban board)</span>
+                        </label>
+                        <p class="text-[10px] text-on-surface-variant ml-5">Hides this card from active columns to free up board space without losing historical records.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Customer & Shipping Details -->
+            <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 space-y-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-primary text-[17px]">person_pin</span>
+                    Customer &amp; Destination
+                </span>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[11px] font-bold text-on-surface block mb-1">Customer Full Name *</label>
+                        <input type="text" id="editCustomerName" required class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" />
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-on-surface block mb-1">Contact Phone</label>
+                        <input type="text" id="editCustomerPhone" class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[11px] font-bold text-on-surface block mb-1">Client Email</label>
+                        <input type="email" id="editCustomerEmail" class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" />
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-on-surface block mb-1">Logistics Destination Zone</label>
+                        <select id="editDestinationZone" class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="Zone 1: Candaba Local & Pampanga">Zone 1: Candaba Local &amp; Pampanga (₱250)</option>
+                            <option value="Zone 2: Bulacan, Bataan, Tarlac, Nueva Ecija">Zone 2: Central Luzon (₱450)</option>
+                            <option value="Zone 3: Metro Manila White-Glove">Zone 3: Metro Manila White-Glove (₱650)</option>
+                            <option value="Zone 4: Rizal, Cavite, Laguna">Zone 4: Calabarzon (₱850)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-bold text-on-surface block mb-1">Full Delivery Address</label>
+                    <textarea id="editCustomerAddress" rows="2" class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+                </div>
+            </div>
+
+            <!-- Section 3: Financials & Settlement -->
+            <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 space-y-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-primary text-[17px]">payments</span>
+                    Financials &amp; GCash Escrow
+                </span>
+
+                <div class="grid grid-cols-3 gap-2.5">
+                    <div>
+                        <label class="text-[10px] font-bold text-on-surface block mb-1">Total (₱)</label>
+                        <input type="number" id="editTotalAmount" min="1" step="any" required class="w-full px-2.5 py-1.5 rounded-lg border border-outline-variant/40 bg-surface text-xs font-mono font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" oninput="recalcEditBalance()" />
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-on-surface block mb-1">Paid (₱)</label>
+                        <input type="number" id="editPaidAmount" min="0" step="any" required class="w-full px-2.5 py-1.5 rounded-lg border border-outline-variant/40 bg-surface text-xs font-mono font-bold text-tertiary focus:outline-none focus:ring-2 focus:ring-primary" oninput="recalcEditBalance()" />
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-on-surface block mb-1">Balance Due (₱)</label>
+                        <input type="number" id="editBalanceAmount" min="0" step="any" readonly class="w-full px-2.5 py-1.5 rounded-lg bg-surface-container text-xs font-mono font-bold text-primary" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[11px] font-bold text-on-surface block mb-1">Payment Mode</label>
+                        <select id="editPaymentMode" class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="fifty">50% Downpayment (Balance on Handover)</option>
+                            <option value="full">100% Full Payment</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-on-surface block mb-1">GCash / InstaPay Reference</label>
+                        <input type="text" id="editGcashRef" class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" placeholder="9021-XXXX-XXXX" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Workshop Artisan & Specs Notes -->
+            <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 space-y-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-primary text-[17px]">handyman</span>
+                    Workshop Artisan Notes &amp; Moisture Specs
+                </span>
+                <textarea id="editArtisanNotes" rows="2" class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Lead: Mang Ronaldo • Batch #491 • 11.4% MC • Special edge chamfer"></textarea>
+            </div>
+
+            <!-- Section 5: Space Clearing & Delete Actions -->
+            <div class="p-3.5 rounded-xl bg-red-50/70 border border-red-200 space-y-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-red-800 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-red-700 text-[17px]">delete_sweep</span>
+                    Clear Board Space &amp; Order Deletion
+                </span>
+                <p class="text-[11px] text-red-700 leading-snug">
+                    Use <strong>Archive</strong> to remove this order from the live Kanban board without losing records, or <strong>Delete</strong> to permanently purge it from Firebase RTDB.
+                </p>
+                <div class="flex flex-wrap gap-2 pt-1">
+                    <button type="button" onclick="quickArchiveCurrentEditOrder()" class="py-1.5 px-3 rounded-lg border border-red-300 bg-white text-xs font-bold text-red-800 hover:bg-red-50 transition-all flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">archive</span>
+                        <span id="quickArchiveBtnText">Archive &amp; Clear from Board</span>
+                    </button>
+                    <button type="button" onclick="quickDeleteCurrentEditOrder()" class="py-1.5 px-3 rounded-lg bg-red-600 hover:bg-red-700 text-xs font-bold text-white transition-all flex items-center gap-1 shadow-xs">
+                        <span class="material-symbols-outlined text-sm">delete_forever</span>
+                        Permanently Delete Order
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/30 sticky bottom-0 bg-surface-container-lowest py-2">
+                <button type="button" onclick="closeEditOrderModal()" class="px-4 py-2 rounded-xl border border-outline-variant text-xs font-bold text-on-surface hover:bg-surface-container transition-all">
+                    Cancel
+                </button>
+                <button type="submit" class="px-5 py-2 bg-primary hover:bg-primary-container text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
+                    <span class="material-symbols-outlined text-sm">save</span>
+                    Save Order Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 </main>
 <footer class="w-full bg-inverse-surface text-inverse-on-surface pt-space-xl pb-space-lg"><div class="max-w-7xl mx-auto px-gutter"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg pb-space-lg"><div class="flex flex-col gap-space-sm"><div class="flex items-center gap-space-xs"><img alt="EcoHaven Furniture Emblem" class="h-8 w-auto object-contain brightness-200" src="https://lh3.googleusercontent.com/aida/AEtjO1WoMmLqUdcp17_0K7-4RU3j_laJKFuB71tIYvo-2PL2jhAcZH749676gu7fQWloblAKrXLnjtrDm7cmDLa4_OGy5SO-WatR_aBQpdDN0K2Bp6LZLKKxNxFLcFB1WDJaz2oG_ycj2LROrpKw9eiaDGzfF-wXFdhm7wzyX7JBN_KzsFFfDSN_mIJx2ADuxlhZHSpu8qhuPImA1uzZy04pyRsDNRGhCYwcwDRbrWqtTrzRhg"/><span class="font-headline-sm text-headline-sm text-surface tracking-tight font-semibold">EcoHaven</span></div><p class="font-body-sm text-body-sm text-inverse-on-surface/80 leading-relaxed">Architectural Japandi woodworking synthesis with traditional Filipino joinery. Crafted with intention in our dedicated Candaba workshop.</p><div class="flex items-center gap-space-xs pt-1"><span class="font-caption text-caption text-primary-fixed bg-surface-container-highest/20 px-2 py-1 rounded">FSC Certified Narra &amp; Teak</span><span class="font-caption text-caption text-tertiary-fixed bg-surface-container-highest/20 px-2 py-1 rounded">Zero-VOC Oils</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Workshop &amp; Coordinates</span><div class="flex items-start gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed mt-0.5">location_on</span><span>Dalan Batu, Pasig, Candaba, Pampanga 2013, Philippines</span></div><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed">call</span><span>Direct Hotline: +63 981 255 8028</span></div><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed">schedule</span><span>Monday to Sunday: 8:00 AM – 5:00 PM PHT</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Workshop Collections</span><div class="flex flex-col gap-2 font-body-sm text-body-sm text-inverse-on-surface/80"><a class="hover:text-primary-fixed transition-colors" data-path="tetratable-4-in-1" href="tetratable.html">TetraTable 4-in-1 Modular</a><a class="hover:text-primary-fixed transition-colors" data-path="furniture-catalog" href="#">Tansu Credenzas &amp; Consoles</a><a class="hover:text-primary-fixed transition-colors" data-path="furniture-catalog" href="#">Live Edge Dining Tables</a><a class="hover:text-primary-fixed transition-colors" data-path="production-tracker" href="#">Kiln Drying &amp; Batch Status</a><a class="hover:text-primary-fixed transition-colors" data-path="seller-portal" href="#">Workshop Artisan Portal</a></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Follow Our Craft</span><p class="font-body-sm text-body-sm text-inverse-on-surface/80">Connect with us on official social media channels for live workshop demonstrations and customer photos.</p><div class="flex items-center gap-3 pt-1"><a href="https://www.facebook.com/profile.php?id=61588914923992&rdid=JkQTafkpCiS2BW1d&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1CBMxNxPbk%2F#" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#1877F2] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Facebook"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a><a href="https://www.tiktok.com/@ecohavenfurnitureph" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-black hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="TikTok (@ecohavenfurnitureph)"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.97v7.54c.03 2.5-1.28 4.9-3.4 6.13-2.15 1.25-4.94 1.19-7.03-.15-2.07-1.32-3.13-3.76-2.69-6.17.43-2.39 2.37-4.27 4.79-4.67.65-.11 1.31-.1 1.96.01v4.06c-.46-.17-.97-.2-1.45-.1-.99.2-1.77.96-1.99 1.94-.22.98.15 2.02.94 2.63.78.61 1.86.68 2.7.18.84-.49 1.34-1.41 1.32-2.38V.02h-.01z"/></svg></a><a href="https://www.instagram.com/ecohavenfuniture?psln=bHN3dzI4dW1oMnY3" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#E4405F] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Instagram (@ecohavenfuniture)"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a></div></div></div></div><div class="pt-space-md flex flex-col sm:flex-row items-center justify-between gap-space-sm"><p class="font-caption text-caption text-inverse-on-surface/60">© 2024 EcoHaven Furniture. All rights reserved. Dalan Batu, Pasig, Candaba, Pampanga.</p><div class="flex items-center gap-space-md font-caption text-caption text-inverse-on-surface/70"><a class="hover:text-primary-fixed transition-colors" href="#">Privacy Framework</a><a class="hover:text-primary-fixed transition-colors" href="#">Warranty Terms</a><a class="hover:text-primary-fixed transition-colors" href="#">Bespoke Commission Agreement</a></div></div></div></footer>
 <!-- Firebase Realtime Database SDK (Official CDN - Zero Build Step) -->
@@ -883,6 +1079,37 @@ Please log in to your account and re-upload your valid payment screenshot at eco
 
 window.expandedOrderCards = window.expandedOrderCards || new Set();
 window.kanbanAllExpanded = false;
+window.kanbanHideArchived = true; // Default: hide archived orders to keep Kanban space clear
+
+function toggleArchivedOrdersFilter() {
+    window.kanbanHideArchived = !window.kanbanHideArchived;
+    const btnText = document.getElementById('textFilterArchived');
+    const btnIcon = document.getElementById('iconFilterArchived');
+    if (window.kanbanHideArchived) {
+        if (btnText) btnText.innerText = 'Hide Archived';
+        if (btnIcon) btnIcon.innerText = 'visibility_off';
+    } else {
+        if (btnText) btnText.innerText = 'Showing All (Archived Visible)';
+        if (btnIcon) btnIcon.innerText = 'visibility';
+    }
+    renderKanban();
+}
+
+async function handleArchiveAllCompleted() {
+    if (!window.ecohaven || !window.ecohaven.archiveAllCompletedOrders) return;
+    await window.ecohaven.archiveAllCompletedOrders();
+    renderKanban();
+}
+
+async function archiveOrderDirect(orderId, event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    if (!window.ecohaven || !window.ecohaven.archiveOrder) return;
+    await window.ecohaven.archiveOrder(orderId, true);
+    renderKanban();
+}
 
 function toggleOrderCardDetails(orderId, event) {
     if (event) {
@@ -928,6 +1155,151 @@ function toggleAllKanbanDetails() {
     renderKanban();
 }
 
+// ==========================================================
+// EDIT ORDER MODAL CONTROLLERS & CLEAR SPACE ACTIONS
+// ==========================================================
+let activeEditOrderId = null;
+
+function openEditOrderModal(orderId, event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    if (!window.ecohaven) return;
+    const ord = window.ecohaven.orders[orderId] || window.ecohaven.getOrder(orderId);
+    if (!ord) return;
+
+    activeEditOrderId = ord.orderId;
+    document.getElementById('editOrderId').value = ord.orderId;
+    document.getElementById('editModalOrderIdTag').innerText = '#' + ord.orderId;
+
+    const stage = ord.stage || 1;
+    document.getElementById('editOrderStage').value = stage;
+    document.getElementById('editModalCurrentStageBadge').innerText = 'Stage ' + stage;
+    document.getElementById('editOrderStatusName').value = ord.orderStatus || ord.stageName || 'In Production';
+
+    document.getElementById('editOrderArchived').checked = !!ord.archived;
+    const quickArchBtn = document.getElementById('quickArchiveBtnText');
+    if (quickArchBtn) {
+        quickArchBtn.innerText = ord.archived ? 'Unarchive Order (Restore to Board)' : 'Archive & Clear from Board';
+    }
+
+    document.getElementById('editCustomerName').value = ord.customerName || '';
+    document.getElementById('editCustomerPhone').value = ord.phone || '';
+    document.getElementById('editCustomerEmail').value = ord.email || '';
+    document.getElementById('editDestinationZone').value = ord.destinationZone || 'Zone 1: Candaba Local & Pampanga';
+    document.getElementById('editCustomerAddress').value = ord.address || '';
+
+    const total = ord.totalAmount || (ord.pricing && ord.pricing.totalAmount) || 7184.00;
+    const paid = ord.downPaymentPaid !== undefined ? ord.downPaymentPaid : (ord.pricing ? ord.pricing.downPaymentPaid : 3467.00);
+    const bal = ord.balanceDue !== undefined ? ord.balanceDue : (total - paid);
+
+    document.getElementById('editTotalAmount').value = total;
+    document.getElementById('editPaidAmount').value = paid;
+    document.getElementById('editBalanceAmount').value = bal;
+    document.getElementById('editPaymentMode').value = ord.paymentMode || 'fifty';
+    document.getElementById('editGcashRef').value = ord.gcashRef || (ord.payment && ord.payment.reference) || '';
+    document.getElementById('editArtisanNotes').value = ord.notes || ord.craftsmanNotes || '';
+
+    const modal = document.getElementById('editOrderModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closeEditOrderModal() {
+    activeEditOrderId = null;
+    const modal = document.getElementById('editOrderModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+function onEditStageChange(newStage) {
+    const stageNames = {
+        '1': 'Pending Review',
+        '2': 'Lumber Cut & Solignum Soaking',
+        '3': 'Precision Joinery & Sanding',
+        '4': 'In Transit via Workshop Fleet',
+        '5': 'Delivered & Complete'
+    };
+    const titleInp = document.getElementById('editOrderStatusName');
+    if (titleInp && stageNames[newStage]) {
+        titleInp.value = stageNames[newStage];
+    }
+    const badge = document.getElementById('editModalCurrentStageBadge');
+    if (badge) badge.innerText = 'Stage ' + newStage;
+}
+
+function recalcEditBalance() {
+    const total = parseFloat(document.getElementById('editTotalAmount').value) || 0;
+    const paid = parseFloat(document.getElementById('editPaidAmount').value) || 0;
+    const bal = Math.max(0, total - paid);
+    document.getElementById('editBalanceAmount').value = bal;
+}
+
+async function handleSaveOrderEdit(event) {
+    if (event) event.preventDefault();
+    if (!activeEditOrderId || !window.ecohaven) return;
+
+    const total = parseFloat(document.getElementById('editTotalAmount').value) || 7184.00;
+    const paid = parseFloat(document.getElementById('editPaidAmount').value) || 0;
+    const bal = Math.max(0, total - paid);
+    const stageNum = parseInt(document.getElementById('editOrderStage').value, 10) || 1;
+    const statusText = document.getElementById('editOrderStatusName').value.trim() || 'In Production';
+    const isArchived = document.getElementById('editOrderArchived').checked;
+
+    const updates = {
+        customerName: document.getElementById('editCustomerName').value.trim(),
+        phone: document.getElementById('editCustomerPhone').value.trim(),
+        email: document.getElementById('editCustomerEmail').value.trim(),
+        destinationZone: document.getElementById('editDestinationZone').value,
+        address: document.getElementById('editCustomerAddress').value.trim(),
+        stage: stageNum,
+        stageName: statusText,
+        orderStatus: statusText,
+        totalAmount: total,
+        downPaymentPaid: paid,
+        balanceDue: bal,
+        paymentMode: document.getElementById('editPaymentMode').value,
+        gcashRef: document.getElementById('editGcashRef').value.trim(),
+        notes: document.getElementById('editArtisanNotes').value.trim(),
+        archived: isArchived
+    };
+
+    if (window.ecohaven.updateOrder) {
+        await window.ecohaven.updateOrder(activeEditOrderId, updates);
+    }
+    closeEditOrderModal();
+    renderKanban();
+}
+
+async function quickArchiveCurrentEditOrder() {
+    if (!activeEditOrderId || !window.ecohaven) return;
+    const ord = window.ecohaven.orders[activeEditOrderId] || window.ecohaven.getOrder(activeEditOrderId);
+    if (!ord) return;
+    const targetArchived = !ord.archived;
+    if (window.ecohaven.archiveOrder) {
+        await window.ecohaven.archiveOrder(activeEditOrderId, targetArchived);
+    }
+    closeEditOrderModal();
+    renderKanban();
+}
+
+async function quickDeleteCurrentEditOrder() {
+    if (!activeEditOrderId || !window.ecohaven) return;
+    const confirmDelete = confirm("Are you sure you want to permanently delete Order #" + activeEditOrderId + "?\n\nThis will remove it from Firebase RTDB and clear Kanban space immediately.");
+    if (!confirmDelete) return;
+
+    if (window.ecohaven.deleteOrder) {
+        await window.ecohaven.deleteOrder(activeEditOrderId);
+    }
+    closeEditOrderModal();
+    renderKanban();
+}
+
 function renderKanban() {
     if (!window.ecohaven) return;
     const orders = window.ecohaven.orders || {};
@@ -946,10 +1318,17 @@ function renderKanban() {
 
     let c1 = 0, c2 = 0, c3 = 0, c4 = 0;
     let revTotal = 0, balTotal = 0;
+    let archivedCount = 0;
 
     const orderList = Object.values(orders);
+    const hideArchived = window.kanbanHideArchived !== false;
 
     orderList.forEach(ord => {
+        if (ord.archived) archivedCount++;
+        if (hideArchived && ord.archived) {
+            return; // Skip displaying archived orders on the active board to clear space
+        }
+
         const stage = ord.stage || 1;
         const total = ord.totalAmount || (ord.pricing ? ord.pricing.totalAmount : 7184.00);
         const paid = ord.downPaymentPaid || (ord.pricing ? ord.pricing.downPaymentPaid : 3467.00);
@@ -967,13 +1346,18 @@ function renderKanban() {
             ? ord.items.map(it => '<div class="text-[11px] text-on-surface truncate">• ' + it.name + ' <span class="text-outline">(' + (it.quantity || 1) + 'x' + (it.finish ? ', ' + it.finish : '') + ')</span></div>').join('')
             : '<div class="text-[11px] text-on-surface-variant italic">• TetraTable 4-in-1 Suite (1x)</div>';
 
+        const editBtnHtml = '<button type="button" onclick="openEditOrderModal(\'' + ord.orderId + '\', event)" class="p-1 rounded text-outline hover:text-primary hover:bg-surface-container transition-all" title="Edit Order Details &amp; Clear Space"><span class="material-symbols-outlined text-[16px]">edit_square</span></button>';
+
         if (stage === 1) {
             c1++;
             const isFull = ord.paymentMode === 'full' || (ord.pricing && !ord.pricing.isDownPayment);
             const isFlagged = ord.orderStatus && ord.orderStatus.includes('Flagged');
             card.innerHTML = `
-                <div class="flex justify-between items-start mb-1.5">
-                    <span class="text-xs font-mono font-bold text-primary">#${ord.orderId}</span>
+                <div class="flex justify-between items-center mb-1.5">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-mono font-bold text-primary">#${ord.orderId}</span>
+                        ${editBtnHtml}
+                    </div>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isFlagged ? 'bg-red-100 text-red-800 border border-red-200' : (isFull ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800')}">
                         ${isFlagged ? '⚠️ Flagged' : (isFull ? '100% Full Paid' : '50% DP')}
                     </span>
@@ -1009,6 +1393,11 @@ function renderKanban() {
                         Order Total: ₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})}
                     </div>
                     `}
+
+                    <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="w-full py-1.5 px-3 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px]">edit_note</span>
+                        <span>Edit Order &amp; Clear Space</span>
+                    </button>
                 </div>
 
                 <!-- Show / Hide Details Toggle Button -->
@@ -1033,8 +1422,11 @@ function renderKanban() {
         } else if (stage === 2) {
             c2++;
             card.innerHTML = `
-                <div class="flex justify-between items-start mb-1.5">
-                    <span class="text-xs font-mono font-bold text-primary">#${ord.orderId}</span>
+                <div class="flex justify-between items-center mb-1.5">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-mono font-bold text-primary">#${ord.orderId}</span>
+                        ${editBtnHtml}
+                    </div>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-surface-container text-on-surface font-semibold">Stage 2</span>
                 </div>
                 <h4 class="font-title-md text-sm text-on-surface font-semibold truncate">${ord.customerName}</h4>
@@ -1059,6 +1451,10 @@ function renderKanban() {
                         Status: Cutting in progress<br/>
                         Preservative: Solignum Immersion
                     </div>
+                    <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="w-full py-1.5 px-3 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px]">edit_note</span>
+                        <span>Edit Order &amp; Clear Space</span>
+                    </button>
                 </div>
 
                 <!-- Show / Hide Details Toggle Button -->
@@ -1077,8 +1473,11 @@ function renderKanban() {
         } else if (stage === 3) {
             c3++;
             card.innerHTML = `
-                <div class="flex justify-between items-start mb-1.5">
-                    <span class="text-xs font-mono font-bold text-primary">#${ord.orderId}</span>
+                <div class="flex justify-between items-center mb-1.5">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-mono font-bold text-primary">#${ord.orderId}</span>
+                        ${editBtnHtml}
+                    </div>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-semibold">In Joinery</span>
                 </div>
                 <h4 class="font-title-md text-sm text-on-surface font-semibold truncate">${ord.customerName}</h4>
@@ -1103,6 +1502,10 @@ function renderKanban() {
                         Sanding: 320-grit Natural Barnis<br/>
                         Epoxy: Pioneer High-Tensile Marine
                     </div>
+                    <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="w-full py-1.5 px-3 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px]">edit_note</span>
+                        <span>Edit Order &amp; Clear Space</span>
+                    </button>
                 </div>
 
                 <!-- Show / Hide Details Toggle Button -->
@@ -1122,8 +1525,11 @@ function renderKanban() {
             c4++;
             const isDone = stage === 5;
             card.innerHTML = `
-                <div class="flex justify-between items-start mb-1.5">
-                    <span class="text-xs font-mono font-bold text-tertiary">#${ord.orderId}</span>
+                <div class="flex justify-between items-center mb-1.5">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-mono font-bold text-tertiary">#${ord.orderId}</span>
+                        ${editBtnHtml}
+                    </div>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isDone ? 'bg-tertiary-fixed text-on-tertiary-fixed' : 'bg-primary-fixed text-on-primary-fixed'}">
                         ${isDone ? 'Delivered & Complete' : 'In Transit'}
                     </span>
@@ -1150,6 +1556,10 @@ function renderKanban() {
                         Courier: Workshop Fleet (CBD 4821)<br/>
                         Driver: Mang Ronaldo Santos
                     </div>
+                    <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="w-full py-1.5 px-3 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px]">edit_note</span>
+                        <span>Edit Order &amp; Clear Space</span>
+                    </button>
                 </div>
 
                 <!-- Show / Hide Details Toggle Button -->
@@ -1164,7 +1574,13 @@ function renderKanban() {
                     <span class="material-symbols-outlined text-sm">check_circle</span>
                     Confirm Delivery &amp; Collect Balance
                 </button>` : `
-                <span class="w-full py-1.5 bg-tertiary-fixed text-on-tertiary-fixed text-xs font-bold rounded-lg text-center block">✓ Order Fulfilled</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="flex-1 py-1.5 bg-tertiary-fixed text-on-tertiary-fixed text-xs font-bold rounded-lg text-center block">✓ Order Fulfilled</span>
+                    <button type="button" onclick="archiveOrderDirect('${ord.orderId}', event)" class="px-2.5 py-1.5 bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-primary rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1" title="Archive order to clear space in Column 4">
+                        <span class="material-symbols-outlined text-[15px]">archive</span>
+                        <span class="text-[11px]">Clear</span>
+                    </button>
+                </div>
                 `}
             `;
             col4.appendChild(card);
@@ -1181,6 +1597,13 @@ function renderKanban() {
     if (elC2) elC2.innerText = c2;
     if (elC3) elC3.innerText = c3;
     if (elC4) elC4.innerText = c4;
+
+    const btnTextFilter = document.getElementById('textFilterArchived');
+    if (btnTextFilter) {
+        btnTextFilter.innerText = hideArchived 
+            ? ('Hide Archived' + (archivedCount > 0 ? ' (' + archivedCount + ')' : ''))
+            : ('Showing All (' + archivedCount + ' Archived)');
+    }
 
     const kpiTotal = document.getElementById('kpiTotalOrders');
     const kpiRev = document.getElementById('kpiRevenue');
