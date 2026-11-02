@@ -1386,10 +1386,10 @@ class EcoHavenStore {
     // ==========================================================
     async updateOrder(orderId, updateFields) {
         if (!orderId) return null;
-        const ord = this.orders[orderId] || this.getOrder(orderId);
+        let ord = this.orders[orderId] || this.getOrder(orderId);
         if (!ord) {
-            console.warn("Order not found for update:", orderId);
-            return null;
+            ord = { orderId: orderId, ...updateFields };
+            this.orders[orderId] = ord;
         }
 
         const total = (updateFields.totalAmount !== undefined && !isNaN(parseFloat(updateFields.totalAmount)))

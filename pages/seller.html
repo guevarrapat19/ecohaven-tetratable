@@ -68,11 +68,11 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
 <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-8">
     <div class="bg-surface-container-lowest border border-outline-variant/30 p-3.5 rounded-xl text-center shadow-xs">
         <span class="text-[11px] text-outline font-medium uppercase tracking-wider block">Total Orders</span>
-        <span id="kpiTotalOrders" class="text-xl font-bold text-on-surface mt-1 block">3</span>
+        <span id="kpiTotalOrders" class="text-xl font-bold text-on-surface mt-1 block">0</span>
     </div>
     <div class="bg-surface-container-lowest border border-amber-300 bg-amber-50/50 p-3.5 rounded-xl text-center shadow-xs">
         <span class="text-[11px] text-amber-700 font-bold uppercase tracking-wider block">Pending Review</span>
-        <span id="kpiPendingReview" class="text-xl font-bold text-amber-800 mt-1 block">2</span>
+        <span id="kpiPendingReview" class="text-xl font-bold text-amber-800 mt-1 block">0</span>
     </div>
     <div class="bg-surface-container-lowest border border-outline-variant/30 p-3.5 rounded-xl text-center shadow-xs">
         <span class="text-[11px] text-outline font-medium uppercase tracking-wider block">Timber Cutting</span>
@@ -80,7 +80,7 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
     </div>
     <div class="bg-surface-container-lowest border border-outline-variant/30 p-3.5 rounded-xl text-center shadow-xs">
         <span class="text-[11px] text-outline font-medium uppercase tracking-wider block">In Joinery</span>
-        <span id="kpiInJoinery" class="text-xl font-bold text-primary mt-1 block">1</span>
+        <span id="kpiInJoinery" class="text-xl font-bold text-primary mt-1 block">0</span>
     </div>
     <div class="bg-surface-container-lowest border border-outline-variant/30 p-3.5 rounded-xl text-center shadow-xs">
         <span class="text-[11px] text-outline font-medium uppercase tracking-wider block">In Transit</span>
@@ -92,11 +92,11 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
     </div>
     <div class="bg-surface-container-lowest border border-outline-variant/30 p-3.5 rounded-xl text-center shadow-xs">
         <span class="text-[11px] text-outline font-medium uppercase tracking-wider block">Revenue</span>
-        <span id="kpiRevenue" class="text-xl font-bold text-tertiary mt-1 block">₱21.5k</span>
+        <span id="kpiRevenue" class="text-xl font-bold text-tertiary mt-1 block">₱0</span>
     </div>
     <div class="bg-surface-container-lowest border border-outline-variant/30 p-3.5 rounded-xl text-center shadow-xs">
         <span class="text-[11px] text-outline font-medium uppercase tracking-wider block">Balance Due</span>
-        <span id="kpiBalanceDue" class="text-xl font-bold text-primary mt-1 block">₱11.1k</span>
+        <span id="kpiBalanceDue" class="text-xl font-bold text-primary mt-1 block">₱0</span>
     </div>
 </div>
 
@@ -1290,13 +1290,14 @@ async function quickArchiveCurrentEditOrder() {
 
 async function quickDeleteCurrentEditOrder() {
     if (!activeEditOrderId || !window.ecohaven) return;
-    const confirmDelete = confirm("Are you sure you want to permanently delete Order #" + activeEditOrderId + "?\n\nThis will remove it from Firebase RTDB and clear Kanban space immediately.");
+    const orderToDelete = activeEditOrderId;
+    const confirmDelete = confirm("Are you sure you want to permanently delete Order #" + orderToDelete + "?\n\nThis will remove it from Firebase RTDB and clear Kanban space immediately.");
     if (!confirmDelete) return;
 
-    if (window.ecohaven.deleteOrder) {
-        await window.ecohaven.deleteOrder(activeEditOrderId);
-    }
     closeEditOrderModal();
+    if (window.ecohaven.deleteOrder) {
+        await window.ecohaven.deleteOrder(orderToDelete);
+    }
     renderKanban();
 }
 
@@ -1316,25 +1317,39 @@ function renderKanban() {
     col3.innerHTML = '';
     col4.innerHTML = '';
 
-    let c1 = 0, c2 = 0, c3 = 0, c4 = 0;
-    let revTotal = 0, balTotal = 0;
-    let archivedCount = 0;
+    let countPending = 0;   // Stage 1: Pending Review
+    let countTimber = 0;    // Stage 2: Timber Cutting & Solignum
+    let countJoinery = 0;   // Stage 3: Joinery & Sanding
+    let countTransit = 0;   // Stage 4: Fleet & In Transit
+    let countComplete = 0;  // Stage 5: Completed & Delivered
+    let countArchived = 0;  // Archived orders
+
+    let totalRevenue = 0;   // Total money collected (down payment or full paid)
+    let totalBalanceDue = 0;// Total remaining unpaid balance due
+    let activeOrdersCount = 0;
 
     const orderList = Object.values(orders);
     const hideArchived = window.kanbanHideArchived !== false;
 
     orderList.forEach(ord => {
-        if (ord.archived) archivedCount++;
-        if (hideArchived && ord.archived) {
-            return; // Skip displaying archived orders on the active board to clear space
+        if (!ord || !ord.orderId) return;
+
+        if (ord.archived) {
+            countArchived++;
+            if (hideArchived) {
+                // If hideArchived is active, skip rendering and active count
+                return;
+            }
         }
 
-        const stage = ord.stage || 1;
-        const total = ord.totalAmount || (ord.pricing ? ord.pricing.totalAmount : 7184.00);
-        const paid = ord.downPaymentPaid || (ord.pricing ? ord.pricing.downPaymentPaid : 3467.00);
-        const bal = ord.balanceDue !== undefined ? ord.balanceDue : (total - paid);
-        revTotal += paid;
-        balTotal += bal;
+        activeOrdersCount++;
+        const stage = parseInt(ord.stage, 10) || 1;
+        const total = parseFloat(ord.totalAmount || (ord.pricing ? ord.pricing.totalAmount : 7184.00)) || 0;
+        const paid = parseFloat(ord.downPaymentPaid !== undefined ? ord.downPaymentPaid : (ord.pricing ? ord.pricing.downPaymentPaid : 3467.00)) || 0;
+        const bal = parseFloat(ord.balanceDue !== undefined ? ord.balanceDue : (total - paid)) || 0;
+
+        totalRevenue += paid;
+        totalBalanceDue += bal;
 
         const isExpanded = !!(window.kanbanAllExpanded || (window.expandedOrderCards && window.expandedOrderCards.has(ord.orderId)));
 
@@ -1349,7 +1364,7 @@ function renderKanban() {
         const editBtnHtml = '<button type="button" onclick="openEditOrderModal(\'' + ord.orderId + '\', event)" class="p-1 rounded text-outline hover:text-primary hover:bg-surface-container transition-all" title="Edit Order Details &amp; Clear Space"><span class="material-symbols-outlined text-[16px]">edit_square</span></button>';
 
         if (stage === 1) {
-            c1++;
+            countPending++;
             const isFull = ord.paymentMode === 'full' || (ord.pricing && !ord.pricing.isDownPayment);
             const isFlagged = ord.orderStatus && ord.orderStatus.includes('Flagged');
             card.innerHTML = `
@@ -1420,7 +1435,7 @@ function renderKanban() {
             `;
             col1.appendChild(card);
         } else if (stage === 2) {
-            c2++;
+            countTimber++;
             card.innerHTML = `
                 <div class="flex justify-between items-center mb-1.5">
                     <div class="flex items-center gap-1.5">
@@ -1471,7 +1486,7 @@ function renderKanban() {
             `;
             col2.appendChild(card);
         } else if (stage === 3) {
-            c3++;
+            countJoinery++;
             card.innerHTML = `
                 <div class="flex justify-between items-center mb-1.5">
                     <div class="flex items-center gap-1.5">
@@ -1522,8 +1537,13 @@ function renderKanban() {
             `;
             col3.appendChild(card);
         } else {
-            c4++;
             const isDone = stage === 5;
+            if (isDone) {
+                countComplete++;
+            } else {
+                countTransit++;
+            }
+
             card.innerHTML = `
                 <div class="flex justify-between items-center mb-1.5">
                     <div class="flex items-center gap-1.5">
@@ -1587,30 +1607,71 @@ function renderKanban() {
         }
     });
 
-    // Update Counts & KPIs
+    // Handle empty states in columns
+    if (countPending === 0) {
+        col1.innerHTML = '<div class="p-6 text-center text-xs text-outline rounded-xl border border-dashed border-outline-variant/50 my-auto">No orders awaiting review</div>';
+    }
+    if (countTimber === 0) {
+        col2.innerHTML = '<div class="p-6 text-center text-xs text-outline rounded-xl border border-dashed border-outline-variant/50 my-auto">No orders in lumber cutting</div>';
+    }
+    if (countJoinery === 0) {
+        col3.innerHTML = '<div class="p-6 text-center text-xs text-outline rounded-xl border border-dashed border-outline-variant/50 my-auto">No orders in joinery assembly</div>';
+    }
+    if ((countTransit + countComplete) === 0) {
+        col4.innerHTML = '<div class="p-6 text-center text-xs text-outline rounded-xl border border-dashed border-outline-variant/50 my-auto">No active fleet or delivered orders</div>';
+    }
+
+    // 1. Column Header Counts
     const elC1 = document.getElementById('colCount1');
     const elC2 = document.getElementById('colCount2');
     const elC3 = document.getElementById('colCount3');
     const elC4 = document.getElementById('colCount4');
 
-    if (elC1) elC1.innerText = c1;
-    if (elC2) elC2.innerText = c2;
-    if (elC3) elC3.innerText = c3;
-    if (elC4) elC4.innerText = c4;
+    if (elC1) elC1.innerText = countPending;
+    if (elC2) elC2.innerText = countTimber;
+    if (elC3) elC3.innerText = countJoinery;
+    if (elC4) elC4.innerText = countTransit + countComplete;
 
+    // 2. Archived Filter Button Text
     const btnTextFilter = document.getElementById('textFilterArchived');
     if (btnTextFilter) {
         btnTextFilter.innerText = hideArchived 
-            ? ('Hide Archived' + (archivedCount > 0 ? ' (' + archivedCount + ')' : ''))
-            : ('Showing All (' + archivedCount + ' Archived)');
+            ? ('Hide Archived' + (countArchived > 0 ? ' (' + countArchived + ')' : ''))
+            : ('Showing All (' + countArchived + ' Archived)');
     }
 
+    // 3. 8-Chip KPI Workshop Telemetry Row (Dynamic Reactivity)
     const kpiTotal = document.getElementById('kpiTotalOrders');
-    const kpiRev = document.getElementById('kpiRevenue');
-    const kpiBal = document.getElementById('kpiBalanceDue');
-    if (kpiTotal) kpiTotal.innerText = orderList.length;
-    if (kpiRev) kpiRev.innerText = '₱' + (revTotal / 1000).toFixed(1) + 'k';
-    if (kpiBal) kpiBal.innerText = '₱' + (balTotal / 1000).toFixed(1) + 'k';
+    const kpiPending = document.getElementById('kpiPendingReview');
+    const kpiTimber = document.getElementById('kpiTimberCutting');
+    const kpiJoinery = document.getElementById('kpiInJoinery');
+    const kpiTransit = document.getElementById('kpiInTransit');
+    const kpiCompleted = document.getElementById('kpiCompleted');
+    const kpiRevenue = document.getElementById('kpiRevenue');
+    const kpiBalanceDue = document.getElementById('kpiBalanceDue');
+
+    if (kpiTotal) kpiTotal.innerText = activeOrdersCount;
+    if (kpiPending) kpiPending.innerText = countPending;
+    if (kpiTimber) kpiTimber.innerText = countTimber;
+    if (kpiJoinery) kpiJoinery.innerText = countJoinery;
+    if (kpiTransit) kpiTransit.innerText = countTransit;
+    if (kpiCompleted) kpiCompleted.innerText = countComplete;
+
+    function formatCurrencyK(val) {
+        if (!val || val <= 0) return '₱0';
+        if (val >= 1000000) return '₱' + (val / 1000000).toFixed(2) + 'M';
+        if (val >= 1000) return '₱' + (val / 1000).toFixed(1) + 'k';
+        return '₱' + Math.round(val).toLocaleString('en-PH');
+    }
+
+    if (kpiRevenue) {
+        kpiRevenue.innerText = formatCurrencyK(totalRevenue);
+        kpiRevenue.title = 'Total Money Collected: ₱' + totalRevenue.toLocaleString('en-PH', {minimumFractionDigits: 2});
+    }
+    if (kpiBalanceDue) {
+        kpiBalanceDue.innerText = formatCurrencyK(totalBalanceDue);
+        kpiBalanceDue.title = 'Remaining Balance Due: ₱' + totalBalanceDue.toLocaleString('en-PH', {minimumFractionDigits: 2});
+    }
 }
 
 function openVerificationModal(orderId) {
