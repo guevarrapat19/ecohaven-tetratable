@@ -759,6 +759,58 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
     </div>
 </div>
 
+
+<!-- Modal 7: Delete Order Confirmation Dialog (Native EcoHaven Styled) -->
+<div id="deleteConfirmModal" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md hidden items-center justify-center p-4 transition-opacity duration-200" onclick="if (event.target === this) closeDeleteConfirmModal();">
+    <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-[28px] max-w-md w-full p-6 sm:p-7 shadow-2xl relative transform transition-all duration-200 scale-95 flex flex-col text-center">
+        <!-- Close button -->
+        <button type="button" onclick="closeDeleteConfirmModal()" class="absolute right-4 top-4 p-2 rounded-full hover:bg-surface-container text-on-surface-variant transition-colors" title="Cancel">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+
+        <!-- Warning icon container -->
+        <div class="w-14 h-14 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4 shadow-sm border border-red-200/80">
+            <span class="material-symbols-outlined text-[30px]">delete_forever</span>
+        </div>
+
+        <h3 class="font-headline-sm text-xl text-on-surface font-bold mb-2">Delete Order Permanently?</h3>
+        
+        <p class="text-xs text-on-surface-variant leading-relaxed mb-4 px-2">
+            Are you sure you want to permanently delete <span id="deleteModalOrderId" class="font-mono font-bold text-on-surface">#EH-2026-XXXX</span> for <strong id="deleteModalCustomerName" class="text-on-surface font-semibold">Customer</strong>?
+        </p>
+
+        <!-- Order Snapshot Box -->
+        <div class="bg-surface-container-low rounded-xl p-3 border border-outline-variant/30 text-left text-xs mb-5 space-y-1.5">
+            <div class="flex justify-between items-center text-on-surface-variant">
+                <span>Production Phase:</span>
+                <span id="deleteModalStage" class="font-bold text-on-surface">Payment Review</span>
+            </div>
+            <div class="flex justify-between items-center text-on-surface-variant">
+                <span>Total Order Value:</span>
+                <span id="deleteModalAmount" class="font-mono font-bold text-primary">₱7,184.00</span>
+            </div>
+            <div class="flex justify-between items-center text-on-surface-variant pt-1 border-t border-outline-variant/20">
+                <span>Board Space Impact:</span>
+                <span class="text-error font-semibold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">cleaning_services</span>
+                    Clears column space &amp; revenue KPIs
+                </span>
+            </div>
+        </div>
+
+        <!-- Confirmation Actions -->
+        <div class="flex gap-3 pt-1">
+            <button type="button" onclick="closeDeleteConfirmModal()" class="w-1/2 py-2.5 rounded-xl border border-outline-variant text-xs font-bold text-on-surface hover:bg-surface-container transition-all active:scale-95">
+                No, Keep Order
+            </button>
+            <button type="button" id="btnConfirmDeleteOrder" onclick="executeDeleteConfirmedOrder()" class="w-1/2 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95">
+                <span class="material-symbols-outlined text-[16px]">delete</span>
+                <span>Yes, Delete Order</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 </main>
 <footer class="w-full bg-inverse-surface text-inverse-on-surface pt-space-xl pb-space-lg"><div class="max-w-7xl mx-auto px-gutter"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg pb-space-lg"><div class="flex flex-col gap-space-sm"><div class="flex items-center gap-space-xs"><img alt="EcoHaven Furniture Emblem" class="h-8 w-auto object-contain brightness-200" src="https://lh3.googleusercontent.com/aida/AEtjO1WoMmLqUdcp17_0K7-4RU3j_laJKFuB71tIYvo-2PL2jhAcZH749676gu7fQWloblAKrXLnjtrDm7cmDLa4_OGy5SO-WatR_aBQpdDN0K2Bp6LZLKKxNxFLcFB1WDJaz2oG_ycj2LROrpKw9eiaDGzfF-wXFdhm7wzyX7JBN_KzsFFfDSN_mIJx2ADuxlhZHSpu8qhuPImA1uzZy04pyRsDNRGhCYwcwDRbrWqtTrzRhg"/><span class="font-headline-sm text-headline-sm text-surface tracking-tight font-semibold">EcoHaven</span></div><p class="font-body-sm text-body-sm text-inverse-on-surface/80 leading-relaxed">Architectural Japandi woodworking synthesis with traditional Filipino joinery. Crafted with intention in our dedicated Candaba workshop.</p><div class="flex items-center gap-space-xs pt-1"><span class="font-caption text-caption text-primary-fixed bg-surface-container-highest/20 px-2 py-1 rounded">FSC Certified Narra &amp; Teak</span><span class="font-caption text-caption text-tertiary-fixed bg-surface-container-highest/20 px-2 py-1 rounded">Zero-VOC Oils</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Workshop &amp; Coordinates</span><div class="flex items-start gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed mt-0.5">location_on</span><span>Dalan Batu, Pasig, Candaba, Pampanga 2013, Philippines</span></div><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed">call</span><span>Direct Hotline: +63 981 255 8028</span></div><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed">schedule</span><span>Monday to Sunday: 8:00 AM – 5:00 PM PHT</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Workshop Collections</span><div class="flex flex-col gap-2 font-body-sm text-body-sm text-inverse-on-surface/80"><a class="hover:text-primary-fixed transition-colors" data-path="tetratable-4-in-1" href="tetratable.html">TetraTable 4-in-1 Modular</a><a class="hover:text-primary-fixed transition-colors" data-path="furniture-catalog" href="#">Tansu Credenzas &amp; Consoles</a><a class="hover:text-primary-fixed transition-colors" data-path="furniture-catalog" href="#">Live Edge Dining Tables</a><a class="hover:text-primary-fixed transition-colors" data-path="production-tracker" href="#">Kiln Drying &amp; Batch Status</a><a class="hover:text-primary-fixed transition-colors" data-path="seller-portal" href="#">Workshop Artisan Portal</a></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Follow Our Craft</span><p class="font-body-sm text-body-sm text-inverse-on-surface/80">Connect with us on official social media channels for live workshop demonstrations and customer photos.</p><div class="flex items-center gap-3 pt-1"><a href="https://www.facebook.com/profile.php?id=61588914923992&rdid=JkQTafkpCiS2BW1d&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1CBMxNxPbk%2F#" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#1877F2] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Facebook"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a><a href="https://www.tiktok.com/@ecohavenfurnitureph" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-black hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="TikTok (@ecohavenfurnitureph)"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.97v7.54c.03 2.5-1.28 4.9-3.4 6.13-2.15 1.25-4.94 1.19-7.03-.15-2.07-1.32-3.13-3.76-2.69-6.17.43-2.39 2.37-4.27 4.79-4.67.65-.11 1.31-.1 1.96.01v4.06c-.46-.17-.97-.2-1.45-.1-.99.2-1.77.96-1.99 1.94-.22.98.15 2.02.94 2.63.78.61 1.86.68 2.7.18.84-.49 1.34-1.41 1.32-2.38V.02h-.01z"/></svg></a><a href="https://www.instagram.com/ecohavenfuniture?psln=bHN3dzI4dW1oMnY3" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#E4405F] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Instagram (@ecohavenfuniture)"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a></div></div></div></div><div class="pt-space-md flex flex-col sm:flex-row items-center justify-between gap-space-sm"><p class="font-caption text-caption text-inverse-on-surface/60">© 2024 EcoHaven Furniture. All rights reserved. Dalan Batu, Pasig, Candaba, Pampanga.</p><div class="flex items-center gap-space-md font-caption text-caption text-inverse-on-surface/70"><a class="hover:text-primary-fixed transition-colors" href="#">Privacy Framework</a><a class="hover:text-primary-fixed transition-colors" href="#">Warranty Terms</a><a class="hover:text-primary-fixed transition-colors" href="#">Bespoke Commission Agreement</a></div></div></div></footer>
 <!-- Firebase Realtime Database SDK (Official CDN - Zero Build Step) -->
@@ -1288,17 +1340,95 @@ async function quickArchiveCurrentEditOrder() {
     renderKanban();
 }
 
-async function quickDeleteCurrentEditOrder() {
-    if (!activeEditOrderId || !window.ecohaven) return;
-    const orderToDelete = activeEditOrderId;
-    const confirmDelete = confirm("Are you sure you want to permanently delete Order #" + orderToDelete + "?\n\nThis will remove it from Firebase RTDB and clear Kanban space immediately.");
-    if (!confirmDelete) return;
+// ==========================================================
+// ORDER DELETION DIALOG CONTROLLERS (NATIVE MODAL ASKING)
+// ==========================================================
+let pendingDeleteOrderId = null;
 
-    closeEditOrderModal();
-    if (window.ecohaven.deleteOrder) {
-        await window.ecohaven.deleteOrder(orderToDelete);
+function promptDeleteOrder(orderId, event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    if (!window.ecohaven) return;
+    const ord = window.ecohaven.orders[orderId] || window.ecohaven.getOrder(orderId);
+    if (!ord) return;
+
+    pendingDeleteOrderId = ord.orderId;
+
+    const idTag = document.getElementById('deleteModalOrderId');
+    const custTag = document.getElementById('deleteModalCustomerName');
+    const stageTag = document.getElementById('deleteModalStage');
+    const amtTag = document.getElementById('deleteModalAmount');
+
+    if (idTag) idTag.innerText = '#' + ord.orderId;
+    if (custTag) custTag.innerText = ord.customerName || 'Customer';
+    if (stageTag) stageTag.innerText = ord.orderStatus || ord.stageName || ('Stage ' + (ord.stage || 1));
+    const total = ord.totalAmount || (ord.pricing ? ord.pricing.totalAmount : 7184.00);
+    if (amtTag) amtTag.innerText = '₱' + total.toLocaleString('en-PH', {minimumFractionDigits: 2});
+
+    const modal = document.getElementById('deleteConfirmModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        const card = modal.querySelector('.scale-95');
+        if (card) {
+            requestAnimationFrame(() => {
+                card.classList.remove('scale-95');
+                card.classList.add('scale-100');
+            });
+        }
+    }
+}
+
+function closeDeleteConfirmModal() {
+    pendingDeleteOrderId = null;
+    const modal = document.getElementById('deleteConfirmModal');
+    if (modal) {
+        const card = modal.querySelector('.scale-100');
+        if (card) {
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+        }
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }, 150);
+    }
+}
+
+async function executeDeleteConfirmedOrder() {
+    if (!pendingDeleteOrderId || !window.ecohaven) return;
+    const orderToDelete = pendingDeleteOrderId;
+    const btn = document.getElementById('btnConfirmDeleteOrder');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span><span>Deleting...</span>';
+    }
+
+    try {
+        if (window.ecohaven.deleteOrder) {
+            await window.ecohaven.deleteOrder(orderToDelete);
+        }
+    } catch (e) {
+        console.error("Error deleting order:", e);
+    }
+
+    if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">delete</span><span>Yes, Delete Order</span>';
+    }
+
+    closeDeleteConfirmModal();
+    if (typeof activeEditOrderId !== 'undefined' && activeEditOrderId === orderToDelete) {
+        closeEditOrderModal();
     }
     renderKanban();
+}
+
+function quickDeleteCurrentEditOrder() {
+    if (!activeEditOrderId) return;
+    promptDeleteOrder(activeEditOrderId);
 }
 
 function renderKanban() {
@@ -1361,7 +1491,16 @@ function renderKanban() {
             ? ord.items.map(it => '<div class="text-[11px] text-on-surface truncate">• ' + it.name + ' <span class="text-outline">(' + (it.quantity || 1) + 'x' + (it.finish ? ', ' + it.finish : '') + ')</span></div>').join('')
             : '<div class="text-[11px] text-on-surface-variant italic">• TetraTable 4-in-1 Suite (1x)</div>';
 
-        const editBtnHtml = '<button type="button" onclick="openEditOrderModal(\'' + ord.orderId + '\', event)" class="p-1 rounded text-outline hover:text-primary hover:bg-surface-container transition-all" title="Edit Order Details &amp; Clear Space"><span class="material-symbols-outlined text-[16px]">edit_square</span></button>';
+        const cardActionBtns = `
+    <div class="flex items-center gap-0.5">
+        <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="p-1 rounded text-outline hover:text-primary hover:bg-surface-container transition-all" title="Edit Order Details">
+            <span class="material-symbols-outlined text-[15px]">edit_square</span>
+        </button>
+        <button type="button" onclick="promptDeleteOrder('${ord.orderId}', event)" class="p-1 rounded text-outline hover:text-error hover:bg-red-50 transition-all" title="Delete Order &amp; Clear Space">
+            <span class="material-symbols-outlined text-[15px]">delete</span>
+        </button>
+    </div>
+`;
 
         if (stage === 1) {
             countPending++;
@@ -1371,7 +1510,7 @@ function renderKanban() {
                 <div class="flex justify-between items-center mb-1.5">
                     <div class="flex items-center gap-1.5">
                         <span class="text-xs font-mono font-bold text-primary">#${ord.orderId}</span>
-                        ${editBtnHtml}
+                        ${cardActionBtns}
                     </div>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isFlagged ? 'bg-red-100 text-red-800 border border-red-200' : (isFull ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800')}">
                         ${isFlagged ? '⚠️ Flagged' : (isFull ? '100% Full Paid' : '50% DP')}
@@ -1409,10 +1548,16 @@ function renderKanban() {
                     </div>
                     `}
 
-                    <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="w-full py-1.5 px-3 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all flex items-center justify-center gap-1.5">
-                        <span class="material-symbols-outlined text-[16px]">edit_note</span>
-                        <span>Edit Order &amp; Clear Space</span>
-                    </button>
+                    <div class="flex gap-2 pt-1">
+                        <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="flex-1 py-1.5 px-2.5 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all flex items-center justify-center gap-1">
+                            <span class="material-symbols-outlined text-[15px]">edit_note</span>
+                            <span>Edit Order</span>
+                        </button>
+                        <button type="button" onclick="promptDeleteOrder('${ord.orderId}', event)" class="py-1.5 px-3 rounded-lg border border-red-200 bg-red-50/60 hover:bg-red-100 text-red-700 text-xs font-bold transition-all flex items-center justify-center gap-1" title="Delete this order">
+                            <span class="material-symbols-outlined text-[15px]">delete</span>
+                            <span>Delete</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Show / Hide Details Toggle Button -->
@@ -1440,7 +1585,7 @@ function renderKanban() {
                 <div class="flex justify-between items-center mb-1.5">
                     <div class="flex items-center gap-1.5">
                         <span class="text-xs font-mono font-bold text-primary">#${ord.orderId}</span>
-                        ${editBtnHtml}
+                        ${cardActionBtns}
                     </div>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-surface-container text-on-surface font-semibold">Stage 2</span>
                 </div>
@@ -1466,10 +1611,16 @@ function renderKanban() {
                         Status: Cutting in progress<br/>
                         Preservative: Solignum Immersion
                     </div>
-                    <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="w-full py-1.5 px-3 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all flex items-center justify-center gap-1.5">
-                        <span class="material-symbols-outlined text-[16px]">edit_note</span>
-                        <span>Edit Order &amp; Clear Space</span>
-                    </button>
+                    <div class="flex gap-2 pt-1">
+                        <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="flex-1 py-1.5 px-2.5 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all flex items-center justify-center gap-1">
+                            <span class="material-symbols-outlined text-[15px]">edit_note</span>
+                            <span>Edit Order</span>
+                        </button>
+                        <button type="button" onclick="promptDeleteOrder('${ord.orderId}', event)" class="py-1.5 px-3 rounded-lg border border-red-200 bg-red-50/60 hover:bg-red-100 text-red-700 text-xs font-bold transition-all flex items-center justify-center gap-1" title="Delete this order">
+                            <span class="material-symbols-outlined text-[15px]">delete</span>
+                            <span>Delete</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Show / Hide Details Toggle Button -->
@@ -1491,7 +1642,7 @@ function renderKanban() {
                 <div class="flex justify-between items-center mb-1.5">
                     <div class="flex items-center gap-1.5">
                         <span class="text-xs font-mono font-bold text-primary">#${ord.orderId}</span>
-                        ${editBtnHtml}
+                        ${cardActionBtns}
                     </div>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-semibold">In Joinery</span>
                 </div>
@@ -1517,10 +1668,16 @@ function renderKanban() {
                         Sanding: 320-grit Natural Barnis<br/>
                         Epoxy: Pioneer High-Tensile Marine
                     </div>
-                    <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="w-full py-1.5 px-3 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all flex items-center justify-center gap-1.5">
-                        <span class="material-symbols-outlined text-[16px]">edit_note</span>
-                        <span>Edit Order &amp; Clear Space</span>
-                    </button>
+                    <div class="flex gap-2 pt-1">
+                        <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="flex-1 py-1.5 px-2.5 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all flex items-center justify-center gap-1">
+                            <span class="material-symbols-outlined text-[15px]">edit_note</span>
+                            <span>Edit Order</span>
+                        </button>
+                        <button type="button" onclick="promptDeleteOrder('${ord.orderId}', event)" class="py-1.5 px-3 rounded-lg border border-red-200 bg-red-50/60 hover:bg-red-100 text-red-700 text-xs font-bold transition-all flex items-center justify-center gap-1" title="Delete this order">
+                            <span class="material-symbols-outlined text-[15px]">delete</span>
+                            <span>Delete</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Show / Hide Details Toggle Button -->
@@ -1548,7 +1705,7 @@ function renderKanban() {
                 <div class="flex justify-between items-center mb-1.5">
                     <div class="flex items-center gap-1.5">
                         <span class="text-xs font-mono font-bold text-tertiary">#${ord.orderId}</span>
-                        ${editBtnHtml}
+                        ${cardActionBtns}
                     </div>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isDone ? 'bg-tertiary-fixed text-on-tertiary-fixed' : 'bg-primary-fixed text-on-primary-fixed'}">
                         ${isDone ? 'Delivered & Complete' : 'In Transit'}
@@ -1576,10 +1733,16 @@ function renderKanban() {
                         Courier: Workshop Fleet (CBD 4821)<br/>
                         Driver: Mang Ronaldo Santos
                     </div>
-                    <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="w-full py-1.5 px-3 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all flex items-center justify-center gap-1.5">
-                        <span class="material-symbols-outlined text-[16px]">edit_note</span>
-                        <span>Edit Order &amp; Clear Space</span>
-                    </button>
+                    <div class="flex gap-2 pt-1">
+                        <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="flex-1 py-1.5 px-2.5 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all flex items-center justify-center gap-1">
+                            <span class="material-symbols-outlined text-[15px]">edit_note</span>
+                            <span>Edit Order</span>
+                        </button>
+                        <button type="button" onclick="promptDeleteOrder('${ord.orderId}', event)" class="py-1.5 px-3 rounded-lg border border-red-200 bg-red-50/60 hover:bg-red-100 text-red-700 text-xs font-bold transition-all flex items-center justify-center gap-1" title="Delete this order">
+                            <span class="material-symbols-outlined text-[15px]">delete</span>
+                            <span>Delete</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Show / Hide Details Toggle Button -->

@@ -1451,7 +1451,7 @@ class EcoHavenStore {
         window.dispatchEvent(new CustomEvent('ecohaven_orders_updated', { detail: this.orders }));
 
         if (typeof window.showEcoHavenToast === 'function') {
-            window.showEcoHavenToast("Order #" + orderId + " deleted and space cleared.", "info");
+            window.showEcoHavenToast("Order #" + orderId + " permanently deleted and board space cleared.", "error", "Order Deleted");
         }
         return true;
     }
@@ -1506,49 +1506,90 @@ window.toggleEcoHavenMobileDrawer = function(open) {
     }
 };
 
-// Global Toast Notification Engine
-window.showEcoHavenToast = function(message, type = 'info') {
+// Global Toast Notification Engine (Luxury Japandi Floating Card)
+window.showEcoHavenToast = function(message, type = 'info', title = null) {
     let container = document.getElementById('ecohavenToastContainer');
     if (!container) {
         container = document.createElement('div');
         container.id = 'ecohavenToastContainer';
-        container.className = 'fixed top-5 right-5 z-[99999] flex flex-col gap-2 pointer-events-none max-w-sm w-full px-4';
+        container.className = 'fixed top-5 right-5 z-[99999] flex flex-col gap-2.5 pointer-events-none max-w-sm w-full px-4';
         document.body.appendChild(container);
     }
 
     const toast = document.createElement('div');
-    const bgColors = {
-        'success': 'bg-[#1b3d22] text-[#d4f5d2] border-[#2e6939]',
-        'error': 'bg-[#4a1313] text-[#ffdad6] border-[#802323]',
-        'info': 'bg-inverse-surface text-inverse-on-surface border-outline-variant/40'
-    };
-    const iconNames = {
-        'success': 'check_circle',
-        'error': 'error',
-        'info': 'info'
+
+    const config = {
+        'success': {
+            bg: 'bg-[#142618]/95 text-white border-emerald-500/40 shadow-[0_12px_36px_rgba(10,35,16,0.35)]',
+            iconBg: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
+            icon: 'check_circle',
+            defaultTitle: 'Success',
+            progressBg: 'bg-emerald-500'
+        },
+        'error': {
+            bg: 'bg-[#2b0e0e]/95 text-white border-red-500/40 shadow-[0_12px_36px_rgba(45,14,14,0.35)]',
+            iconBg: 'bg-red-500/20 text-red-400 border border-red-500/30',
+            icon: 'delete_forever',
+            defaultTitle: 'Order Deleted',
+            progressBg: 'bg-red-500'
+        },
+        'warning': {
+            bg: 'bg-[#2a1b0d]/95 text-white border-amber-500/40 shadow-[0_12px_36px_rgba(45,30,13,0.35)]',
+            iconBg: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
+            icon: 'warning',
+            defaultTitle: 'Workshop Warning',
+            progressBg: 'bg-amber-500'
+        },
+        'info': {
+            bg: 'bg-[#211710]/95 text-white border-primary/40 shadow-[0_12px_36px_rgba(33,23,16,0.35)]',
+            iconBg: 'bg-primary/20 text-primary-fixed border border-primary/30',
+            icon: 'info',
+            defaultTitle: 'EcoHaven Notice',
+            progressBg: 'bg-primary'
+        }
     };
 
-    toast.className = `${bgColors[type] || bgColors['info']} pointer-events-auto shadow-2xl rounded-2xl p-3.5 px-4 flex items-center gap-3 border backdrop-blur-md transform transition-all duration-300 translate-y-[-20px] opacity-0 text-sm font-medium`;
+    const cfg = config[type] || config['info'];
+    const displayTitle = title || cfg.defaultTitle;
+
+    toast.className = `${cfg.bg} pointer-events-auto rounded-2xl p-3.5 pr-4 flex flex-col gap-2 border backdrop-blur-xl transform transition-all duration-300 translate-y-[-16px] opacity-0 select-none overflow-hidden relative shadow-2xl`;
+
     toast.innerHTML = `
-        <span class="material-symbols-outlined text-[20px] flex-shrink-0">${iconNames[type] || 'info'}</span>
-        <span class="flex-1 text-xs sm:text-sm font-semibold leading-tight">${message}</span>
-        <button class="opacity-70 hover:opacity-100 transition-opacity p-0.5" onclick="this.parentElement.remove()">
-            <span class="material-symbols-outlined text-[16px]">close</span>
-        </button>
+        <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-xl ${cfg.iconBg} flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
+                <span class="material-symbols-outlined text-[19px]">${cfg.icon}</span>
+            </div>
+            <div class="flex-1 min-w-0 pr-1">
+                <div class="text-[10px] font-bold uppercase tracking-wider text-outline-variant/80">${displayTitle}</div>
+                <div class="text-xs sm:text-sm font-semibold text-white/95 leading-snug mt-0.5 break-words">${message}</div>
+            </div>
+            <button type="button" class="text-white/50 hover:text-white transition-all p-1 -mr-1 -mt-1 rounded-lg hover:bg-white/10 hover:rotate-90" onclick="this.closest('.pointer-events-auto').remove()" title="Dismiss">
+                <span class="material-symbols-outlined text-[16px]">close</span>
+            </button>
+        </div>
+        <div class="w-full bg-white/10 h-0.5 rounded-full overflow-hidden mt-0.5">
+            <div class="toast-progress h-full ${cfg.progressBg} transition-all duration-[3300ms] ease-linear w-full"></div>
+        </div>
     `;
 
     container.appendChild(toast);
 
     requestAnimationFrame(() => {
-        toast.classList.remove('translate-y-[-20px]', 'opacity-0');
+        toast.classList.remove('translate-y-[-16px]', 'opacity-0');
         toast.classList.add('translate-y-0', 'opacity-100');
+        const bar = toast.querySelector('.toast-progress');
+        if (bar) {
+            setTimeout(() => { bar.style.width = '0%'; }, 50);
+        }
     });
 
-    setTimeout(() => {
+    const removeTimer = setTimeout(() => {
         toast.classList.remove('translate-y-0', 'opacity-100');
-        toast.classList.add('translate-y-[-20px]', 'opacity-0');
+        toast.classList.add('translate-y-[-16px]', 'opacity-0');
         setTimeout(() => toast.remove(), 350);
     }, 3500);
+
+    toast.addEventListener('mouseenter', () => clearTimeout(removeTimer));
 };
 
 // Global Drawer Forwarders for Backward Compatibility
