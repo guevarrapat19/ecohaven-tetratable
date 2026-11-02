@@ -18,71 +18,235 @@
     },
     "products": {
       "tetratable-mahogany": {
-        "id": "tetratable-mahogany",
-        "name": "TetraTable Multifunctional 4-in-1 Suite",
-        "category": "Multifunctional 4-in-1",
-        "price": 6934.0,
-        "downPaymentPrice": 3467.0,
-        "isFlagship": true,
-        "woodSpecies": "100% Solid Philippine Mahogany",
-        "moistureRating": "11.4% MC (Kiln Stabilized)",
-        "treatment": "Solignum Deep Anti-Termite & Borer Chemical Barrier",
-        "bonding": "Pioneer High-Strength Epoxy Mortise Joinery",
-        "finish": "Natural Polished Barnis Wood Stain",
         "availableFinishes": [
           "Natural Polished Mahogany",
           "Dark Smoked Walnut",
           "Warm Golden Teak"
         ],
-        "staticLoadCapacityPerChairKg": 120,
-        "stowedFootprintM2": 0.3,
-        "dimensionsStowed": {
-          "lengthCm": 45,
-          "widthCm": 45,
-          "heightCm": 50
-        },
-        "conversionSpeedSeconds": 8.5,
+        "bonding": "Pioneer High-Strength Epoxy Mortise Joinery",
+        "category": "Multifunctional 4-in-1",
         "componentsCount": 5,
+        "conversionSpeedSeconds": 8.5,
         "description": "Innovative multifunctional space-saving furniture with precision interlocking mortise joinery that functions as a compact side table and cleanly separates into four (4) standalone dining chairs.",
+        "dimensionsStowed": {
+          "heightCm": 50,
+          "lengthCm": 45,
+          "widthCm": 45
+        },
+        "downPaymentPrice": 3467,
+        "finish": "Natural Polished Barnis Wood Stain",
+        "id": "tetratable-mahogany",
         "image": "./assets/images/product pic.png",
+        "isFlagship": true,
         "lifestyleImage": "./assets/images/tetratable-luxury-pampanga-house.jpg",
+        "moistureRating": "11.4% MC (Kiln Stabilized)",
+        "name": "TetraTable Multifunctional 4-in-1 Suite",
+        "price": 6934,
+        "staticLoadCapacityPerChairKg": 120,
+        "status": "In Stock",
         "stockLevel": 18,
-        "status": "In Stock"
+        "stowedFootprintM2": 0.3,
+        "treatment": "Solignum Deep Anti-Termite & Borer Chemical Barrier",
+        "woodSpecies": "100% Solid Philippine Mahogany"
+      },
+      "santos-butterfly": {
+        "availableFinishes": [
+          "Rustic Pine / Mahogany Finish",
+          "Natural Teak Barnis"
+        ],
+        "bonding": "Precision Brass Gateleg Hinges & Mortise Frame",
+        "category": "Transformable Dining Suites",
+        "componentsCount": 5,
+        "conversionSpeedSeconds": 15,
+        "description": "Multi-mode drop-leaf dining suite with integrated gateleg support and concealed folding chair bay for compact luxury living.",
+        "dimensionsStowed": {
+          "heightCm": 76,
+          "lengthCm": 140,
+          "widthCm": 35
+        },
+        "downPaymentPrice": 10421,
+        "finish": "Rustic Pine / Mahogany Finish (Solignum & Barnis)",
+        "id": "santos-butterfly",
+        "image": "./assets/images/santos-butterfly-dining-set.jpg",
+        "isFlagship": false,
+        "lifestyleImage": "./assets/images/santos-butterfly-dining-set.jpg",
+        "moistureRating": "11.4% MC (Kiln Stabilized)",
+        "name": "Santos Butterfly Drop-Leaf Dining Set",
+        "price": 20842,
+        "staticLoadCapacityPerChairKg": 130,
+        "status": "In Stock",
+        "stockLevel": 6,
+        "stowedFootprintM2": 0.49,
+        "treatment": "Solignum Deep Anti-Termite Chemical Barrier",
+        "woodSpecies": "Kiln-Dried Narra & Teak / Solid Hardwood"
+      },
+      "tetralift-table": {
+        "availableFinishes": [
+          "Philippine Mahogany & Woven Canvas",
+          "Smoked Walnut"
+        ],
+        "bonding": "Heavy-Duty Dual Pneumatic Gas Struts & Solid Mortise",
+        "category": "Lifting & Multi-Height",
+        "componentsCount": 5,
+        "conversionSpeedSeconds": 5,
+        "description": "Pneumatic lift-top workstation coffee table with four nested upholstered storage ottomans.",
+        "dimensionsStowed": {
+          "heightCm": 48,
+          "lengthCm": 100,
+          "widthCm": 60
+        },
+        "downPaymentPrice": 14931.5,
+        "finish": "Philippine Mahogany & Woven Canvas",
+        "id": "tetralift-table",
+        "image": "./assets/images/tetralift-center-table.jpg",
+        "isFlagship": false,
+        "lifestyleImage": "./assets/images/tetralift-center-table.jpg",
+        "moistureRating": "11.4% MC (Kiln Stabilized)",
+        "name": "TetraLift Center Table & Ottomans",
+        "price": 29863,
+        "staticLoadCapacityPerChairKg": 120,
+        "status": "In Stock",
+        "stockLevel": 4,
+        "stowedFootprintM2": 0.6,
+        "treatment": "Solignum Anti-Termite Preservative",
+        "woodSpecies": "Solid Mahogany & Pneumatic Steel"
+      },
+      "transformer-console": {
+        "availableFinishes": [
+          "Kiln-Dried Hardwood Trestle",
+          "Dark Walnut"
+        ],
+        "bonding": "Hydraulic Scissor Lift Mechanism & Solid Pegged Trestle",
+        "category": "Hydraulic Expanding",
+        "componentsCount": 1,
+        "conversionSpeedSeconds": 10,
+        "description": "Hydraulic scissor mechanism converts from low lounge cocktail table to full 8-seater dining height in seconds.",
+        "dimensionsStowed": {
+          "heightCm": 45,
+          "lengthCm": 120,
+          "widthCm": 70
+        },
+        "downPaymentPrice": 17788,
+        "finish": "Kiln-Dried Hardwood Trestle",
+        "id": "transformer-console",
+        "image": "./assets/images/transformer-cocktail-dining-table.jpg",
+        "isFlagship": false,
+        "lifestyleImage": "./assets/images/transformer-cocktail-dining-table.jpg",
+        "moistureRating": "11.4% MC (Kiln Stabilized)",
+        "name": "Transformer Cocktail Table",
+        "price": 35576,
+        "status": "In Stock",
+        "stockLevel": 5,
+        "stowedFootprintM2": 0.84,
+        "treatment": "Solignum Anti-Borer Chemical Barrier",
+        "woodSpecies": "Solid Timber & Heavy-Duty Scissor Struts"
+      },
+      "hexaring-round": {
+        "availableFinishes": [
+          "Solid Mahogany & Light Gray Linen",
+          "Narra Inlay Polished"
+        ],
+        "bonding": "Compound Curved Mortise & Flush Apron Housing",
+        "category": "Round Expandable",
+        "componentsCount": 5,
+        "conversionSpeedSeconds": 8,
+        "description": "40-inch circular dining table with four quadrant curved chairs that nest completely flush beneath the apron.",
+        "dimensionsStowed": {
+          "heightCm": 76,
+          "lengthCm": 102,
+          "widthCm": 102
+        },
+        "downPaymentPrice": 21250,
+        "finish": "Solid Mahogany & Light Gray Linen",
+        "id": "hexaring-round",
+        "image": "./assets/images/hexaring-round-dining-set.jpg",
+        "isFlagship": false,
+        "lifestyleImage": "./assets/images/hexaring-round-dining-set.jpg",
+        "moistureRating": "11.4% MC (Kiln Stabilized)",
+        "name": "HexaRing 40\" Round Dining Set",
+        "price": 42500,
+        "staticLoadCapacityPerChairKg": 135,
+        "status": "In Stock",
+        "stockLevel": 3,
+        "stowedFootprintM2": 0.82,
+        "treatment": "Solignum Kiln Stabilization Barrier",
+        "woodSpecies": "100% Kiln-Dried Mahogany & Narra Inlay"
+      },
+      "prod-pampanga-credenza---console": {
+        "availableFinishes": [
+          "Hand-Rubbed Natural Barnis",
+          "Smoked Teak"
+        ],
+        "bonding": "Pioneer Epoxy Dovetail & Hidden Magnetic Latches",
+        "category": "Modular Transformable",
+        "componentsCount": 1,
+        "conversionSpeedSeconds": 12,
+        "description": "Architectural solid mahogany console table with integrated concealed storage compartments that smoothly unfolds into an extended sideboard or buffet service.",
+        "dimensionsStowed": {
+          "heightCm": 85,
+          "lengthCm": 120,
+          "widthCm": 40
+        },
+        "downPaymentPrice": 22450,
+        "finish": "Hand-Rubbed Natural Barnis",
+        "id": "prod-pampanga-credenza---console",
+        "image": "./assets/images/tetratable-luxury-pampanga-house.jpg",
+        "isFlagship": false,
+        "lifestyleImage": "./assets/images/tetratable-luxury-pampanga-house.jpg",
+        "moistureRating": "11.4% MC (Kiln Stabilized)",
+        "name": "Pampanga Credenza & Console",
+        "price": 44900,
+        "status": "In Stock",
+        "stockLevel": 5,
+        "stowedFootprintM2": 0.48,
+        "treatment": "Solignum Deep Treated Barrier",
+        "woodSpecies": "Philippine Mahogany (11.4% MC)"
       },
       "stool-mahogany": {
-        "id": "stool-mahogany",
-        "name": "Artisan Solid Mahogany Low Stool",
         "category": "Stools & Seating",
-        "price": 1450.0,
-        "downPaymentPrice": 725.0,
-        "woodSpecies": "Philippine Mahogany",
-        "treatment": "Solignum Treated",
+        "downPaymentPrice": 725,
         "finish": "Natural Polished Barnis",
+        "id": "stool-mahogany",
         "image": "./assets/images/Picture4.png",
+        "name": "Artisan Solid Mahogany Low Stool",
+        "price": 1450,
+        "status": "In Stock",
         "stockLevel": 24,
-        "status": "In Stock"
+        "treatment": "Solignum Treated",
+        "woodSpecies": "Philippine Mahogany"
       },
       "cushion-pack-4": {
-        "id": "cushion-pack-4",
-        "name": "Orthopedic High-Density Linen Cushions (Set of 4)",
         "category": "Add-ons & Accessories",
-        "price": 1250.0,
-        "downPaymentPrice": 625.0,
-        "material": "Breathable Oatmeal Linen with High-Density Foam",
+        "downPaymentPrice": 625,
+        "id": "cushion-pack-4",
         "image": "./assets/images/Picture3.png",
-        "stockLevel": 30,
-        "status": "In Stock"
+        "material": "Breathable Oatmeal Linen with High-Density Foam",
+        "name": "Orthopedic High-Density Linen Cushions (Set of 4)",
+        "price": 1250,
+        "status": "In Stock",
+        "stockLevel": 30
       },
       "wood-care-kit": {
-        "id": "wood-care-kit",
-        "name": "Natural Beeswax & Barnis Wood Maintenance Kit",
         "category": "Wood Care Essentials",
-        "price": 580.0,
-        "downPaymentPrice": 290.0,
-        "includes": "Organic Beeswax Balm, Microfiber Cloth, Barnis Touch-Up Bottle",
+        "downPaymentPrice": 290,
+        "id": "wood-care-kit",
         "image": "./assets/images/candaba-wood-care-kit.jpg",
-        "stockLevel": 45,
-        "status": "In Stock"
+        "includes": "Organic Beeswax Balm, Microfiber Cloth, Barnis Touch-Up Bottle",
+        "name": "Natural Beeswax & Barnis Wood Maintenance Kit",
+        "price": 580,
+        "status": "In Stock",
+        "stockLevel": 45
+      },
+      "ecowax-polish": {
+        "category": "Wood Care Essentials",
+        "downPaymentPrice": 225,
+        "id": "ecowax-polish",
+        "image": "./assets/images/ecowax-botanical-polish.jpg",
+        "includes": "100g Pure Candelilla & Candaba Beeswax Grain Nourishment Tin",
+        "name": "EcoWax Botanical Polish",
+        "price": 450,
+        "status": "In Stock",
+        "stockLevel": 40
       }
     },
     "orders": {
@@ -93,25 +257,25 @@
         "phone": "+639171234567",
         "address": "Villa 8, Marquee Residences, Pulung Maragul, Angeles City, Pampanga, 2009",
         "destinationZone": "Zone 1: Candaba / Pampanga Local",
-        "deliveryFee": 250.0,
+        "deliveryFee": 250,
         "items": [
           {
             "productId": "tetratable-mahogany",
             "name": "TetraTable 4-in-1 Suite",
             "finish": "Natural Polished Mahogany",
             "quantity": 1,
-            "unitPrice": 6934.0,
-            "lineTotal": 6934.0
+            "unitPrice": 6934,
+            "lineTotal": 6934
           }
         ],
         "pricing": {
-          "subtotal": 6934.0,
-          "deliveryFee": 250.0,
-          "discount": 0.0,
-          "totalAmount": 7184.0,
+          "subtotal": 6934,
+          "deliveryFee": 250,
+          "discount": 0,
+          "totalAmount": 7184,
           "isDownPayment": true,
-          "downPaymentPaid": 3467.0,
-          "balanceDue": 3717.0
+          "downPaymentPaid": 3467,
+          "balanceDue": 3717
         },
         "payment": {
           "method": "GCash",
@@ -138,7 +302,7 @@
             "title": "50% Down Payment Verified",
             "date": "2026-10-31T14:45:00Z",
             "completed": true,
-            "note": "GCash payment of \u20b13,467.00 verified by Candaba workshop administration."
+            "note": "GCash payment of ₱3,467.00 verified by Candaba workshop administration."
           },
           {
             "stage": 2,
@@ -167,7 +331,7 @@
             "title": "White-Glove In-Home Delivery & Inspection",
             "completed": false,
             "active": false,
-            "note": "In-home placement and remaining \u20b13,717.00 balance settlement."
+            "note": "In-home placement and remaining ₱3,717.00 balance settlement."
           }
         ],
         "createdAt": "2026-10-31T14:40:00Z",
@@ -180,24 +344,24 @@
         "phone": "+639189876543",
         "address": "Block 4, Lot 12, Villa Gloria, San Fernando, Pampanga",
         "destinationZone": "Zone 1: Candaba / Pampanga Local",
-        "deliveryFee": 250.0,
+        "deliveryFee": 250,
         "items": [
           {
             "productId": "tetratable-mahogany",
             "name": "TetraTable 4-in-1 Suite",
             "finish": "Natural Polished Mahogany",
             "quantity": 1,
-            "unitPrice": 6934.0,
-            "lineTotal": 6934.0
+            "unitPrice": 6934,
+            "lineTotal": 6934
           }
         ],
         "pricing": {
-          "subtotal": 6934.0,
-          "deliveryFee": 250.0,
-          "totalAmount": 7184.0,
+          "subtotal": 6934,
+          "deliveryFee": 250,
+          "totalAmount": 7184,
           "isDownPayment": true,
-          "downPaymentPaid": 3467.0,
-          "balanceDue": 3717.0
+          "downPaymentPaid": 3467,
+          "balanceDue": 3717
         },
         "payment": {
           "method": "GCash",
@@ -218,20 +382,20 @@
         "phone": "+639201234567",
         "address": "Unit 402, Clark Hills, Clark Freeport Zone, Pampanga",
         "destinationZone": "Zone 1: Candaba / Pampanga Local",
-        "deliveryFee": 250.0,
+        "deliveryFee": 250,
         "items": [
           {
             "productId": "tetratable-mahogany",
             "name": "TetraTable 4-in-1 Suite",
             "quantity": 1,
-            "unitPrice": 6934.0
+            "unitPrice": 6934
           }
         ],
         "pricing": {
-          "totalAmount": 7184.0,
+          "totalAmount": 7184,
           "isDownPayment": true,
-          "downPaymentPaid": 3467.0,
-          "balanceDue": 3717.0
+          "downPaymentPaid": 3467,
+          "balanceDue": 3717
         },
         "payment": {
           "method": "GCash",
@@ -261,24 +425,147 @@
       "packaging": {
         "bubbleWrapRolls": 18,
         "heavyDutyTransitTapeRolls": 24
+      },
+      "products": {
+        "beeswax-care-kit": {
+          "category": "Care Kit",
+          "downPayment": 600,
+          "id": "beeswax-care-kit",
+          "image": "wood_care_kit_luxury_pampanga_home_1773454409000.png",
+          "name": "Botanical Beeswax & Care",
+          "price": 1200,
+          "status": "Stocked",
+          "units": 52,
+          "wood": "Organic Beeswax Polish"
+        },
+        "hexaring-round": {
+          "category": "Round Expandable",
+          "downPayment": 24900,
+          "id": "hexaring-round",
+          "image": "hexaring_round_dining_luxury_pampanga_home_1773454409000.png",
+          "name": "HexaRing Round Dining",
+          "price": 49800,
+          "status": "Low",
+          "units": 3,
+          "wood": "Candaba Narra Inlay"
+        },
+        "prod-pampanga-credenza---console": {
+          "category": "Modular Transformable",
+          "downPayment": 22450,
+          "id": "prod-pampanga-credenza---console",
+          "image": "tetratable_luxury_living_room_1793454407629.jpg",
+          "name": "Pampanga Credenza & Console",
+          "price": 44900,
+          "status": "Ready",
+          "units": 5,
+          "wood": "Philippine Mahogany (11.4% MC)"
+        },
+        "santos-butterfly": {
+          "category": "Dining Suite",
+          "downPayment": 26000,
+          "id": "santos-butterfly",
+          "image": "santos_butterfly_dining_luxury_pampanga_home_1773454409000.png",
+          "name": "Santos Butterfly Dining",
+          "price": 52000,
+          "status": "Ready",
+          "units": 6,
+          "wood": "Kiln-Dried Narra & Teak"
+        },
+        "tetralift-table": {
+          "category": "Lifting Table",
+          "downPayment": 19250,
+          "id": "tetralift-table",
+          "image": "tetralift_coffee_dining_luxury_pampanga_home_1773454409000.png",
+          "name": "TetraLift Coffee Table",
+          "price": 38500,
+          "status": "Ready",
+          "units": 4,
+          "wood": "Solid Mahogany & Gas Strut"
+        },
+        "tetratable-4in1": {
+          "category": "Modular Transformable",
+          "downPayment": 22450,
+          "id": "tetratable-4in1",
+          "image": "tetratable_luxury_living_room_1793454407629.jpg",
+          "name": "TetraTable 4-in-1 Suite",
+          "price": 44900,
+          "status": "Ready",
+          "units": 14,
+          "wood": "Philippine Mahogany (11.4% MC)"
+        },
+        "transformer-console": {
+          "category": "Console Table",
+          "downPayment": 23000,
+          "id": "transformer-console",
+          "image": "transformer_table_luxury_living_room_1773454409000.png",
+          "name": "Transformer Console",
+          "price": 46000,
+          "status": "Ready",
+          "units": 5,
+          "wood": "Philippine Mahogany & Steel"
+        },
+        "stool-mahogany": {
+          "category": "Stools & Seating",
+          "downPayment": 725,
+          "id": "stool-mahogany",
+          "image": "Picture4.png",
+          "name": "Artisan Solid Mahogany Low Stool",
+          "price": 1450,
+          "status": "Ready",
+          "units": 24,
+          "wood": "Philippine Mahogany (Solignum Treated)"
+        },
+        "cushion-pack-4": {
+          "category": "Add-ons & Accessories",
+          "downPayment": 625,
+          "id": "cushion-pack-4",
+          "image": "Picture3.png",
+          "name": "Orthopedic High-Density Linen Cushions (Set of 4)",
+          "price": 1250,
+          "status": "Stocked",
+          "units": 30,
+          "wood": "High-Density Foam & Linen"
+        },
+        "wood-care-kit": {
+          "category": "Care Kit",
+          "downPayment": 290,
+          "id": "wood-care-kit",
+          "image": "candaba-wood-care-kit.jpg",
+          "name": "Natural Beeswax & Barnis Wood Maintenance Kit",
+          "price": 580,
+          "status": "Stocked",
+          "units": 45,
+          "wood": "Organic Beeswax Balm & Cloth"
+        },
+        "ecowax-polish": {
+          "category": "Care Kit",
+          "downPayment": 225,
+          "id": "ecowax-polish",
+          "image": "ecowax-botanical-polish.jpg",
+          "name": "EcoWax Botanical Polish",
+          "price": 450,
+          "status": "Stocked",
+          "units": 40,
+          "wood": "100g Candelilla & Beeswax"
+        }
       }
     },
     "logisticsZones": {
       "zone1": {
         "name": "Zone 1: Candaba Local & Pampanga",
-        "rate": 250.0,
+        "rate": 250,
         "deliveryTime": "1-2 business days",
         "service": "EcoHaven Direct Workshop Fleet"
       },
       "zone2": {
         "name": "Zone 2: Bulacan, Bataan, Tarlac, Nueva Ecija",
-        "rate": 450.0,
+        "rate": 450,
         "deliveryTime": "2-3 business days",
         "service": "EcoHaven Regional Transport"
       },
       "zone3": {
         "name": "Zone 3: Subic, Metro Manila & Greater Central Luzon",
-        "rate": 650.0,
+        "rate": 650,
         "deliveryTime": "3-4 business days",
         "service": "White-Glove In-Home Delivery & Inspection"
       }
@@ -319,7 +606,7 @@
         "address": "Dalan Batu, Pasig, Candaba, Pampanga, 2013, Philippines",
         "zone": "Zone 1 - Pampanga Local",
         "zoneCode": "250",
-        "deliveryFee": 250.0,
+        "deliveryFee": 250,
         "isDefault": true
       },
       {
@@ -331,7 +618,7 @@
         "address": "Bldg 4, Clark Sun Valley Estate, Jose Abad Santos Ave, Clark Freeport Zone, Pampanga, 2023",
         "zone": "Zone 1 - Pampanga Local",
         "zoneCode": "250",
-        "deliveryFee": 250.0,
+        "deliveryFee": 250,
         "isDefault": false
       },
       {
@@ -343,7 +630,7 @@
         "address": "Unit 24B, Pacific Plaza Towers, 4th Ave, Bonifacio Global City, Taguig, 1634 Metro Manila",
         "zone": "Zone 3 - Greater Metro Manila",
         "zoneCode": "650",
-        "deliveryFee": 650.0,
+        "deliveryFee": 650,
         "isDefault": false
       }
     ]

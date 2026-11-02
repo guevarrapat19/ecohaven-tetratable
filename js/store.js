@@ -286,6 +286,61 @@ const DEFAULT_INVENTORY = {
             status: "Stocked",
             wood: "Organic Beeswax Polish",
             image: "wood_care_kit_luxury_pampanga_home_1773454409000.png"
+        },
+        "prod-pampanga-credenza---console": {
+            id: "prod-pampanga-credenza---console",
+            name: "Pampanga Credenza & Console",
+            category: "Modular Transformable",
+            units: 5,
+            price: 44900,
+            downPayment: 22450,
+            status: "Ready",
+            wood: "Philippine Mahogany (11.4% MC)",
+            image: "tetratable_luxury_living_room_1793454407629.jpg"
+        },
+        "stool-mahogany": {
+            id: "stool-mahogany",
+            name: "Artisan Solid Mahogany Low Stool",
+            category: "Stools & Seating",
+            units: 24,
+            price: 1450,
+            downPayment: 725,
+            status: "Ready",
+            wood: "Philippine Mahogany (Solignum Treated)",
+            image: "Picture4.png"
+        },
+        "cushion-pack-4": {
+            id: "cushion-pack-4",
+            name: "Orthopedic High-Density Linen Cushions (Set of 4)",
+            category: "Add-ons & Accessories",
+            units: 30,
+            price: 1250,
+            downPayment: 625,
+            status: "Stocked",
+            wood: "High-Density Foam & Linen",
+            image: "Picture3.png"
+        },
+        "wood-care-kit": {
+            id: "wood-care-kit",
+            name: "Natural Beeswax & Barnis Wood Maintenance Kit",
+            category: "Care Kit",
+            units: 45,
+            price: 580,
+            downPayment: 290,
+            status: "Stocked",
+            wood: "Organic Beeswax Balm & Cloth",
+            image: "candaba-wood-care-kit.jpg"
+        },
+        "ecowax-polish": {
+            id: "ecowax-polish",
+            name: "EcoWax Botanical Polish",
+            category: "Care Kit",
+            units: 40,
+            price: 450,
+            downPayment: 225,
+            status: "Stocked",
+            wood: "100g Candelilla & Beeswax",
+            image: "ecowax-botanical-polish.jpg"
         }
     },
     materials: {
