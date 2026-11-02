@@ -201,7 +201,7 @@
 </label>
 <div class="relative flex items-center">
 <span class="material-symbols-outlined text-outline absolute left-3 text-[18px]">person</span>
-<input id="customerNameInput" class="w-full bg-surface-container-low pl-9 pr-3 py-2.5 rounded-lg font-body-md text-body-md text-on-surface outline-none focus:bg-surface focus:shadow-[0_0_0_2px_#86450d]" type="text" value="Juan Dela Cruz" oninput="if(typeof syncCustomerPhoneDisplay === 'function') syncCustomerPhoneDisplay();"/>
+<input id="customerNameInput" class="w-full bg-surface-container-low pl-9 pr-3 py-2.5 rounded-lg font-body-md text-body-md text-on-surface outline-none focus:bg-surface focus:shadow-[0_0_0_2px_#86450d]" type="text" placeholder="Full Legal Name" value="" oninput="if(typeof syncCustomerPhoneDisplay === 'function') syncCustomerPhoneDisplay();"/>
 </div>
 <span class="font-caption text-caption text-on-surface-variant">Matches GCash Verified Account Name</span>
 </div>
@@ -212,7 +212,7 @@
 </label>
 <div class="relative flex items-center">
 <span class="material-symbols-outlined text-outline absolute left-3 text-[18px]">smartphone</span>
-<input id="customerPhoneInput" class="w-full bg-surface-container-low pl-9 pr-3 py-2.5 rounded-lg font-body-md text-body-md text-on-surface outline-none focus:bg-surface focus:shadow-[0_0_0_2px_#86450d]" type="tel" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(typeof syncCustomerPhoneDisplay === 'function') syncCustomerPhoneDisplay();" placeholder="09175551234" value="09175551234"/>
+<input id="customerPhoneInput" class="w-full bg-surface-container-low pl-9 pr-3 py-2.5 rounded-lg font-body-md text-body-md text-on-surface outline-none focus:bg-surface focus:shadow-[0_0_0_2px_#86450d]" type="tel" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(typeof syncCustomerPhoneDisplay === 'function') syncCustomerPhoneDisplay();" placeholder="09XXXXXXXXX" value=""/>
 </div>
 <span class="font-caption text-caption text-on-surface-variant">GCash deep-link auth &amp; SMS dispatch updates</span>
 </div>
@@ -224,11 +224,11 @@
 </label>
 <div class="relative flex items-center">
 <span class="material-symbols-outlined text-outline absolute left-3 text-[18px]">mail</span>
-<input id="customerEmailInput" class="w-full bg-surface-container-low pl-9 pr-3 py-2.5 rounded-lg font-body-md text-body-md text-on-surface outline-none focus:bg-surface focus:shadow-[0_0_0_2px_#86450d]" type="email" value="juan.delacruz@email.ph"/>
+<input id="customerEmailInput" class="w-full bg-surface-container-low pl-9 pr-3 py-2.5 rounded-lg font-body-md text-body-md text-on-surface outline-none focus:bg-surface focus:shadow-[0_0_0_2px_#86450d]" type="email" placeholder="Email Address" value=""/>
 </div>
 </div>
 <!-- Shopee-Style Saved Delivery Address Section -->
-<div class="flex flex-col gap-2 p-4 rounded-xl bg-surface-container-low border border-outline-variant/40">
+<div id="savedAddressSection" class="flex flex-col gap-2 p-4 rounded-xl bg-surface-container-low border border-outline-variant/40">
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-1.5">
       <span class="material-symbols-outlined text-[20px] text-primary">pin_drop</span>
@@ -236,14 +236,22 @@
         Saved Delivery Destination (Shopee-Style Fast Select)
       </label>
     </div>
-    <a href="dashboard.html" class="text-xs font-bold text-primary hover:underline flex items-center gap-1 transition-colors">
+    <a href="dashboard.html" id="manageProfileAddressLink" class="hidden text-xs font-bold text-primary hover:underline flex items-center gap-1 transition-colors">
       <span class="material-symbols-outlined text-[15px]">manage_accounts</span>
       Manage in Profile
     </a>
   </div>
 
-  <!-- Saved Address Dropdown Selector -->
-  <div class="relative">
+  <!-- Guest Notice for Anonymous Shoppers -->
+  <div id="savedAddressGuestNotice" class="p-3 rounded-lg bg-surface-container-lowest border border-dashed border-outline-variant/60 text-xs text-on-surface-variant flex items-center justify-between">
+    <div class="flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-outline text-[16px]">account_circle</span>
+      <span>Ordering as Guest. <button type="button" onclick="openAuthModal('signin')" class="text-primary font-bold hover:underline">Log in</button> or <button type="button" onclick="openAuthModal('register')" class="text-primary font-bold hover:underline">Register</button> to unlock 1-click saved addresses.</span>
+    </div>
+  </div>
+
+  <!-- Saved Address Dropdown Selector (Active ONLY for registered logged-in users with saved addresses) -->
+  <div id="savedAddressSelectContainer" class="relative hidden">
     <select id="savedAddressSelect" onchange="onSavedAddressSelect(this.value)" class="w-full bg-surface-container-lowest border border-primary/30 py-2.5 px-3 rounded-lg font-body-md text-body-md text-on-surface font-medium focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer shadow-xs">
       <!-- Options dynamically rendered via renderSavedAddressesDropdown() -->
     </select>
@@ -253,7 +261,7 @@
   <div class="space-y-2.5 pt-1 border-t border-outline-variant/20">
     <div class="flex items-center justify-between">
       <span class="font-caption text-caption text-on-surface-variant font-medium">Structured Address Details <span class="text-error">*</span></span>
-      <span id="selectedAddressBadge" class="text-[11px] font-bold text-tertiary px-2 py-0.5 rounded-full bg-tertiary-fixed/40">Default Address</span>
+      <span id="selectedAddressBadge" class="text-[11px] font-bold text-tertiary px-2 py-0.5 rounded-full bg-tertiary-fixed/40">Manual Entry</span>
     </div>
 
     <!-- Dropdown Selections: Province and City / Municipality -->
@@ -282,22 +290,22 @@
       </div>
       <div>
         <label class="block text-[11px] font-bold text-on-surface mb-1">Postal / ZIP Code</label>
-        <input id="addrZipInput" type="text" oninput="syncSynthesizedAddress()" placeholder="2013" class="w-full bg-surface-container-lowest border border-outline-variant/40 p-2.5 rounded-lg text-xs font-mono font-semibold text-on-surface focus:ring-2 focus:ring-primary focus:outline-none"/>
+        <input id="addrZipInput" type="text" oninput="syncSynthesizedAddress()" placeholder="ZIP Code" value="" class="w-full bg-surface-container-lowest border border-outline-variant/40 p-2.5 rounded-lg text-xs font-mono font-semibold text-on-surface focus:ring-2 focus:ring-primary focus:outline-none"/>
       </div>
     </div>
 
     <!-- One-Row Input: Street Name, House / Unit / Building No., Subdivision -->
     <div>
       <label class="block text-[11px] font-bold text-on-surface mb-1">One-Row Street Details (House No., Street, Subdivision, Estate)</label>
-      <input id="addrStreetInput" type="text" oninput="syncSynthesizedAddress()" placeholder="e.g. Lot 14 Blk 5, Mahogany Hills Estate, Dalan Batu" class="w-full bg-surface-container-lowest border border-outline-variant/40 p-2.5 rounded-lg text-xs font-medium text-on-surface focus:ring-2 focus:ring-primary focus:outline-none"/>
+      <input id="addrStreetInput" type="text" oninput="syncSynthesizedAddress()" placeholder="House No., Street, Subdivision, Estate" value="" class="w-full bg-surface-container-lowest border border-outline-variant/40 p-2.5 rounded-lg text-xs font-medium text-on-surface focus:ring-2 focus:ring-primary focus:outline-none"/>
     </div>
 
     <!-- Synthesized Address Preview & Hidden Input for Form Submission -->
-    <input type="hidden" id="customerAddressInput" value="Dalan Batu, Pasig, Candaba, Pampanga, 2013, Philippines"/>
+    <input type="hidden" id="customerAddressInput" value=""/>
     <div class="p-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant/20 flex items-center justify-between text-xs text-on-surface-variant">
       <div class="flex items-center gap-1.5 min-w-0">
         <span class="material-symbols-outlined text-primary text-[16px] flex-shrink-0">place</span>
-        <span id="fullAddressPreview" class="truncate font-medium text-on-surface">Dalan Batu, Pasig, Candaba, Pampanga, 2013, Philippines</span>
+        <span id="fullAddressPreview" class="truncate font-medium text-on-surface">Please select your delivery destination below</span>
       </div>
       <span class="text-[10px] text-tertiary font-bold px-2 py-0.5 rounded bg-tertiary-fixed/30 flex-shrink-0">Auto-Synced</span>
     </div>
@@ -1092,17 +1100,23 @@
     // ==========================================================
     function initRegionDropdowns() {
       const provSelect = document.getElementById('addrProvinceSelect');
+      const citySelect = document.getElementById('addrCitySelect');
+      const brgySelect = document.getElementById('addrBarangaySelect');
       if (!provSelect) return;
 
       const regions = window.PHILIPPINE_LOGISTICS_REGIONS || {};
-      let provHtml = '';
+      let provHtml = '<option value="" disabled selected>Select Province / Region</option>';
       Object.keys(regions).forEach(provName => {
         provHtml += `<option value="${provName}">${provName}</option>`;
       });
       provSelect.innerHTML = provHtml;
 
-      // Populate cities for default province
-      onProvinceChange(provSelect.value || 'Pampanga', true);
+      if (citySelect) {
+        citySelect.innerHTML = '<option value="" disabled selected>Select City / Municipality</option>';
+      }
+      if (brgySelect) {
+        brgySelect.innerHTML = '<option value="" disabled selected>Select Barangay</option>';
+      }
     }
 
     function onProvinceChange(provName, isInitial = false) {
@@ -1158,18 +1172,23 @@
     }
 
     function syncSynthesizedAddress() {
-      const prov = document.getElementById('addrProvinceSelect')?.value || 'Pampanga';
-      const city = document.getElementById('addrCitySelect')?.value || 'Candaba';
-      const brgy = document.getElementById('addrBarangaySelect')?.value || 'Pasig';
-      const zip = document.getElementById('addrZipInput')?.value || '2013';
+      const prov = document.getElementById('addrProvinceSelect')?.value;
+      const city = document.getElementById('addrCitySelect')?.value;
+      const brgy = document.getElementById('addrBarangaySelect')?.value;
+      const zip = document.getElementById('addrZipInput')?.value || '';
       const street = document.getElementById('addrStreetInput')?.value || '';
 
-      const fullStr = `${street ? street + ', ' : ''}${brgy}, ${city}, ${prov}, ${zip}, Philippines`;
-      
       const hiddenInput = document.getElementById('customerAddressInput');
-      if (hiddenInput) hiddenInput.value = fullStr;
-
       const preview = document.getElementById('fullAddressPreview');
+
+      if (!prov || !city) {
+        if (hiddenInput) hiddenInput.value = '';
+        if (preview) preview.innerText = 'Please complete your delivery address (Province, City, Street)';
+        return;
+      }
+
+      const fullStr = `${street ? street + ', ' : ''}${brgy ? brgy + ', ' : ''}${city}, ${prov}${zip ? ', ' + zip : ''}, Philippines`;
+      if (hiddenInput) hiddenInput.value = fullStr;
       if (preview) preview.innerText = fullStr;
     }
 
@@ -1234,24 +1253,90 @@
 
     function renderSavedAddressesDropdown() {
       const select = document.getElementById('savedAddressSelect');
-      if (!select || !window.ecohaven) return;
+      const selectContainer = document.getElementById('savedAddressSelectContainer');
+      const guestNotice = document.getElementById('savedAddressGuestNotice');
+      const manageLink = document.getElementById('manageProfileAddressLink');
+      const saveAsDefaultRow = document.getElementById('saveAsDefaultRow');
+      const badge = document.getElementById('selectedAddressBadge');
+      if (!select) return;
 
-      const addresses = window.ecohaven.getAddresses ? window.ecohaven.getAddresses() : [];
-      let defaultAddr = window.ecohaven.getDefaultAddress ? window.ecohaven.getDefaultAddress() : addresses[0];
+      const userStr = localStorage.getItem('ecohaven_user');
+      let currentUser = null;
+      try {
+        if (userStr) currentUser = JSON.parse(userStr);
+      } catch (e) {}
 
-      let optionsHtml = '';
-      addresses.forEach(addr => {
-        const isDef = addr.isDefault ? ' [Default]' : '';
-        const shortAddr = addr.address ? (addr.address.length > 55 ? addr.address.substring(0, 52) + '...' : addr.address) : '';
-        optionsHtml += `<option value="${addr.id}" ${addr.isDefault ? 'selected' : ''}>📍 ${addr.label}${isDef} — ${addr.recipientName}, ${shortAddr}</option>`;
-      });
-      optionsHtml += `<option value="new">➕ + Use / Enter a New Delivery Address...</option>`;
+      // 1. GUEST / ANONYMOUS CUSTOMER (NOT LOGGED IN)
+      if (!currentUser) {
+        if (selectContainer) selectContainer.classList.add('hidden');
+        if (guestNotice) guestNotice.classList.remove('hidden');
+        if (manageLink) manageLink.classList.add('hidden');
+        if (saveAsDefaultRow) saveAsDefaultRow.classList.add('hidden');
+        if (badge) badge.innerText = 'Manual Entry';
 
-      select.innerHTML = optionsHtml;
+        // ZERO default address - leave inputs completely blank
+        const nameInp = document.getElementById('customerNameInput');
+        const phoneInp = document.getElementById('customerPhoneInput');
+        const emailInp = document.getElementById('customerEmailInput');
+        const streetInp = document.getElementById('addrStreetInput');
+        const zipInp = document.getElementById('addrZipInput');
+        const hiddenAddr = document.getElementById('customerAddressInput');
+        const preview = document.getElementById('fullAddressPreview');
 
-      // Populate default address immediately
-      if (defaultAddr) {
-        applyAddressToInputs(defaultAddr);
+        if (nameInp && nameInp.value === 'Juan Dela Cruz') nameInp.value = '';
+        if (phoneInp && phoneInp.value === '09175551234') phoneInp.value = '';
+        if (emailInp && emailInp.value === 'juan.delacruz@email.ph') emailInp.value = '';
+        if (hiddenAddr && hiddenAddr.value.includes('Dalan Batu')) hiddenAddr.value = '';
+        if (preview && preview.innerText.includes('Dalan Batu')) {
+          preview.innerText = 'Please enter your delivery destination below';
+        }
+        return;
+      }
+
+      // 2. LOGGED-IN REGISTERED USER
+      if (guestNotice) guestNotice.classList.add('hidden');
+      if (manageLink) manageLink.classList.remove('hidden');
+      if (saveAsDefaultRow) saveAsDefaultRow.classList.remove('hidden');
+
+      // Autofill contact info from user's registered account
+      const nameInp = document.getElementById('customerNameInput');
+      const phoneInp = document.getElementById('customerPhoneInput');
+      const emailInp = document.getElementById('customerEmailInput');
+      if (nameInp && (!nameInp.value || nameInp.value === 'Juan Dela Cruz')) {
+        nameInp.value = currentUser.displayName || currentUser.fullName || '';
+      }
+      if (emailInp && (!emailInp.value || emailInp.value === 'juan.delacruz@email.ph')) {
+        emailInp.value = currentUser.email || '';
+      }
+      if (phoneInp && (!phoneInp.value || phoneInp.value === '09175551234')) {
+        phoneInp.value = currentUser.phone || '';
+      }
+
+      const addresses = (window.ecohaven && typeof window.ecohaven.getAddresses === 'function')
+        ? window.ecohaven.getAddresses()
+        : [];
+      const defaultAddr = (window.ecohaven && typeof window.ecohaven.getDefaultAddress === 'function')
+        ? window.ecohaven.getDefaultAddress()
+        : null;
+
+      if (addresses.length > 0) {
+        if (selectContainer) selectContainer.classList.remove('hidden');
+        let optionsHtml = '';
+        addresses.forEach(addr => {
+          const isDef = addr.isDefault ? ' [Default]' : '';
+          const shortAddr = addr.address ? (addr.address.length > 55 ? addr.address.substring(0, 52) + '...' : addr.address) : '';
+          optionsHtml += `<option value="${addr.id}" ${addr.isDefault ? 'selected' : ''}>📍 ${addr.label}${isDef} — ${addr.recipientName || ''}, ${shortAddr}</option>`;
+        });
+        optionsHtml += `<option value="new">➕ + Use / Enter a New Delivery Address...</option>`;
+        select.innerHTML = optionsHtml;
+
+        if (defaultAddr) {
+          applyAddressToInputs(defaultAddr);
+        }
+      } else {
+        // Registered user without any saved addresses yet
+        if (selectContainer) selectContainer.classList.add('hidden');
+        if (badge) badge.innerText = 'New Address';
       }
     }
 
@@ -1688,6 +1773,36 @@
         } else {
           alert("⚠️ Cannot proceed: Your Order Queue has 0 products (₱0.00). Please add a piece from our catalog.");
         }
+        return false;
+      }
+
+      // 0.5. Validate Customer Details & Delivery Destination
+      const name = document.getElementById('customerNameInput') ? document.getElementById('customerNameInput').value.trim() : '';
+      const phone = document.getElementById('customerPhoneInput') ? document.getElementById('customerPhoneInput').value.trim() : '';
+      const email = document.getElementById('customerEmailInput') ? document.getElementById('customerEmailInput').value.trim() : '';
+      const prov = document.getElementById('addrProvinceSelect') ? document.getElementById('addrProvinceSelect').value : '';
+      const city = document.getElementById('addrCitySelect') ? document.getElementById('addrCitySelect').value : '';
+      const street = document.getElementById('addrStreetInput') ? document.getElementById('addrStreetInput').value.trim() : '';
+      const address = document.getElementById('customerAddressInput') ? document.getElementById('customerAddressInput').value.trim() : '';
+
+      if (!name) {
+        document.getElementById('customerNameInput')?.focus();
+        window.showEcoHavenToast ? window.showEcoHavenToast("⚠️ Please enter your Full Legal Name for delivery.", "warning") : alert("Please enter your Full Legal Name.");
+        return false;
+      }
+      if (!phone || phone.length < 10) {
+        document.getElementById('customerPhoneInput')?.focus();
+        window.showEcoHavenToast ? window.showEcoHavenToast("⚠️ Please enter a valid 11-digit Philippine Mobile Number.", "warning") : alert("Please enter a valid Philippine Mobile Number.");
+        return false;
+      }
+      if (!email || !email.includes('@')) {
+        document.getElementById('customerEmailInput')?.focus();
+        window.showEcoHavenToast ? window.showEcoHavenToast("⚠️ Please enter a valid Client Email Address.", "warning") : alert("Please enter a valid Client Email Address.");
+        return false;
+      }
+      if (!prov || !city || !street || !address) {
+        document.getElementById('addrStreetInput')?.focus();
+        window.showEcoHavenToast ? window.showEcoHavenToast("⚠️ Please complete your delivery address (Province, City, and Street details).", "warning") : alert("Please complete your delivery address.");
         return false;
       }
 

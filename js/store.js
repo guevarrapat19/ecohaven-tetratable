@@ -1280,7 +1280,7 @@ class EcoHavenStore {
         } catch (e) {
             console.warn("Storage read error for addresses:", e);
         }
-        return [...DEFAULT_SAVED_ADDRESSES];
+        return []; // Guests have zero default addresses
     }
 
     saveAddresses(addresses) {
@@ -1297,11 +1297,35 @@ class EcoHavenStore {
     }
 
     getAddresses() {
-        return (this.addresses && this.addresses.length > 0) ? this.addresses : this.loadAddresses();
+        // Saved address book is a privilege for REGISTERED logged-in users only
+        let user = null;
+        try {
+            const uStr = localStorage.getItem('ecohaven_user');
+            if (uStr) user = JSON.parse(uStr);
+        } catch(e) {}
+
+        if (!user) {
+            return []; // Anonymous / guest customers have 0 saved addresses
+        }
+
+        const all = (this.addresses && this.addresses.length > 0) ? this.addresses : this.loadAddresses();
+        const userEmail = (user.email || '').toLowerCase().trim();
+        const userPhone = (user.phone || '').replace(/[^0-9]/g, '');
+        const userUid = user.uid || '';
+
+        // Only return addresses that belong to THIS registered user
+        return all.filter(a => {
+            if (!a) return false;
+            if (a.uid && userUid && a.uid === userUid) return true;
+            if (a.email && userEmail && a.email.toLowerCase().trim() === userEmail) return true;
+            if (a.phone && userPhone && a.phone.replace(/[^0-9]/g, '') === userPhone) return true;
+            return false;
+        });
     }
 
     getDefaultAddress() {
         const list = this.getAddresses();
+        if (!list || list.length === 0) return null;
         return list.find(a => a.isDefault) || list[0] || null;
     }
 
@@ -1315,23 +1339,33 @@ class EcoHavenStore {
     }
 
     saveOrUpdateAddress(addrData) {
-        let list = this.getAddresses();
+        let user = null;
+        try {
+            const uStr = localStorage.getItem('ecohaven_user');
+            if (uStr) user = JSON.parse(uStr);
+        } catch(e) {}
+
+        if (user) {
+            addrData.uid = user.uid;
+            if (!addrData.email) addrData.email = user.email;
+        }
+
+        let all = (this.addresses && this.addresses.length > 0) ? this.addresses : this.loadAddresses();
         const id = addrData.id || ('addr-' + Date.now());
         addrData.id = id;
 
-        if (addrData.isDefault) {
-            list = list.map(a => ({ ...a, isDefault: false }));
+        if (addrData.isDefault && user) {
+            all = all.map(a => (a.uid === user.uid || a.email === user.email) ? ({ ...a, isDefault: false }) : a);
         }
 
-        const existingIdx = list.findIndex(a => a.id === id);
+        const existingIdx = all.findIndex(a => a.id === id);
         if (existingIdx >= 0) {
-            list[existingIdx] = { ...list[existingIdx], ...addrData };
+            all[existingIdx] = { ...all[existingIdx], ...addrData };
         } else {
-            if (list.length === 0) addrData.isDefault = true;
-            list.push(addrData);
+            all.push(addrData);
         }
 
-        this.saveAddresses(list);
+        this.saveAddresses(all);
         window.showEcoHavenToast(`Address "${addrData.label || 'New Address'}" saved!`, "success");
         return id;
     }
