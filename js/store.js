@@ -768,11 +768,11 @@ class EcoHavenStore {
             const saved = localStorage.getItem('ecohaven_cart');
             if (saved) {
                 const parsed = JSON.parse(saved);
-                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                if (Array.isArray(parsed)) return parsed;
             }
-            return [{ ...ECOHAVEN_DEFAULT_PRODUCT }];
+            return [];
         } catch (e) {
-            return [{ ...ECOHAVEN_DEFAULT_PRODUCT }];
+            return [];
         }
     }
 
@@ -1028,13 +1028,13 @@ class EcoHavenStore {
 
         // Update displays
         const dueDisplay = document.getElementById('drawerDueAmount');
-        if (dueDisplay) dueDisplay.innerText = `₱${dueAmount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        if (dueDisplay) dueDisplay.innerText = this.cart.length === 0 ? '₱0.00' : `₱${dueAmount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
         const halfDisplay = document.getElementById('drawerHalfAmountDisplay');
-        if (halfDisplay) halfDisplay.innerText = `₱${half.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        if (halfDisplay) halfDisplay.innerText = this.cart.length === 0 ? '₱0.00' : `₱${half.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
         const fullDisplay = document.getElementById('drawerFullAmountDisplay');
-        if (fullDisplay) fullDisplay.innerText = `₱${subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        if (fullDisplay) fullDisplay.innerText = this.cart.length === 0 ? '₱0.00' : `₱${subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
         const cartSubtotalEl = document.getElementById('cart-subtotal');
         if (cartSubtotalEl) cartSubtotalEl.innerText = `₱${subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;

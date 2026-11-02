@@ -1,69 +1,23 @@
 // EcoHaven Furniture - Natural E-Commerce Customer Notifications System
 // Live Order & Workshop Milestone updates from Candaba Workshop to Customer
+// User-Scoped Visibility: Customers see only their own notifications; Sellers see all workshop notifications.
 
 (function() {
   const STORAGE_KEY = 'ecohaven_notifications';
 
-  const INITIAL_NOTIFICATIONS = [
-    {
-      id: "notif_01",
-      type: "order",
-      title: "🚚 Out for Delivery via Workshop Fleet",
-      body: "Order #EH-2026-88123 has been quality inspected and dispatched via Workshop Fleet (Plate: CBD 4821). Driver: Mang Juan S. On the way to Pasig, Candaba.",
-      orderId: "EH-2026-88123",
-      timestamp: Date.now() - 35 * 60 * 1000,
-      read: false,
-      icon: "local_shipping",
-      badgeColor: "bg-amber-100 text-amber-800"
-    },
-    {
-      id: "notif_02",
-      type: "order",
-      title: "🪚 Production Milestone: Joinery & Sanding",
-      body: "Your TetraTable 4-in-1 Suite has progressed to Stage 3! Master woodworkers are assembling the precision interlocking slats and sanding contact surfaces.",
-      orderId: "EH-2026-88123",
-      timestamp: Date.now() - 3 * 3600 * 1000,
-      read: false,
-      icon: "handyman",
-      badgeColor: "bg-primary/10 text-primary"
-    },
-    {
-      id: "notif_03",
-      type: "workshop",
-      title: "🪵 Timber Cut & Solignum Termite-Treated",
-      body: "Solid Philippine Mahogany stock stabilized to 11.4% moisture content and treated with Solignum anti-termite biocide (Batch #PMP-2026-ND-491).",
-      orderId: "EH-2026-88123",
-      timestamp: Date.now() - 22 * 3600 * 1000,
-      read: true,
-      icon: "water_drop",
-      badgeColor: "bg-tertiary/10 text-tertiary"
-    },
-    {
-      id: "notif_04",
-      type: "payment",
-      title: "✅ 50% Earnest Down Payment Verified",
-      body: "₱3,467.00 down payment confirmed via GCash (Ref: 9021-8841-2910). Candaba workshop fabrication queue initialized.",
-      orderId: "EH-2026-88123",
-      timestamp: Date.now() - 48 * 3600 * 1000,
-      read: true,
-      icon: "verified",
-      badgeColor: "bg-emerald-100 text-emerald-800"
-    }
-  ];
-
-  function getNotifications() {
+  // Retrieve raw stored list of all notifications
+  function getAllNotifications() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch(e) {}
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_NOTIFICATIONS));
-    return INITIAL_NOTIFICATIONS;
+    return [];
   }
 
-  function saveNotifications(list) {
+  function saveAllNotifications(list) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
       updateBadge();
@@ -71,6 +25,75 @@
     } catch(e) {
       console.error('Failed to save notifications:', e);
     }
+  }
+
+  // Get currently logged-in user
+  function getCurrentUser() {
+    try {
+      const u = localStorage.getItem('ecohaven_user') || localStorage.getItem('ecohaven_auth_user') || localStorage.getItem('currentUser');
+      if (u) {
+        const parsed = JSON.parse(u);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch (e) {}
+    if (typeof window.getCurrentEcoHavenUser === 'function') {
+      try { return window.getCurrentEcoHavenUser(); } catch (e) {}
+    }
+    return null;
+  }
+
+  // Check if current user is seller/craftsman
+  function isSellerUser(user) {
+    if (!user) return false;
+    const role = (user.role || '').toLowerCase();
+    const email = (user.email || '').toLowerCase();
+    return role === 'seller' || role === 'admin' || email === 'artisan@ecohaven.ph' || email === 'admin@ecohaven.ph' || email === 'seller@ecohaven.ph';
+  }
+
+  // Retrieve notifications filtered strictly by current user scope
+  function getNotifications() {
+    const all = getAllNotifications();
+    const user = getCurrentUser();
+
+    // 1. Seller or Admin: sees ALL notifications across all workshop orders & customers
+    if (isSellerUser(user)) {
+      return all;
+    }
+
+    // 2. Customer: MUST ONLY see notifications addressed to their name / email / order IDs
+    if (user && (user.fullName || user.email || user.uid)) {
+      const userEmail = (user.email || '').trim().toLowerCase();
+      const userName = (user.fullName || user.name || '').trim().toLowerCase();
+      const userUid = user.uid || user.id;
+
+      // Collect order IDs placed by this specific customer
+      const myOrderIds = [];
+      try {
+        const storeOrders = (window.ecohaven && window.ecohaven.orders) ? window.ecohaven.orders : {};
+        Object.values(storeOrders).forEach(ord => {
+          const ordEmail = (ord.email || '').trim().toLowerCase();
+          const ordName = (ord.customerName || '').trim().toLowerCase();
+          if ((userEmail && ordEmail === userEmail) || (userName && ordName === userName) || (userUid && ord.userId === userUid)) {
+            if (ord.orderId) myOrderIds.push(ord.orderId);
+          }
+        });
+      } catch (e) {}
+
+      return all.filter(n => {
+        // Direct customer email match
+        if (n.customerEmail && userEmail && n.customerEmail.trim().toLowerCase() === userEmail) return true;
+        // Direct customer name match
+        if (n.customerName && userName && n.customerName.trim().toLowerCase() === userName) return true;
+        // Direct UID match
+        if (n.userId && userUid && n.userId === userUid) return true;
+        // Associated with customer's order
+        if (n.orderId && myOrderIds.includes(n.orderId)) return true;
+        return false;
+      });
+    }
+
+    // 3. Guest / Not logged in: NEVER show someone else's private order notifications
+    return [];
   }
 
   function formatTimeAgo(ts) {
@@ -85,7 +108,7 @@
     return `${days}d ago`;
   }
 
-  // Update all alert badges on the page
+  // Update all alert badges on the page based on scoped notifications
   function updateBadge() {
     const list = getNotifications();
     const unreadCount = list.filter(n => !n.read).length;
@@ -94,8 +117,10 @@
       if (unreadCount > 0) {
         b.textContent = unreadCount > 9 ? '9+' : unreadCount;
         b.classList.remove('hidden');
+        b.style.display = 'flex';
       } else {
         b.classList.add('hidden');
+        b.style.display = 'none';
       }
     });
   }
@@ -106,22 +131,41 @@
     const container = document.getElementById('notifItemsList');
     if (!container) return;
 
+    const user = getCurrentUser();
+    const isSeller = isSellerUser(user);
     const list = getNotifications();
+
     let filtered = list;
     if (activeTab === 'orders') {
-      filtered = list.filter(n => n.type === 'order' || n.type === 'payment');
+      filtered = list.filter(n => n.type === 'order' || n.type === 'payment' || n.type === 'alert');
     } else if (activeTab === 'workshop') {
       filtered = list.filter(n => n.type === 'workshop');
     }
 
+    // Empty state handling
     if (filtered.length === 0) {
-      container.innerHTML = `
-        <div class="py-12 text-center text-on-surface-variant">
-          <span class="material-symbols-outlined text-[36px] text-outline-variant mb-2 block">notifications_paused</span>
-          <p class="text-xs font-semibold text-on-surface">No notifications in this tab</p>
-          <p class="text-[11px] text-on-surface-variant mt-0.5">Workshop and order alerts will appear here</p>
-        </div>
-      `;
+      if (!user) {
+        container.innerHTML = `
+          <div class="py-10 px-4 text-center text-on-surface-variant">
+            <span class="material-symbols-outlined text-[36px] text-outline mb-2 block">lock</span>
+            <p class="text-xs font-bold text-on-surface">Customer Notifications are Private</p>
+            <p class="text-[11px] text-on-surface-variant mt-1 mb-3">Sign in to your account to view notifications for your handcrafted orders.</p>
+            <button type="button" onclick="toggleEcoHavenNotifications(); typeof openAuthModal === 'function' ? openAuthModal() : null;" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-container transition-all shadow-xs">
+              <span class="material-symbols-outlined text-[15px]">person</span>
+              <span>Sign In / Register</span>
+            </button>
+          </div>
+        `;
+      } else {
+        const displayName = isSeller ? 'Workshop Master' : (user.fullName || user.name || 'Customer');
+        container.innerHTML = `
+          <div class="py-10 text-center text-on-surface-variant">
+            <span class="material-symbols-outlined text-[36px] text-outline-variant mb-2 block">notifications_paused</span>
+            <p class="text-xs font-semibold text-on-surface">No updates for ${displayName}</p>
+            <p class="text-[11px] text-on-surface-variant mt-0.5">Order milestones and timber alerts will appear here in real time.</p>
+          </div>
+        `;
+      }
       return;
     }
 
@@ -178,7 +222,7 @@
             </div>
             <div>
               <h3 class="font-headline text-base sm:text-lg font-bold text-on-surface leading-tight">Order Updates</h3>
-              <p class="text-[11px] text-on-surface-variant">Live Candaba Workshop Notifications</p>
+              <p class="text-[11px] text-on-surface-variant" id="notifScopeSubtitle">Candaba Workshop Notifications</p>
             </div>
           </div>
           <div class="flex items-center gap-1.5">
@@ -210,7 +254,7 @@
         </div>
 
         <!-- Notification Items List -->
-        <div id="notifItemsList" class="p-3 sm:p-4 space-y-2.5 overflow-y-auto no-scrollbar flex-grow max-h-[58vh]">
+        <div id="notifItemsList" class="p-3 sm:p-4 space-y-2.5 overflow-y-auto flex-grow max-h-[58vh]">
           <!-- Injected via renderNotificationItems() -->
         </div>
 
@@ -249,6 +293,19 @@
         if (backdrop) backdrop.classList.add('hidden');
       }, 250);
     } else {
+      // Update subtitle to reflect current scope
+      const sub = document.getElementById('notifScopeSubtitle');
+      const user = getCurrentUser();
+      if (sub) {
+        if (isSellerUser(user)) {
+          sub.textContent = 'All Workshop Orders (Artisan Master)';
+        } else if (user) {
+          sub.textContent = `Notifications for ${user.fullName || user.name || 'You'}`;
+        } else {
+          sub.textContent = 'Sign in to see your order updates';
+        }
+      }
+
       renderNotificationItems();
       if (backdrop) backdrop.classList.remove('hidden');
       drawer.classList.remove('hidden');
@@ -279,43 +336,67 @@
 
   // Mark single as read
   window.markEcoHavenNotificationRead = function(id) {
-    const list = getNotifications();
-    const item = list.find(n => n.id === id);
+    const all = getAllNotifications();
+    const item = all.find(n => n.id === id);
     if (item && !item.read) {
       item.read = true;
-      saveNotifications(list);
+      saveAllNotifications(all);
       renderNotificationItems();
     }
   };
 
-  // Mark all as read
+  // Mark all as read for current user scope
   window.markAllEcoHavenNotificationsRead = function() {
-    const list = getNotifications();
-    list.forEach(n => n.read = true);
-    saveNotifications(list);
+    const all = getAllNotifications();
+    const scoped = getNotifications();
+    const scopedIds = scoped.map(s => s.id);
+    all.forEach(n => {
+      if (scopedIds.includes(n.id)) n.read = true;
+    });
+    saveAllNotifications(all);
     renderNotificationItems();
     if (typeof window.showEcoHavenToast === 'function') {
-      window.showEcoHavenToast('All notifications marked as read.', 'success');
+      window.showEcoHavenToast('Notifications marked as read.', 'success');
     }
   };
 
   // Add a new notification (called when seller updates or checkout completes)
   window.addEcoHavenNotification = function(notif) {
-    const list = getNotifications();
+    const allList = getAllNotifications();
+
+    // Automatically enrich with customer details from order
+    let customerName = notif.customerName || null;
+    let customerEmail = notif.customerEmail || notif.to || null;
+    let userId = notif.userId || null;
+
+    if (notif.orderId && window.ecohaven) {
+      try {
+        const ord = window.ecohaven.getOrder ? window.ecohaven.getOrder(notif.orderId) : (window.ecohaven.orders ? window.ecohaven.orders[notif.orderId] : null);
+        if (ord) {
+          if (!customerName) customerName = ord.customerName;
+          if (!customerEmail) customerEmail = ord.email;
+          if (!userId) userId = ord.userId;
+        }
+      } catch (e) {}
+    }
+
     const newEntry = {
       id: 'notif_' + Date.now(),
       type: notif.type || 'order',
       title: notif.title || 'Order Update',
       body: notif.body || '',
       orderId: notif.orderId || null,
+      customerName: customerName,
+      customerEmail: customerEmail,
+      userId: userId,
       timestamp: Date.now(),
       read: false,
       icon: notif.icon || 'notifications',
       badgeColor: notif.badgeColor || 'bg-primary/10 text-primary'
     };
 
-    list.unshift(newEntry);
-    saveNotifications(list);
+    allList.unshift(newEntry);
+    saveAllNotifications(allList);
 
     // Sync with Firebase Realtime Database
     if (window.ecoHavenDb && notif.orderId) {
@@ -324,8 +405,19 @@
       } catch(e) {}
     }
 
-    // Show toast announcement for incoming notification
-    if (typeof window.showEcoHavenToast === 'function') {
+    // Only show toast if user is allowed to see this notification
+    const currentUser = getCurrentUser();
+    const isSeller = isSellerUser(currentUser);
+    let shouldToast = isSeller;
+    if (!isSeller && currentUser) {
+      const uEmail = (currentUser.email || '').trim().toLowerCase();
+      const uName = (currentUser.fullName || currentUser.name || '').trim().toLowerCase();
+      if ((customerEmail && uEmail && customerEmail.toLowerCase() === uEmail) || (customerName && uName && customerName.toLowerCase() === uName)) {
+        shouldToast = true;
+      }
+    }
+
+    if (shouldToast && typeof window.showEcoHavenToast === 'function') {
       window.showEcoHavenToast(newEntry.title, 'info');
     }
   };
@@ -340,6 +432,9 @@
     injectNotificationDrawer();
     updateBadge();
     window.addEventListener('ecohaven_notifications_updated', updateBadge);
+    window.addEventListener('ecohaven_user_logged_in', () => { updateBadge(); renderNotificationItems(); });
+    window.addEventListener('ecohaven_user_logged_out', () => { updateBadge(); renderNotificationItems(); });
+    window.addEventListener('storage', () => { updateBadge(); renderNotificationItems(); });
   }
 
   if (document.readyState === 'loading') {
@@ -348,4 +443,3 @@
     initNotifications();
   }
 })();
-
