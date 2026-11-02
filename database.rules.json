@@ -17,7 +17,7 @@
         "$orderId": {
           ".read": true,
           ".write": true,
-          ".validate": "newData.hasChildren(['customerName', 'totalAmount']) || !newData.exists()"
+          ".validate": "newData.hasChildren(['customerName', 'totalAmount']) && newData.child('totalAmount').val() > 0 && newData.child('items').exists() || !newData.exists()"
         }
       },
       "notifications": {

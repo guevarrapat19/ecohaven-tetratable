@@ -948,7 +948,7 @@ class EcoHavenStore {
                         <span class="font-label-md text-label-md text-on-surface-variant font-medium">Due Today at Reservation:</span>
                         <span class="font-headline-md text-headline-md text-primary font-bold" id="drawerDueAmount">₱3,467.00</span>
                     </div>
-                    <a href="${checkoutUrl}" class="w-full py-3.5 px-4 rounded-xl bg-primary hover:bg-on-primary-fixed text-on-primary font-label-md text-label-md font-bold flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-98">
+                    <a id="drawerCheckoutBtn" href="${checkoutUrl}" class="w-full py-3.5 px-4 rounded-xl bg-primary hover:bg-on-primary-fixed text-on-primary font-label-md text-label-md font-bold flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-98">
                         <span>Proceed to Logistics & Checkout →</span>
                     </a>
                     <p class="text-center font-caption text-caption text-on-surface-variant mt-2">
@@ -1043,6 +1043,19 @@ class EcoHavenStore {
         if (cartTotalEl) cartTotalEl.innerText = `₱${subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
         if (!listContainer) return;
+
+        const drawerBtn = document.getElementById('drawerCheckoutBtn');
+        if (drawerBtn) {
+            if (this.cart.length === 0) {
+                drawerBtn.href = isPages ? 'shop.html' : 'pages/shop.html';
+                drawerBtn.className = "w-full py-3.5 px-4 rounded-xl bg-secondary-container text-on-secondary-container hover:bg-secondary-fixed font-label-md text-label-md font-bold flex items-center justify-center gap-2 shadow-sm transition-transform active:scale-98";
+                drawerBtn.innerHTML = `<span>Explore Collection Catalog →</span>`;
+            } else {
+                drawerBtn.href = isPages ? 'checkout.html' : 'pages/checkout.html';
+                drawerBtn.className = "w-full py-3.5 px-4 rounded-xl bg-primary hover:bg-on-primary-fixed text-on-primary font-label-md text-label-md font-bold flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-98";
+                drawerBtn.innerHTML = `<span>Proceed to Logistics & Checkout →</span>`;
+            }
+        }
 
         if (this.cart.length === 0) {
             listContainer.innerHTML = `

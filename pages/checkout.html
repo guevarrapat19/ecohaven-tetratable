@@ -1313,12 +1313,15 @@
     function getActiveCartItems() {
       try {
         const saved = localStorage.getItem('ecohaven_cart');
-        if (saved) {
+        if (saved !== null) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed)) {
             if (window.ecohaven) window.ecohaven.cart = parsed;
             return parsed;
           }
+        } else if (window.ecohaven) {
+          window.ecohaven.cart = [];
+          return [];
         }
       } catch (e) {}
       if (window.ecohaven && Array.isArray(window.ecohaven.cart)) {
@@ -1378,7 +1381,44 @@
     function recalculate() {
       const cart = getActiveCartItems();
       const calculatedSub = cart.reduce((sum, item) => sum + ((parseFloat(item.price) || 0) * (item.quantity || 1)), 0);
-      if (calculatedSub > 0) basePrice = calculatedSub;
+      basePrice = calculatedSub;
+
+      const payBtn = document.getElementById('primaryPaymentBtn');
+      const payBtnText = document.getElementById('primaryPaymentBtnText');
+
+      if (cart.length === 0 || basePrice <= 0) {
+        // ENFORCE ZERO-PRODUCT / ZERO-COST RULE: CANNOT PROCEED TO PAYMENT
+        if (payBtn) {
+          payBtn.disabled = true;
+          payBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+        }
+        if (payBtnText) {
+          payBtnText.textContent = "Order Queue is Empty (₱0.00) — Add Product to Pay";
+        }
+        const grossEl = document.getElementById('grossTotal');
+        if (grossEl) grossEl.innerText = "₱0.00";
+        const freightEl = document.getElementById('freightVal');
+        if (freightEl) freightEl.innerText = "₱0.00";
+        const dueEl = document.getElementById('dueToday');
+        if (dueEl) dueEl.innerText = "₱0.00";
+        const balEl = document.getElementById('balanceDue');
+        if (balEl) balEl.innerText = "₱0.00";
+        const remRow = document.getElementById('remainingBalanceRow');
+        if (remRow) remRow.classList.add('hidden');
+        const subDisplay = document.getElementById('summarySubtotal');
+        if (subDisplay) subDisplay.innerText = "₱0.00";
+        const countLabel = document.getElementById('summaryItemsCountLabel');
+        if (countLabel) countLabel.innerText = "Workshop Pieces Subtotal (0 Items)";
+        return;
+      }
+
+      if (payBtn) {
+        payBtn.disabled = false;
+        payBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+      }
+      if (typeof onPaymentMethodChange === 'function') {
+        onPaymentMethodChange(selectedGateway);
+      }
 
       const hasFurniture = cart.some(item => (parseFloat(item.price) || 0) >= 3000);
 
@@ -1640,6 +1680,17 @@
     }
 
     function handlePrimaryPaymentClick() {
+      // 0. ENFORCE RULE: CANNOT PROCEED TO PAYMENT WITHOUT A PRODUCT (0 COST)
+      const activeCart = getActiveCartItems();
+      if (!activeCart || activeCart.length === 0 || basePrice <= 0) {
+        if (typeof window.showEcoHavenToast === 'function') {
+          window.showEcoHavenToast("⚠️ Cannot proceed to payment: Your Order Queue is empty (₱0.00). Please select an item from our catalog.", "error");
+        } else {
+          alert("⚠️ Cannot proceed: Your Order Queue has 0 products (₱0.00). Please add a piece from our catalog.");
+        }
+        return false;
+      }
+
       // 1. Validate Order & Escrow Agreement Checkbox
       const agreement = document.getElementById('orderAgreementCheckbox');
       if (agreement && !agreement.checked) {
@@ -2011,6 +2062,14 @@
     }
 
     async function confirmOrderSuccess() {
+      const activeCart = getActiveCartItems();
+      if (!activeCart || activeCart.length === 0 || basePrice <= 0) {
+        if (typeof window.showEcoHavenToast === 'function') {
+          window.showEcoHavenToast("⚠️ Cannot create order: Order Queue is empty (₱0.00).", "error");
+        }
+        closeGCashModal();
+        return;
+      }
       closeGCashModal();
       
       const name = document.getElementById('customerNameInput') ? document.getElementById('customerNameInput').value : "Juan Dela Cruz";

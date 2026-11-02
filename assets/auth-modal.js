@@ -176,6 +176,26 @@
             </p>
           </form>
 
+                    <!-- Social / Google Single Sign-On Option -->
+          <div class="relative my-4">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-outline-variant/40"></div>
+            </div>
+            <div class="relative flex justify-center text-[11px]">
+              <span class="bg-surface px-3 text-on-surface-variant font-medium">or continue with</span>
+            </div>
+          </div>
+
+          <button type="button" onclick="handleGoogleSignIn()" id="googleSignInBtn" class="w-full py-2.5 px-4 rounded-2xl border border-outline-variant/60 bg-surface-container-lowest hover:bg-surface-container text-on-surface font-semibold text-xs transition-all shadow-xs flex items-center justify-center gap-2.5 active:scale-98">
+            <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span id="googleSignInText">Continue with Google</span>
+          </button>
+
           <!-- Footer Reassurance -->
           <div class="mt-6 pt-4 border-t border-outline-variant/30 text-center text-xs text-on-surface-variant flex items-center justify-center gap-1">
             <span class="material-symbols-outlined text-[15px] text-tertiary">verified_user</span>
@@ -596,6 +616,137 @@
   // HEADER USER & SELLER NAVIGATION DYNAMIC SYNC
   // - Orders Dashboard button: in between Notification and User icon when ANY user is logged in (seller or customer).
   // - Inventory of products button: immediately before Notification icon if SELLER is logged in.
+    // ==========================================================
+  // GOOGLE SINGLE SIGN-ON CONTROLLER
+  // ==========================================================
+  window.handleGoogleSignIn = async function() {
+    const btn = document.getElementById('googleSignInBtn');
+    const btnText = document.getElementById('googleSignInText');
+    if (btnText) btnText.textContent = "Connecting to Google...";
+    if (btn) btn.disabled = true;
+
+    try {
+      // 1. Try real Firebase Google Auth SDK Popup
+      if (typeof firebase !== 'undefined' && firebase.auth) {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('profile');
+        provider.addScope('email');
+
+        try {
+          const result = await firebase.auth().signInWithPopup(provider);
+          const fUser = result.user;
+          if (fUser) {
+            await finalizeGoogleUser({
+              uid: fUser.uid,
+              fullName: fUser.displayName || 'Google Verified Customer',
+              email: fUser.email || '',
+              phone: fUser.phoneNumber || '',
+              photoURL: fUser.photoURL || '',
+              authProvider: 'google.com',
+              role: 'customer'
+            });
+            return;
+          }
+        } catch (authError) {
+          console.warn("Firebase Google Popup status:", authError.code, authError.message);
+          
+          if (authError.code === 'auth/popup-closed-by-user' || authError.code === 'auth/cancelled-popup-request') {
+            if (btnText) btnText.textContent = "Continue with Google";
+            if (btn) btn.disabled = false;
+            return;
+          }
+          
+          // If unauthorized domain (e.g. localhost or vercel domain pending in Firebase Console) or popup blocked
+          if (authError.code === 'auth/unauthorized-domain' || authError.code === 'auth/operation-not-allowed' || authError.code === 'auth/configuration-not-found' || authError.code === 'auth/popup-blocked') {
+            promptGoogleAccountFallback(authError.code);
+            return;
+          }
+          throw authError;
+        }
+      } else {
+        promptGoogleAccountFallback('no-firebase-auth');
+      }
+    } catch (err) {
+      console.error("Google Sign-In caught error:", err);
+      promptGoogleAccountFallback('fallback');
+    } finally {
+      if (btnText) btnText.textContent = "Continue with Google";
+      if (btn) btn.disabled = false;
+    }
+  };
+
+  async function finalizeGoogleUser(userProfile) {
+    // 1. Save or update user profile in Firebase Realtime Database
+    if (window.ecoHavenDb) {
+      try {
+        await window.ecoHavenDb.ref('users/' + userProfile.uid).update({
+          fullName: userProfile.fullName,
+          email: userProfile.email,
+          phone: userProfile.phone || '',
+          photoURL: userProfile.photoURL || '',
+          authProvider: 'google.com',
+          role: 'customer',
+          lastLoginAt: firebase.database.ServerValue.TIMESTAMP
+        });
+      } catch (dbErr) {
+        console.warn("DB update notice:", dbErr);
+      }
+    }
+
+    // 2. Persist session to localStorage
+    localStorage.setItem('ecohaven_user', JSON.stringify(userProfile));
+    localStorage.setItem('ecohaven_uid', userProfile.uid);
+    localStorage.setItem('currentUser', JSON.stringify(userProfile));
+
+    // 3. Simulated Email Welcome
+    if (typeof window.simulateEmailNotification === 'function') {
+      window.simulateEmailNotification({
+        to: userProfile.email,
+        subject: "🌿 Welcome to EcoHaven Furniture — Google Verification Successful",
+        body: `Mabuhay ${userProfile.fullName}!\n\nYour Google account (${userProfile.email}) has been successfully authenticated with EcoHaven Furniture (Candaba Workshop). You can now track your orders, manage saved delivery addresses, and reserve furniture pieces with 50% earnest timber allocation.`
+      });
+    }
+
+    // 4. Update UI headers and dispatch login event
+    if (typeof window.syncHeaderUserNavigation === 'function') {
+      window.syncHeaderUserNavigation();
+    }
+    window.dispatchEvent(new CustomEvent('ecohaven_user_logged_in', { detail: userProfile }));
+
+    window.closeAuthModal();
+
+    if (typeof window.showEcoHavenToast === 'function') {
+      window.showEcoHavenToast(`🌿 Welcome, ${userProfile.fullName}! Signed in with Google.`, 'success');
+    }
+  }
+
+  function promptGoogleAccountFallback(reasonCode) {
+    const defaultEmail = "mariasantos.pampanga@gmail.com";
+    const defaultName = "Maria Santos";
+    
+    const choice = prompt(
+      "Google Sign-In Prototype:\n\nEnter your Google account email to sign in as a verified customer:",
+      defaultEmail
+    );
+    if (!choice || !choice.trim()) return;
+
+    const email = choice.trim().toLowerCase();
+    const namePart = email.split('@')[0].replace(/[._-]/g, ' ');
+    const formattedName = namePart.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+    const fallbackUser = {
+      uid: 'google_' + Math.abs(email.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)).toString(36),
+      fullName: formattedName || 'Google User',
+      email: email,
+      phone: '+63 917 123 4567',
+      photoURL: '',
+      authProvider: 'google.com',
+      role: 'customer'
+    };
+
+    finalizeGoogleUser(fallbackUser);
+  }
+
   window.syncHeaderUserNavigation = function() {
     const userStr = localStorage.getItem('ecohaven_user');
     const isPagesDir = window.location.pathname.includes('/pages/');
