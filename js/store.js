@@ -218,6 +218,125 @@ const DEFAULT_SAVED_ADDRESSES = [
     }
 ];
 
+
+const DEFAULT_INVENTORY = {
+    products: {
+        "tetratable-4in1": {
+            id: "tetratable-4in1",
+            name: "TetraTable 4-in-1 Suite",
+            category: "Modular Transformable",
+            units: 14,
+            price: 44900,
+            downPayment: 22450,
+            status: "Ready",
+            wood: "Philippine Mahogany (11.4% MC)",
+            image: "tetratable_luxury_living_room_1793454407629.jpg"
+        },
+        "santos-butterfly": {
+            id: "santos-butterfly",
+            name: "Santos Butterfly Dining",
+            category: "Dining Suite",
+            units: 6,
+            price: 52000,
+            downPayment: 26000,
+            status: "Ready",
+            wood: "Kiln-Dried Narra & Teak",
+            image: "santos_butterfly_dining_luxury_pampanga_home_1773454409000.png"
+        },
+        "tetralift-table": {
+            id: "tetralift-table",
+            name: "TetraLift Coffee Table",
+            category: "Lifting Table",
+            units: 4,
+            price: 38500,
+            downPayment: 19250,
+            status: "Ready",
+            wood: "Solid Mahogany & Gas Strut",
+            image: "tetralift_coffee_dining_luxury_pampanga_home_1773454409000.png"
+        },
+        "hexaring-round": {
+            id: "hexaring-round",
+            name: "HexaRing Round Dining",
+            category: "Round Expandable",
+            units: 3,
+            price: 49800,
+            downPayment: 24900,
+            status: "Low",
+            wood: "Candaba Narra Inlay",
+            image: "hexaring_round_dining_luxury_pampanga_home_1773454409000.png"
+        },
+        "transformer-console": {
+            id: "transformer-console",
+            name: "Transformer Console",
+            category: "Console Table",
+            units: 5,
+            price: 46000,
+            downPayment: 23000,
+            status: "Ready",
+            wood: "Philippine Mahogany & Steel",
+            image: "transformer_table_luxury_living_room_1773454409000.png"
+        },
+        "beeswax-care-kit": {
+            id: "beeswax-care-kit",
+            name: "Botanical Beeswax & Care",
+            category: "Care Kit",
+            units: 52,
+            price: 1200,
+            downPayment: 600,
+            status: "Stocked",
+            wood: "Organic Beeswax Polish",
+            image: "wood_care_kit_luxury_pampanga_home_1773454409000.png"
+        }
+    },
+    materials: {
+        "ph-mahogany": {
+            id: "ph-mahogany",
+            name: "Philippine Mahogany",
+            quantity: 1450,
+            unit: "BF",
+            status: "11.4% MC • Safe",
+            grade: "FSC Certified Kiln Dried",
+            batch: "PMP-2026-ND-491"
+        },
+        "solignum-barrier": {
+            id: "solignum-barrier",
+            name: "Solignum Barrier",
+            quantity: 35,
+            unit: "Liters",
+            status: "Anti-Termite",
+            grade: "Marine Preservative",
+            batch: "SLG-2026-B12"
+        },
+        "pioneer-epoxy": {
+            id: "pioneer-epoxy",
+            name: "Pioneer Epoxy",
+            quantity: 28,
+            unit: "Sets",
+            status: "High Tensile",
+            grade: "Structural Adhesive",
+            batch: "PNR-2026-088"
+        },
+        "polished-barnis": {
+            id: "polished-barnis",
+            name: "Polished Barnis",
+            quantity: 42,
+            unit: "Cans",
+            status: "Protective Sheen",
+            grade: "Zero-VOC Natural Resin",
+            batch: "BRN-2026-104"
+        },
+        "bubble-wrap": {
+            id: "bubble-wrap",
+            name: "Bubble Wrap & Tape",
+            quantity: 18,
+            unit: "Rolls",
+            status: "Heavy-Duty",
+            grade: "Export Impact Packaging",
+            batch: "BBL-2026-04"
+        }
+    }
+};
+
 class EcoHavenStore {
     constructor() {
         this.db = window.ecoHavenDb;
@@ -225,6 +344,7 @@ class EcoHavenStore {
         this.orders = this.loadInitialOrders();
         this.users = {};
         this.addresses = this.loadAddresses();
+        this.inventory = this.loadInitialInventory();
         this.drawerPaymentMode = 'fifty'; // 'fifty' or 'full'
         this.init();
     }
@@ -296,6 +416,24 @@ class EcoHavenStore {
                 }
                 window.dispatchEvent(new CustomEvent('ecohaven_addresses_updated', { detail: this.addresses }));
             });
+
+            // Sync Workshop Inventory & Finished Products
+            const invRef = window.ecoHavenDb.ref('ecohaven/inventory');
+            invRef.on('value', (snap) => {
+                const cloudInv = snap.val();
+                if (cloudInv && (cloudInv.products || cloudInv.materials)) {
+                    if (!this.inventory) this.inventory = {};
+                    if (cloudInv.products) this.inventory.products = cloudInv.products;
+                    if (cloudInv.materials) this.inventory.materials = cloudInv.materials;
+                    this.saveLocalBackup('ecohaven_inventory_cache', this.inventory);
+                    console.log("🪵 EcoHaven: Real-time Workshop Inventory Synced.");
+                } else {
+                    console.log("🪵 Seeding default workshop inventory to Firebase...");
+                    invRef.set(DEFAULT_INVENTORY);
+                }
+                window.dispatchEvent(new CustomEvent('ecohaven_inventory_updated', { detail: this.inventory }));
+            });
+
 
             // Sync Users
             const usersRef = window.ecoHavenDb.ref('ecohaven/users');
@@ -470,6 +608,156 @@ class EcoHavenStore {
             this.saveLocalBackup('ecohaven_cloud_orders_cache', this.orders);
             window.dispatchEvent(new CustomEvent('ecohaven_orders_updated', { detail: this.orders }));
         }
+    }
+
+    // ==========================================================
+    // WORKSHOP INVENTORY & REJECTION WORKFLOW
+    // ==========================================================
+    loadInitialInventory() {
+        try {
+            const cached = localStorage.getItem('ecohaven_inventory_cache');
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (parsed && (parsed.products || parsed.materials)) return parsed;
+            }
+        } catch(e) {}
+        return JSON.parse(JSON.stringify(DEFAULT_INVENTORY));
+    }
+
+    async addProduct(productData) {
+        if (!productData.id) {
+            productData.id = 'prod-' + (productData.name ? productData.name.toLowerCase().replace(/[^a-z0-9]/g, '-') : Date.now());
+        }
+        if (!this.inventory.products) this.inventory.products = {};
+        this.inventory.products[productData.id] = productData;
+        
+        if (window.ecoHavenDb) {
+            try {
+                await window.ecoHavenDb.ref('ecohaven/inventory/products/' + productData.id).set(productData);
+                console.log("✅ Product added to Firebase RTDB:", productData.name);
+            } catch(e) {
+                console.warn("Firebase addProduct warning:", e);
+            }
+        }
+        this.saveLocalBackup('ecohaven_inventory_cache', this.inventory);
+        window.dispatchEvent(new CustomEvent('ecohaven_inventory_updated', { detail: this.inventory }));
+        return productData;
+    }
+
+    async updateProductStock(productId, deltaOrQty, isDelta = true) {
+        if (!this.inventory.products || !this.inventory.products[productId]) return;
+        const prod = this.inventory.products[productId];
+        if (isDelta) {
+            prod.units = Math.max(0, (parseInt(prod.units) || 0) + deltaOrQty);
+        } else {
+            prod.units = Math.max(0, parseInt(deltaOrQty) || 0);
+        }
+        prod.status = prod.units === 0 ? "Out of Stock" : (prod.units <= 3 ? "Low" : "Ready");
+        
+        if (window.ecoHavenDb) {
+            try {
+                await window.ecoHavenDb.ref('ecohaven/inventory/products/' + productId).update({
+                    units: prod.units,
+                    status: prod.status
+                });
+            } catch(e) {
+                console.warn("Firebase updateStock warning:", e);
+            }
+        }
+        this.saveLocalBackup('ecohaven_inventory_cache', this.inventory);
+        window.dispatchEvent(new CustomEvent('ecohaven_inventory_updated', { detail: this.inventory }));
+    }
+
+    async addOrRestockMaterial(materialData) {
+        if (!materialData.id) {
+            materialData.id = 'mat-' + (materialData.name ? materialData.name.toLowerCase().replace(/[^a-z0-9]/g, '-') : Date.now());
+        }
+        if (!this.inventory.materials) this.inventory.materials = {};
+        
+        if (this.inventory.materials[materialData.id] && materialData.addQuantity) {
+            const current = parseFloat(this.inventory.materials[materialData.id].quantity) || 0;
+            this.inventory.materials[materialData.id].quantity = current + parseFloat(materialData.addQuantity);
+            if (materialData.batch) this.inventory.materials[materialData.id].batch = materialData.batch;
+        } else {
+            this.inventory.materials[materialData.id] = materialData;
+        }
+        
+        if (window.ecoHavenDb) {
+            try {
+                await window.ecoHavenDb.ref('ecohaven/inventory/materials/' + materialData.id).set(this.inventory.materials[materialData.id]);
+                console.log("✅ Material logged in Firebase RTDB:", materialData.name);
+            } catch(e) {
+                console.warn("Firebase material warning:", e);
+            }
+        }
+        this.saveLocalBackup('ecohaven_inventory_cache', this.inventory);
+        window.dispatchEvent(new CustomEvent('ecohaven_inventory_updated', { detail: this.inventory }));
+        return this.inventory.materials[materialData.id];
+    }
+
+    // Craftsman Rejection with Specific Reason & Guidance
+    async flagOrderPayment(orderId, { reason, code, notes }) {
+        const ord = this.orders[orderId] || this.getOrder(orderId);
+        if (!ord) return;
+
+        const updates = {
+            orderStatus: "Payment Flagged (Action Required)",
+            stage: 1,
+            stageName: "Payment Flagged: " + (reason || "Action Required"),
+            rejectionReason: reason || "Unverified Payment Proof",
+            rejectionCode: code || "invalid_reference",
+            rejectionNotes: notes || "Please re-upload a clear transaction screenshot.",
+            flaggedAt: new Date().toISOString()
+        };
+
+        if (window.ecoHavenDb) {
+            try {
+                await window.ecoHavenDb.ref('ecohaven/orders/' + orderId).update(updates);
+                console.log("⚠️ Order", orderId, "flagged with reason in Firebase RTDB:", reason);
+            } catch (err) {
+                console.error("Firebase flag error:", err);
+            }
+        }
+
+        Object.assign(ord, updates);
+        this.saveLocalBackup('ecohaven_cloud_orders_cache', this.orders);
+        window.dispatchEvent(new CustomEvent('ecohaven_orders_updated', { detail: this.orders }));
+        return ord;
+    }
+
+    // Customer Resubmission of Payment Proof
+    async resubmitPaymentProof(orderId, { reference, receiptFile, note }) {
+        const ord = this.orders[orderId] || this.getOrder(orderId);
+        if (!ord) return;
+
+        const updates = {
+            orderStatus: "Pending Review",
+            stage: 1,
+            stageName: "Resubmitted Payment Proof (Under Review)",
+            rejectionReason: "",
+            rejectionNotes: "",
+            rejectionCode: "",
+            gcashRef: reference || ord.gcashRef,
+            resubmittedAt: new Date().toISOString(),
+            customerResubmitNote: note || "Resubmitted by customer"
+        };
+        if (receiptFile) {
+            updates.receiptFile = receiptFile;
+        }
+
+        if (window.ecoHavenDb) {
+            try {
+                await window.ecoHavenDb.ref('ecohaven/orders/' + orderId).update(updates);
+                console.log("🔄 Order", orderId, "resubmitted in Firebase RTDB!");
+            } catch (err) {
+                console.error("Firebase resubmit error:", err);
+            }
+        }
+
+        Object.assign(ord, updates);
+        this.saveLocalBackup('ecohaven_cloud_orders_cache', this.orders);
+        window.dispatchEvent(new CustomEvent('ecohaven_orders_updated', { detail: this.orders }));
+        return ord;
     }
 
     // ==========================================================

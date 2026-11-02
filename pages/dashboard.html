@@ -131,9 +131,10 @@
 
         <!-- Active Order Card -->
         <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-[20px] p-6 md:p-8 shadow-sm">
+            <div id="dashFlagNotice" class="hidden"></div>
             <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-outline-variant/30 mb-6">
                 <div>
-                    <span class="text-xs font-mono font-bold text-primary">Order #EH-2026-88123</span>
+                    <span id="dashOrderIdTag" class="text-xs font-mono font-bold text-primary">Order #EH-2026-88123</span>
                     <h3 class="font-headline-sm text-lg text-on-surface mt-0.5">TetraTable 4-in-1 Suite</h3>
                     <span class="text-xs text-on-surface-variant">Natural Polished Mahogany • Handcrafted in Candaba</span>
                 </div>
@@ -303,6 +304,45 @@ function updateCustomerDashboard() {
     const trackBtn = document.getElementById('dashTrackBtn');
     if (trackBtn) {
         trackBtn.href = `track.html?orderId=${ord.orderId}`;
+    }
+
+    const orderIdTag = document.getElementById('dashOrderIdTag');
+    if (orderIdTag) orderIdTag.innerText = 'Order #' + ord.orderId;
+
+    const statusBadge = document.getElementById('dashStatusBadge');
+    const isFlagged = (ord.orderStatus && ord.orderStatus.includes('Flagged')) || ord.rejectionReason;
+    const flagNotice = document.getElementById('dashFlagNotice');
+    
+    if (statusBadge) {
+        if (isFlagged) {
+            statusBadge.className = "inline-block px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200";
+            statusBadge.innerText = "⚠️ Payment Proof Flagged";
+        } else {
+            statusBadge.className = "inline-block px-3 py-1 rounded-full text-xs font-bold bg-primary text-on-primary";
+            statusBadge.innerText = `Stage ${ord.stage || 1}: ${ord.stageName || 'In Production'}`;
+        }
+    }
+
+    if (flagNotice) {
+        if (isFlagged) {
+            flagNotice.classList.remove('hidden');
+            flagNotice.innerHTML = `
+                <div class="p-3.5 mb-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2.5">
+                    <span class="material-symbols-outlined text-red-600 text-[20px] flex-shrink-0 mt-0.5">warning</span>
+                    <div>
+                        <span class="text-xs font-bold text-red-800 uppercase tracking-wide block">Action Required from Candaba Workshop</span>
+                        <p class="text-xs text-red-800 font-bold mt-0.5">Reason: ${ord.rejectionReason || 'Receipt Unverified'}</p>
+                        <p class="text-[11px] text-on-surface mt-1 leading-snug bg-white/70 p-2 rounded-lg border border-red-100">${ord.rejectionNotes || 'Please re-upload a valid transaction screenshot.'}</p>
+                        <a href="track.html?orderId=${ord.orderId}" class="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 transition-all shadow-xs">
+                            <span class="material-symbols-outlined text-xs">upload_file</span> Re-Upload Receipt on Tracker
+                        </a>
+                    </div>
+                </div>
+            `;
+        } else {
+            flagNotice.classList.add('hidden');
+            flagNotice.innerHTML = '';
+        }
     }
 }
 window.addEventListener('ecohaven_orders_updated', updateCustomerDashboard);

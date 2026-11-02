@@ -170,14 +170,18 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
             </div>
             <p class="text-xs text-on-surface-variant">Real-time inventory levels, finished unit counts, and raw timber reserves at the Candaba, Pampanga workshop.</p>
         </div>
-        <div class="flex items-center gap-2">
-            <a href="sourcing.html" class="px-4 py-2 bg-surface-container hover:bg-surface-container-high rounded-xl text-xs font-bold text-primary transition-all flex items-center gap-1.5">
+        <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="openAddProductModal()" class="px-3.5 py-2 bg-primary text-white hover:bg-primary-container rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
+                <span class="material-symbols-outlined text-sm">add_box</span>
+                Add Finished Product
+            </button>
+            <button type="button" onclick="openAddMaterialModal()" class="px-3.5 py-2 bg-surface-container hover:bg-surface-container-high rounded-xl text-xs font-bold text-on-surface transition-all flex items-center gap-1.5 border border-outline-variant/40 active:scale-95">
+                <span class="material-symbols-outlined text-sm">forest</span>
+                Log / Restock Material
+            </button>
+            <a href="sourcing.html" class="px-3 py-2 bg-surface-container hover:bg-surface-container-high rounded-xl text-xs font-semibold text-on-surface transition-all flex items-center gap-1">
                 <span class="material-symbols-outlined text-sm">visibility</span>
-                View Sourcing Logs
-            </a>
-            <a href="shop.html" class="px-4 py-2 bg-primary text-white hover:bg-primary-container rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
-                <span class="material-symbols-outlined text-sm">storefront</span>
-                Live Storefront
+                Sourcing
             </a>
         </div>
     </div>
@@ -188,50 +192,7 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
             <span class="material-symbols-outlined text-[16px]">chair</span>
             <span>Finished Goods In-Stock Units</span>
         </span>
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            <div class="p-3 rounded-xl border border-outline-variant/30 bg-surface flex flex-col justify-between">
-                <span class="text-[11px] text-on-surface-variant font-medium truncate">TetraTable 4-in-1</span>
-                <div class="mt-1 flex items-baseline justify-between">
-                    <span class="text-lg font-bold text-on-surface">14</span>
-                    <span class="text-[10px] text-emerald-800 font-semibold bg-emerald-100 px-1.5 py-0.5 rounded">Ready</span>
-                </div>
-            </div>
-            <div class="p-3 rounded-xl border border-outline-variant/30 bg-surface flex flex-col justify-between">
-                <span class="text-[11px] text-on-surface-variant font-medium truncate">Santos Butterfly</span>
-                <div class="mt-1 flex items-baseline justify-between">
-                    <span class="text-lg font-bold text-on-surface">6</span>
-                    <span class="text-[10px] text-emerald-800 font-semibold bg-emerald-100 px-1.5 py-0.5 rounded">Ready</span>
-                </div>
-            </div>
-            <div class="p-3 rounded-xl border border-outline-variant/30 bg-surface flex flex-col justify-between">
-                <span class="text-[11px] text-on-surface-variant font-medium truncate">TetraLift Table</span>
-                <div class="mt-1 flex items-baseline justify-between">
-                    <span class="text-lg font-bold text-on-surface">4</span>
-                    <span class="text-[10px] text-emerald-800 font-semibold bg-emerald-100 px-1.5 py-0.5 rounded">Ready</span>
-                </div>
-            </div>
-            <div class="p-3 rounded-xl border border-outline-variant/30 bg-surface flex flex-col justify-between">
-                <span class="text-[11px] text-on-surface-variant font-medium truncate">HexaRing Round</span>
-                <div class="mt-1 flex items-baseline justify-between">
-                    <span class="text-lg font-bold text-on-surface">3</span>
-                    <span class="text-[10px] text-amber-800 font-semibold bg-amber-100 px-1.5 py-0.5 rounded">Low</span>
-                </div>
-            </div>
-            <div class="p-3 rounded-xl border border-outline-variant/30 bg-surface flex flex-col justify-between">
-                <span class="text-[11px] text-on-surface-variant font-medium truncate">Transformer Table</span>
-                <div class="mt-1 flex items-baseline justify-between">
-                    <span class="text-lg font-bold text-on-surface">5</span>
-                    <span class="text-[10px] text-emerald-800 font-semibold bg-emerald-100 px-1.5 py-0.5 rounded">Ready</span>
-                </div>
-            </div>
-            <div class="p-3 rounded-xl border border-outline-variant/30 bg-surface flex flex-col justify-between">
-                <span class="text-[11px] text-on-surface-variant font-medium truncate">Beeswax &amp; Care</span>
-                <div class="mt-1 flex items-baseline justify-between">
-                    <span class="text-lg font-bold text-on-surface">52</span>
-                    <span class="text-[10px] text-emerald-800 font-semibold bg-emerald-100 px-1.5 py-0.5 rounded">Stocked</span>
-                </div>
-            </div>
-        </div>
+        <div id="finishedGoodsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"></div>
     </div>
 
     <!-- Raw Material Reserves Tracker -->
@@ -239,33 +200,7 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
         <span class="material-symbols-outlined text-[16px]">forest</span>
         <span>Raw Timber &amp; Chemical Reserves</span>
     </span>
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div class="p-4 rounded-xl border border-outline-variant/30 bg-surface">
-            <span class="text-xs text-outline block">Philippine Mahogany</span>
-            <span class="text-lg font-bold text-on-surface mt-1 block">1,450 BF</span>
-            <span class="text-[11px] text-tertiary font-medium mt-1 block">11.4% MC • Safe</span>
-        </div>
-        <div class="p-4 rounded-xl border border-outline-variant/30 bg-surface">
-            <span class="text-xs text-outline block">Solignum Barrier</span>
-            <span class="text-lg font-bold text-on-surface mt-1 block">35 Liters</span>
-            <span class="text-[11px] text-tertiary font-medium mt-1 block">Anti-Termite</span>
-        </div>
-        <div class="p-4 rounded-xl border border-outline-variant/30 bg-surface">
-            <span class="text-xs text-outline block">Pioneer Epoxy</span>
-            <span class="text-lg font-bold text-on-surface mt-1 block">28 Sets</span>
-            <span class="text-[11px] text-tertiary font-medium mt-1 block">High Tensile</span>
-        </div>
-        <div class="p-4 rounded-xl border border-outline-variant/30 bg-surface">
-            <span class="text-xs text-outline block">Polished Barnis</span>
-            <span class="text-lg font-bold text-on-surface mt-1 block">42 Cans</span>
-            <span class="text-[11px] text-tertiary font-medium mt-1 block">Protective Sheen</span>
-        </div>
-        <div class="p-4 rounded-xl border border-outline-variant/30 bg-surface">
-            <span class="text-xs text-outline block">Bubble Wrap &amp; Tape</span>
-            <span class="text-lg font-bold text-on-surface mt-1 block">18 Rolls</span>
-            <span class="text-[11px] text-tertiary font-medium mt-1 block">Heavy-Duty</span>
-        </div>
-    </div>
+    <div id="rawMaterialsContainer" class="grid grid-cols-2 md:grid-cols-5 gap-4"></div>
 </div>
 
 <!-- Modal: GCash Receipt Screenshot Verification Lightbox -->
@@ -306,8 +241,9 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
         </div>
 
         <div class="flex gap-3">
-            <button onclick="rejectPayment()" class="w-1/2 py-3 rounded-xl border border-red-300 text-red-700 hover:bg-red-50 text-sm font-bold transition-all">
-                Reject / Request Re-upload
+            <button type="button" onclick="openRejectReasonModal(activeVerificationOrderId)" class="w-1/2 py-3 rounded-xl border border-red-300 text-red-700 hover:bg-red-50 text-sm font-bold transition-all flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">block</span>
+                Reject / Select Reason
             </button>
             <button onclick="approvePayment()" class="w-1/2 py-3 bg-tertiary hover:bg-tertiary-container text-on-tertiary rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm">
                 <span class="material-symbols-outlined text-sm">check</span>
@@ -367,6 +303,248 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
     </div>
 </div>
 
+
+<!-- Modal 1: Rejection Reason Selection & Actionable Guidance -->
+<div id="rejectReasonModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-[24px] max-w-xl w-full p-6 md:p-8 shadow-2xl relative">
+        <button onclick="closeRejectReasonModal()" class="absolute right-5 top-5 p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <div class="flex items-center gap-2 mb-1">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span>
+            <span class="text-xs font-bold uppercase tracking-wider text-red-700">Audit Action • Flag Payment</span>
+        </div>
+        <h3 class="font-headline-sm text-2xl text-on-surface mb-1">Select Rejection Reason</h3>
+        <p class="text-xs text-on-surface-variant mb-4">Choose the reason why this payment cannot be approved. The customer will immediately receive official workshop guidance via in-app alert, SMS, and email.</p>
+        
+        <!-- Target Order Pill -->
+        <div class="bg-surface p-3 rounded-xl border border-outline-variant/30 flex items-center justify-between text-xs mb-4">
+            <div>
+                <span class="text-outline">Order:</span> <strong id="rejectTargetOrderId" class="text-on-surface font-mono">#EH-2026-XXXX</strong>
+                <span class="mx-2 text-outline">•</span>
+                <span id="rejectTargetCustomer" class="font-semibold text-on-surface">Client Name</span>
+            </div>
+            <div class="font-mono font-bold text-primary" id="rejectTargetAmount">₱0.00</div>
+        </div>
+
+        <form onsubmit="confirmRejectWithReason(event)" class="space-y-4">
+            <!-- 6 Selectable Rejection Reasons -->
+            <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                <label class="flex items-start gap-3 p-3 rounded-xl border border-outline-variant/30 hover:border-red-400 bg-surface cursor-pointer transition-all has-[:checked]:border-red-600 has-[:checked]:bg-red-50/50">
+                    <input type="radio" name="rejectionReasonOption" value="invalid_reference" checked onchange="updateRejectionNotes(this.value)" class="mt-1 text-red-600 focus:ring-red-500"/>
+                    <div>
+                        <div class="text-xs font-bold text-on-surface flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[16px] text-red-600">search_off</span>
+                            Invalid or Unmatched Reference Number
+                        </div>
+                        <p class="text-[11px] text-on-surface-variant mt-0.5 leading-snug">The reference number does not match any transaction in our official GCash/Maya merchant settlement logs.</p>
+                    </div>
+                </label>
+
+                <label class="flex items-start gap-3 p-3 rounded-xl border border-outline-variant/30 hover:border-red-400 bg-surface cursor-pointer transition-all has-[:checked]:border-red-600 has-[:checked]:bg-red-50/50">
+                    <input type="radio" name="rejectionReasonOption" value="blurry_receipt" onchange="updateRejectionNotes(this.value)" class="mt-1 text-red-600 focus:ring-red-500"/>
+                    <div>
+                        <div class="text-xs font-bold text-on-surface flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[16px] text-amber-600">broken_image</span>
+                            Blurry, Cropped, or Incomplete Screenshot
+                        </div>
+                        <p class="text-[11px] text-on-surface-variant mt-0.5 leading-snug">The uploaded image is cut off or unreadable. Key details (date, amount, recipient name) are missing.</p>
+                    </div>
+                </label>
+
+                <label class="flex items-start gap-3 p-3 rounded-xl border border-outline-variant/30 hover:border-red-400 bg-surface cursor-pointer transition-all has-[:checked]:border-red-600 has-[:checked]:bg-red-50/50">
+                    <input type="radio" name="rejectionReasonOption" value="amount_shortfall" onchange="updateRejectionNotes(this.value)" class="mt-1 text-red-600 focus:ring-red-500"/>
+                    <div>
+                        <div class="text-xs font-bold text-on-surface flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[16px] text-primary">price_change</span>
+                            Insufficient Downpayment Amount
+                        </div>
+                        <p class="text-[11px] text-on-surface-variant mt-0.5 leading-snug">The amount remitted is less than the required 50% earnest downpayment for mahogany reservation.</p>
+                    </div>
+                </label>
+
+                <label class="flex items-start gap-3 p-3 rounded-xl border border-outline-variant/30 hover:border-red-400 bg-surface cursor-pointer transition-all has-[:checked]:border-red-600 has-[:checked]:bg-red-50/50">
+                    <input type="radio" name="rejectionReasonOption" value="wrong_recipient" onchange="updateRejectionNotes(this.value)" class="mt-1 text-red-600 focus:ring-red-500"/>
+                    <div>
+                        <div class="text-xs font-bold text-on-surface flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[16px] text-red-600">contact_emergency</span>
+                            Payment Sent to Wrong Merchant / Personal QR
+                        </div>
+                        <p class="text-[11px] text-on-surface-variant mt-0.5 leading-snug">Funds were transferred to an unrecognized personal account instead of the official Candaba Workshop merchant QR.</p>
+                    </div>
+                </label>
+
+                <label class="flex items-start gap-3 p-3 rounded-xl border border-outline-variant/30 hover:border-red-400 bg-surface cursor-pointer transition-all has-[:checked]:border-red-600 has-[:checked]:bg-red-50/50">
+                    <input type="radio" name="rejectionReasonOption" value="freight_unserviceable" onchange="updateRejectionNotes(this.value)" class="mt-1 text-red-600 focus:ring-red-500"/>
+                    <div>
+                        <div class="text-xs font-bold text-on-surface flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[16px] text-amber-700">location_off</span>
+                            Delivery Address Outside Service Fleet Route
+                        </div>
+                        <p class="text-[11px] text-on-surface-variant mt-0.5 leading-snug">The delivery destination requires specialized long-haul third-party freight coordination before proceeding.</p>
+                    </div>
+                </label>
+
+                <label class="flex items-start gap-3 p-3 rounded-xl border border-outline-variant/30 hover:border-red-400 bg-surface cursor-pointer transition-all has-[:checked]:border-red-600 has-[:checked]:bg-red-50/50">
+                    <input type="radio" name="rejectionReasonOption" value="custom_artisan" onchange="updateRejectionNotes(this.value)" class="mt-1 text-red-600 focus:ring-red-500"/>
+                    <div>
+                        <div class="text-xs font-bold text-on-surface flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[16px] text-on-surface">handyman</span>
+                            Custom Craftsman Reason / Dimension Clarification
+                        </div>
+                        <p class="text-[11px] text-on-surface-variant mt-0.5 leading-snug">Custom instruction or inquiry regarding custom specifications or wood finish.</p>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Customizable Guidance Textarea -->
+            <div>
+                <label class="text-xs font-bold text-on-surface block mb-1">Craftsman Guidance for Customer</label>
+                <textarea id="rejectionNotesInput" rows="3" class="w-full p-3 rounded-xl border border-outline-variant/40 bg-surface text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-red-500 leading-relaxed"></textarea>
+            </div>
+
+            <!-- Communication Channel Indicator -->
+            <div class="p-2.5 rounded-xl bg-surface-container flex items-center gap-2 text-xs text-on-surface-variant">
+                <span class="material-symbols-outlined text-[18px] text-emerald-700">outgoing_mail</span>
+                <span>Customer will receive simulated SMS to registered phone and Email with re-upload link.</span>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeRejectReasonModal()" class="w-1/2 py-2.5 rounded-xl border border-outline-variant text-xs font-bold text-on-surface hover:bg-surface-container transition-all">
+                    Cancel
+                </button>
+                <button type="submit" class="w-1/2 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                    <span class="material-symbols-outlined text-sm">block</span>
+                    Confirm Flag &amp; Notify
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal 2: Add Finished Product to Inventory -->
+<div id="addProductModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-[24px] max-w-lg w-full p-6 md:p-8 shadow-2xl relative">
+        <button onclick="closeAddProductModal()" class="absolute right-5 top-5 p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <div class="flex items-center gap-2 mb-1">
+            <span class="material-symbols-outlined text-primary text-[20px]">add_box</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-primary">Catalog &amp; Inventory</span>
+        </div>
+        <h3 class="font-headline-sm text-2xl text-on-surface mb-2">Add Finished Product</h3>
+        <p class="text-xs text-on-surface-variant mb-6">Register a handcrafted furniture unit or accessory into the Candaba workshop finished goods inventory.</p>
+
+        <form onsubmit="handleSaveProduct(event)" class="space-y-4">
+            <div>
+                <label class="text-xs font-bold text-on-surface block mb-1">Product Title</label>
+                <input type="text" id="newProdName" required placeholder="e.g. Santos Butterfly Dining Table" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-sm font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-xs font-bold text-on-surface block mb-1">Category</label>
+                    <select id="newProdCategory" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-xs font-medium text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="Modular Transformable">Modular Transformable</option>
+                        <option value="Dining Suite">Dining Suite</option>
+                        <option value="Lifting Table">Lifting Table</option>
+                        <option value="Round Expandable">Round Expandable</option>
+                        <option value="Console Table">Console Table</option>
+                        <option value="Care Kit">Wood Care Kit</option>
+                        <option value="Cushions & Accents">Cushions & Accents</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-on-surface block mb-1">Wood Species</label>
+                    <input type="text" id="newProdWood" value="Philippine Mahogany (11.4% MC)" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-xs font-medium text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label class="text-xs font-bold text-on-surface block mb-1">Retail Price (₱)</label>
+                    <input type="number" id="newProdPrice" required min="100" step="50" value="44900" oninput="document.getElementById('newProdDp').value = Math.round(this.value / 2)" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-xs font-mono font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-on-surface block mb-1">50% DP (₱)</label>
+                    <input type="number" id="newProdDp" readonly value="22450" class="w-full px-3 py-2.5 rounded-xl bg-surface-container text-xs font-mono font-bold text-primary"/>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-on-surface block mb-1">Stock Units</label>
+                    <input type="number" id="newProdUnits" required min="1" max="500" value="5" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-xs font-mono font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeAddProductModal()" class="w-1/2 py-2.5 rounded-xl border border-outline-variant text-xs font-bold text-on-surface hover:bg-surface-container transition-all">
+                    Cancel
+                </button>
+                <button type="submit" class="w-1/2 py-2.5 bg-primary hover:bg-primary-container text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                    <span class="material-symbols-outlined text-sm">save</span>
+                    Save to Finished Goods
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal 3: Log & Restock Raw Material -->
+<div id="addMaterialModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-[24px] max-w-lg w-full p-6 md:p-8 shadow-2xl relative">
+        <button onclick="closeAddMaterialModal()" class="absolute right-5 top-5 p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <div class="flex items-center gap-2 mb-1">
+            <span class="material-symbols-outlined text-tertiary text-[20px]">forest</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-tertiary">Workshop Supply Reserves</span>
+        </div>
+        <h3 class="font-headline-sm text-2xl text-on-surface mb-2">Log Raw Material / Chemical</h3>
+        <p class="text-xs text-on-surface-variant mb-6">Record incoming raw timber, preservative barriers, or assembly adhesives into Candaba reserves.</p>
+
+        <form onsubmit="handleSaveMaterial(event)" class="space-y-4">
+            <div>
+                <label class="text-xs font-bold text-on-surface block mb-1">Material Name</label>
+                <input type="text" id="newMatName" required placeholder="e.g. Kiln-Dried Narra Planks" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-sm font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-xs font-bold text-on-surface block mb-1">Quantity</label>
+                    <input type="number" id="newMatQty" required min="1" step="any" value="500" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-xs font-mono font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-on-surface block mb-1">Unit of Measure</label>
+                    <select id="newMatUnit" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-xs font-medium text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="BF">BF (Board Feet)</option>
+                        <option value="Liters">Liters</option>
+                        <option value="Sets">Sets</option>
+                        <option value="Cans">Cans</option>
+                        <option value="Rolls">Rolls</option>
+                        <option value="Kg">Kilograms (Kg)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-xs font-bold text-on-surface block mb-1">Moisture / Grade Specs</label>
+                    <input type="text" id="newMatSpecs" value="11.4% MC • Kiln Stabilized" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-xs font-medium text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-on-surface block mb-1">Batch / Sourcing Code</label>
+                    <input type="text" id="newMatBatch" value="PMP-2026-ND-492" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-xs font-mono font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeAddMaterialModal()" class="w-1/2 py-2.5 rounded-xl border border-outline-variant text-xs font-bold text-on-surface hover:bg-surface-container transition-all">
+                    Cancel
+                </button>
+                <button type="submit" class="w-1/2 py-2.5 bg-tertiary hover:bg-tertiary-container text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                    <span class="material-symbols-outlined text-sm">post_add</span>
+                    Log into Reserves
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 </main>
 <footer class="w-full bg-inverse-surface text-inverse-on-surface pt-space-xl pb-space-lg"><div class="max-w-7xl mx-auto px-gutter"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg pb-space-lg"><div class="flex flex-col gap-space-sm"><div class="flex items-center gap-space-xs"><img alt="EcoHaven Furniture Emblem" class="h-8 w-auto object-contain brightness-200" src="https://lh3.googleusercontent.com/aida/AEtjO1WoMmLqUdcp17_0K7-4RU3j_laJKFuB71tIYvo-2PL2jhAcZH749676gu7fQWloblAKrXLnjtrDm7cmDLa4_OGy5SO-WatR_aBQpdDN0K2Bp6LZLKKxNxFLcFB1WDJaz2oG_ycj2LROrpKw9eiaDGzfF-wXFdhm7wzyX7JBN_KzsFFfDSN_mIJx2ADuxlhZHSpu8qhuPImA1uzZy04pyRsDNRGhCYwcwDRbrWqtTrzRhg"/><span class="font-headline-sm text-headline-sm text-surface tracking-tight font-semibold">EcoHaven</span></div><p class="font-body-sm text-body-sm text-inverse-on-surface/80 leading-relaxed">Architectural Japandi woodworking synthesis with traditional Filipino joinery. Crafted with intention in our dedicated Candaba workshop.</p><div class="flex items-center gap-space-xs pt-1"><span class="font-caption text-caption text-primary-fixed bg-surface-container-highest/20 px-2 py-1 rounded">FSC Certified Narra &amp; Teak</span><span class="font-caption text-caption text-tertiary-fixed bg-surface-container-highest/20 px-2 py-1 rounded">Zero-VOC Oils</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Workshop &amp; Coordinates</span><div class="flex items-start gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed mt-0.5">location_on</span><span>Dalan Batu, Pasig, Candaba, Pampanga 2013, Philippines</span></div><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed">call</span><span>Direct Hotline: +63 981 255 8028</span></div><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed">schedule</span><span>Monday to Sunday: 8:00 AM – 5:00 PM PHT</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Workshop Collections</span><div class="flex flex-col gap-2 font-body-sm text-body-sm text-inverse-on-surface/80"><a class="hover:text-primary-fixed transition-colors" data-path="tetratable-4-in-1" href="tetratable.html">TetraTable 4-in-1 Modular</a><a class="hover:text-primary-fixed transition-colors" data-path="furniture-catalog" href="#">Tansu Credenzas &amp; Consoles</a><a class="hover:text-primary-fixed transition-colors" data-path="furniture-catalog" href="#">Live Edge Dining Tables</a><a class="hover:text-primary-fixed transition-colors" data-path="production-tracker" href="#">Kiln Drying &amp; Batch Status</a><a class="hover:text-primary-fixed transition-colors" data-path="seller-portal" href="#">Workshop Artisan Portal</a></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Follow Our Craft</span><p class="font-body-sm text-body-sm text-inverse-on-surface/80">Connect with us on official social media channels for live workshop demonstrations and customer photos.</p><div class="flex items-center gap-3 pt-1"><a href="https://www.facebook.com/profile.php?id=61588914923992&rdid=JkQTafkpCiS2BW1d&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1CBMxNxPbk%2F#" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#1877F2] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Facebook"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a><a href="https://www.tiktok.com/@ecohavenfurnitureph" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-black hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="TikTok (@ecohavenfurnitureph)"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.97v7.54c.03 2.5-1.28 4.9-3.4 6.13-2.15 1.25-4.94 1.19-7.03-.15-2.07-1.32-3.13-3.76-2.69-6.17.43-2.39 2.37-4.27 4.79-4.67.65-.11 1.31-.1 1.96.01v4.06c-.46-.17-.97-.2-1.45-.1-.99.2-1.77.96-1.99 1.94-.22.98.15 2.02.94 2.63.78.61 1.86.68 2.7.18.84-.49 1.34-1.41 1.32-2.38V.02h-.01z"/></svg></a><a href="https://www.instagram.com/ecohavenfuniture?psln=bHN3dzI4dW1oMnY3" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#E4405F] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Instagram (@ecohavenfuniture)"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a></div></div></div></div><div class="pt-space-md flex flex-col sm:flex-row items-center justify-between gap-space-sm"><p class="font-caption text-caption text-inverse-on-surface/60">© 2024 EcoHaven Furniture. All rights reserved. Dalan Batu, Pasig, Candaba, Pampanga.</p><div class="flex items-center gap-space-md font-caption text-caption text-inverse-on-surface/70"><a class="hover:text-primary-fixed transition-colors" href="#">Privacy Framework</a><a class="hover:text-primary-fixed transition-colors" href="#">Warranty Terms</a><a class="hover:text-primary-fixed transition-colors" href="#">Bespoke Commission Agreement</a></div></div></div></footer>
 <!-- Firebase Realtime Database SDK (Official CDN - Zero Build Step) -->
@@ -382,6 +560,308 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
 <script>
 let activeVerificationOrderId = null;
 let pendingDispatchOrderId = null;
+let pendingRejectionOrderId = null;
+
+const REJECTION_PRESETS = {
+    'invalid_reference': {
+        title: 'Invalid or Unmatched Reference Number',
+        notes: 'The payment reference provided does not match any transaction in our official GCash/Maya merchant settlement logs. Please verify your banking app transaction history and resubmit the correct 13-digit reference number.'
+    },
+    'blurry_receipt': {
+        title: 'Blurry, Cropped, or Incomplete Screenshot',
+        notes: 'The attached payment proof screenshot is blurry, low-resolution, or cuts off crucial details (date, amount, or recipient). Please take a clear, full-screen screenshot and resubmit.'
+    },
+    'amount_shortfall': {
+        title: 'Insufficient Downpayment Amount',
+        notes: 'The amount remitted is less than the required 50% earnest downpayment for your order. Please settle the remaining downpayment balance or attach the full transaction receipt.'
+    },
+    'wrong_recipient': {
+        title: 'Payment Sent to Wrong Merchant / Personal QR',
+        notes: 'The remittance appears to have been sent to an unverified personal account rather than our official Candaba Workshop merchant QR. Please check your transaction or contact support.'
+    },
+    'freight_unserviceable': {
+        title: 'Delivery Address Outside Service Fleet Route',
+        notes: 'Your delivery destination is currently outside our standard Luzon white-glove route. Our workshop logistics coordinator will reach out to discuss freight options.'
+    },
+    'custom_artisan': {
+        title: 'Custom Craftsman Reason / Spec Adjustment',
+        notes: 'Our Candaba joinery masters require clarification regarding your timber grain finish or delivery site clearance before starting fabrication.'
+    }
+};
+
+// ==========================================================
+// 1. INVENTORY RENDERING & CONTROLLER
+// ==========================================================
+function renderInventory() {
+    if (!window.ecohaven) return;
+    const inv = window.ecohaven.inventory || {};
+    const prods = (inv.products) || {};
+    const mats = (inv.materials) || {};
+
+    const fgContainer = document.getElementById('finishedGoodsContainer');
+    const rmContainer = document.getElementById('rawMaterialsContainer');
+
+    if (fgContainer) {
+        fgContainer.innerHTML = '';
+        Object.values(prods).forEach(p => {
+            const card = document.createElement('div');
+            card.className = "p-3 rounded-xl border border-outline-variant/30 bg-surface flex flex-col justify-between hover:border-primary/40 transition-all shadow-xs";
+            const isLow = p.units <= 3 && p.units > 0;
+            const isOut = p.units === 0;
+            const badgeClass = isOut ? 'bg-red-100 text-red-800' : (isLow ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800');
+            const badgeText = isOut ? 'Out of Stock' : (isLow ? 'Low Stock' : 'Ready');
+
+            card.innerHTML = `
+                <div>
+                    <div class="flex items-start justify-between gap-1 mb-1">
+                        <span class="text-[11px] text-on-surface font-semibold truncate block" title="${p.name}">${p.name}</span>
+                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${badgeClass}">${badgeText}</span>
+                    </div>
+                    <span class="text-[10px] text-outline block truncate">${p.category || 'Furniture'} • ₱${(p.price || 0).toLocaleString()}</span>
+                </div>
+                <div class="mt-2 pt-2 border-t border-outline-variant/20 flex items-center justify-between">
+                    <span class="text-base font-bold font-mono text-on-surface">${p.units} <span class="text-[10px] font-normal text-outline">units</span></span>
+                    <div class="flex items-center gap-1">
+                        <button type="button" onclick="adjustProductStock('${p.id}', -1)" class="w-6 h-6 rounded-md bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold flex items-center justify-center transition-all" title="Decrease Stock">-</button>
+                        <button type="button" onclick="adjustProductStock('${p.id}', 1)" class="w-6 h-6 rounded-md bg-primary hover:bg-primary-container text-white text-xs font-bold flex items-center justify-center transition-all shadow-xs" title="Increase Stock">+</button>
+                    </div>
+                </div>
+            `;
+            fgContainer.appendChild(card);
+        });
+    }
+
+    if (rmContainer) {
+        rmContainer.innerHTML = '';
+        Object.values(mats).forEach(m => {
+            const card = document.createElement('div');
+            card.className = "p-4 rounded-xl border border-outline-variant/30 bg-surface flex flex-col justify-between hover:border-tertiary/40 transition-all shadow-xs";
+            card.innerHTML = `
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs text-outline font-medium truncate">${m.name}</span>
+                        <span class="text-[9px] text-tertiary font-bold px-1.5 py-0.5 rounded bg-tertiary/10">${m.batch || 'In Stock'}</span>
+                    </div>
+                    <span class="text-lg font-bold text-on-surface mt-1 block font-mono">${(parseFloat(m.quantity) || 0).toLocaleString()} <span class="text-xs font-normal text-outline">${m.unit}</span></span>
+                    <span class="text-[11px] text-tertiary font-medium mt-1 block truncate">${m.status || m.grade || 'Kiln Stabilized'}</span>
+                </div>
+                <div class="mt-3 pt-2 border-t border-outline-variant/20">
+                    <button type="button" onclick="quickRestockMaterial('${m.id}', '${m.name}', '${m.unit}')" class="w-full py-1 text-[11px] font-bold text-primary hover:text-primary-container bg-surface-container rounded-lg transition-all flex items-center justify-center gap-1">
+                        <span class="material-symbols-outlined text-[13px]">add</span> Restock
+                    </button>
+                </div>
+            `;
+            rmContainer.appendChild(card);
+        });
+    }
+}
+
+async function adjustProductStock(prodId, delta) {
+    if (!window.ecohaven) return;
+    await window.ecohaven.updateProductStock(prodId, delta, true);
+    if (typeof window.showEcoHavenToast === 'function') {
+        const prod = window.ecohaven.inventory.products[prodId];
+        window.showEcoHavenToast(`Stock updated for ${prod ? prod.name : 'product'}: ${prod ? prod.units : ''} units remaining.`, 'info');
+    }
+    renderInventory();
+}
+
+function openAddProductModal() {
+    document.getElementById('addProductModal').classList.remove('hidden');
+    document.getElementById('addProductModal').classList.add('flex');
+}
+
+function closeAddProductModal() {
+    document.getElementById('addProductModal').classList.add('hidden');
+    document.getElementById('addProductModal').classList.remove('flex');
+}
+
+async function handleSaveProduct(event) {
+    if (event) event.preventDefault();
+    if (!window.ecohaven) return;
+
+    const name = document.getElementById('newProdName').value.trim();
+    const category = document.getElementById('newProdCategory').value;
+    const wood = document.getElementById('newProdWood').value.trim();
+    const price = parseFloat(document.getElementById('newProdPrice').value) || 44900;
+    const downPayment = parseFloat(document.getElementById('newProdDp').value) || Math.round(price / 2);
+    const units = parseInt(document.getElementById('newProdUnits').value) || 1;
+
+    const newProd = {
+        name,
+        category,
+        wood,
+        price,
+        downPayment,
+        units,
+        status: units > 3 ? "Ready" : "Low",
+        image: "tetratable_luxury_living_room_1793454407629.jpg"
+    };
+
+    await window.ecohaven.addProduct(newProd);
+    closeAddProductModal();
+    if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast(`✅ Product "${name}" added to finished inventory (${units} units)!`, 'success');
+    }
+    renderInventory();
+}
+
+function openAddMaterialModal(prefillId = null, prefillName = null, prefillUnit = null) {
+    if (prefillName) {
+        document.getElementById('newMatName').value = prefillName;
+    }
+    if (prefillUnit) {
+        document.getElementById('newMatUnit').value = prefillUnit;
+    }
+    document.getElementById('addMaterialModal').classList.remove('hidden');
+    document.getElementById('addMaterialModal').classList.add('flex');
+}
+
+function closeAddMaterialModal() {
+    document.getElementById('addMaterialModal').classList.add('hidden');
+    document.getElementById('addMaterialModal').classList.remove('flex');
+}
+
+function quickRestockMaterial(id, name, unit) {
+    openAddMaterialModal(id, name, unit);
+}
+
+async function handleSaveMaterial(event) {
+    if (event) event.preventDefault();
+    if (!window.ecohaven) return;
+
+    const name = document.getElementById('newMatName').value.trim();
+    const quantity = parseFloat(document.getElementById('newMatQty').value) || 100;
+    const unit = document.getElementById('newMatUnit').value;
+    const specs = document.getElementById('newMatSpecs').value.trim();
+    const batch = document.getElementById('newMatBatch').value.trim();
+
+    const matId = 'mat-' + name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+
+    const matData = {
+        id: matId,
+        name,
+        quantity,
+        addQuantity: quantity,
+        unit,
+        status: specs,
+        grade: specs,
+        batch
+    };
+
+    await window.ecohaven.addOrRestockMaterial(matData);
+    closeAddMaterialModal();
+    if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast(`✅ Material "${name}" logged (+${quantity} ${unit}) in Candaba reserves!`, 'success');
+    }
+    renderInventory();
+}
+
+// ==========================================================
+// 2. REJECTION REASON SELECTION & WORKFLOW
+// ==========================================================
+function openRejectReasonModal(orderId) {
+    if (!orderId || !window.ecohaven) return;
+    const ord = window.ecohaven.orders[orderId] || window.ecohaven.getOrder(orderId);
+    if (!ord) return;
+
+    pendingRejectionOrderId = ord.orderId;
+    document.getElementById('rejectTargetOrderId').innerText = '#' + ord.orderId;
+    document.getElementById('rejectTargetCustomer').innerText = ord.customerName || 'Client';
+    const paid = ord.downPaymentPaid || (ord.pricing ? ord.pricing.downPaymentPaid : 3467.00);
+    document.getElementById('rejectTargetAmount').innerText = `₱${paid.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
+
+    // Select default radio
+    const firstRadio = document.querySelector('input[name="rejectionReasonOption"][value="invalid_reference"]');
+    if (firstRadio) firstRadio.checked = true;
+    updateRejectionNotes('invalid_reference');
+
+    document.getElementById('rejectReasonModal').classList.remove('hidden');
+    document.getElementById('rejectReasonModal').classList.add('flex');
+}
+
+function closeRejectReasonModal() {
+    document.getElementById('rejectReasonModal').classList.add('hidden');
+    document.getElementById('rejectReasonModal').classList.remove('flex');
+}
+
+function updateRejectionNotes(reasonKey) {
+    const preset = REJECTION_PRESETS[reasonKey];
+    const notesInput = document.getElementById('rejectionNotesInput');
+    if (preset && notesInput) {
+        notesInput.value = preset.notes;
+    }
+}
+
+async function confirmRejectWithReason(event) {
+    if (event) event.preventDefault();
+    if (!pendingRejectionOrderId || !window.ecohaven) return;
+
+    const selectedOption = document.querySelector('input[name="rejectionReasonOption"]:checked');
+    const reasonCode = selectedOption ? selectedOption.value : 'invalid_reference';
+    const reasonTitle = REJECTION_PRESETS[reasonCode] ? REJECTION_PRESETS[reasonCode].title : 'Payment Verification Issue';
+    const customNotes = document.getElementById('rejectionNotesInput').value.trim();
+
+    const ord = window.ecohaven.orders[pendingRejectionOrderId] || window.ecohaven.getOrder(pendingRejectionOrderId) || {};
+
+    // 1. Flag Order in Store & Firebase RTDB
+    await window.ecohaven.flagOrderPayment(pendingRejectionOrderId, {
+        reason: reasonTitle,
+        code: reasonCode,
+        notes: customNotes
+    });
+
+    // 2. Dispatch In-App Notification to Customer
+    if (typeof window.addEcoHavenNotification === 'function') {
+        window.addEcoHavenNotification({
+            type: 'alert',
+            title: `⚠️ Action Required for Order #${pendingRejectionOrderId}`,
+            body: `Payment Notice: ${reasonTitle}. ${customNotes}`,
+            orderId: pendingRejectionOrderId,
+            icon: 'warning',
+            badgeColor: 'bg-red-100 text-red-800'
+        });
+    }
+
+    // 3. Dispatch Simulated Email with exact reason & guidance
+    if (typeof window.simulateEmailNotification === 'function') {
+        window.simulateEmailNotification({
+            to: ord.email || 'mariasantos.pampanga@gmail.com',
+            subject: `⚠️ Action Required: Payment Proof Flagged for Order #${pendingRejectionOrderId}`,
+            body: `Mabuhay ${ord.customerName || 'Customer'}!
+
+Our Candaba workshop finance team reviewed your submitted payment screenshot for Order #${pendingRejectionOrderId}.
+
+STATUS: Payment Proof Flagged (${reasonTitle})
+CRAFTSMAN GUIDANCE:
+${customNotes}
+
+Please log in to your account and re-upload your valid payment screenshot at ecohaven.ph/track?orderId=${pendingRejectionOrderId} so our joiners can begin cutting your solid Philippine mahogany.`,
+            orderId: pendingRejectionOrderId,
+            category: 'Payment Flagged'
+        });
+    }
+
+    // 4. Dispatch Simulated SMS to customer
+    if (typeof window.simulateSmsNotification === 'function') {
+        window.simulateSmsNotification({
+            to: ord.phone || '09175548921',
+            message: `[EcoHaven PH] Action needed for #${pendingRejectionOrderId}: ${reasonTitle}. ${customNotes.slice(0, 80)}... Resubmit at ecohaven.ph/track?orderId=${pendingRejectionOrderId}`,
+            orderId: pendingRejectionOrderId,
+            category: 'Payment Flagged'
+        });
+    }
+
+    if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast(`⚠️ Order #${pendingRejectionOrderId} flagged: "${reasonTitle}". Customer notified with guidance!`, 'amber');
+    }
+
+    closeRejectReasonModal();
+    closeVerificationModal();
+    renderKanban();
+}
+
+// pendingDispatchOrderId already declared above
 
 function renderKanban() {
     if (!window.ecohaven) return;
@@ -418,25 +898,37 @@ function renderKanban() {
         if (stage === 1) {
             c1++;
             const isFull = ord.paymentMode === 'full' || (ord.pricing && !ord.pricing.isDownPayment);
+            const isFlagged = ord.orderStatus && ord.orderStatus.includes('Flagged');
             card.innerHTML = `
                 <div class="flex justify-between items-start mb-2">
                     <span class="text-xs font-mono font-bold text-primary">#${ord.orderId}</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isFull ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${isFull ? '100% Full Paid' : '50% DP'}</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isFlagged ? 'bg-red-100 text-red-800 border border-red-200' : (isFull ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800')}">
+                        ${isFlagged ? '⚠️ Flagged' : (isFull ? '100% Full Paid' : '50% DP')}
+                    </span>
                 </div>
                 <h4 class="font-title-md text-sm text-on-surface font-semibold">${ord.customerName}</h4>
                 <p class="text-xs text-on-surface-variant mb-2">${ord.address ? ord.address.split(',')[1] || ord.address : 'Pampanga'}</p>
+                
+                ${isFlagged ? `
+                <div class="bg-red-50 border border-red-200 p-2 rounded-lg text-[11px] text-red-800 mb-3 leading-snug">
+                    <strong>Reason:</strong> ${ord.rejectionReason || 'Receipt Unverified'}<br/>
+                    <span class="text-[10px] text-red-700">Awaiting customer resubmission</span>
+                </div>
+                ` : `
                 <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline mb-3">
                     Ref: ${ord.gcashRef || (ord.payment && ord.payment.reference) || '9021-8841-2910'}<br/>
                     Amount: ₱${paid.toLocaleString('en-PH', {minimumFractionDigits: 2})}
                 </div>
+                `}
+
                 <div class="flex gap-2">
                     <button onclick="openVerificationModal('${ord.orderId}')" 
                             class="flex-1 py-2 bg-primary text-on-primary rounded-lg text-xs font-bold hover:bg-primary-container transition-all flex items-center justify-center gap-1 shadow-xs">
                         <span class="material-symbols-outlined text-sm">verified_user</span>
-                        <span>Audit Proof</span>
+                        <span>${isFlagged ? 'Re-Audit Proof' : 'Audit Proof'}</span>
                     </button>
-                    <button onclick="rejectPaymentForOrder('${ord.orderId}')" 
-                            class="px-2.5 py-2 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg text-xs font-bold transition-all" title="Flag / Reject Payment">
+                    <button onclick="openRejectReasonModal('${ord.orderId}')" 
+                            class="px-2.5 py-2 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg text-xs font-bold transition-all" title="Select Rejection Reason & Guidance">
                         <span class="material-symbols-outlined text-sm">block</span>
                     </button>
                 </div>
@@ -603,6 +1095,9 @@ Solid Philippine Mahogany batch #PMP-2026-ND-491 (11.4% moisture content) has be
 }
 
 function rejectPaymentForOrder(orderId) {
+    openRejectReasonModal(orderId);
+    return;
+    // legacy fallback below:
     const ord = window.ecohaven ? (window.ecohaven.orders[orderId] || window.ecohaven.getOrder(orderId)) : null;
     if (typeof window.showEcoHavenToast === 'function') {
         window.showEcoHavenToast(`⚠️ Payment for #${orderId} flagged/rejected. Customer notified to re-upload proof.`, 'amber');
@@ -767,8 +1262,9 @@ Expected Delivery Window: Today before 5:00 PM PHT. Please prepare the remaining
 
 // Reactivity
 window.addEventListener('ecohaven_orders_updated', renderKanban);
+window.addEventListener('ecohaven_inventory_updated', renderInventory);
 window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(renderKanban, 250);
+    setTimeout(() => { renderKanban(); renderInventory(); }, 250);
 });
 
 // Seller Profile Session Sync

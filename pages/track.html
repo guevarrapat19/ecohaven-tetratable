@@ -280,6 +280,7 @@
           </div>
         </div>
 
+        <div id="flaggedAlertContainer" class="mb-6"></div>
         <!-- 5-Stage Live Stepper -->
         <div id="trackStepperContainer" class="space-y-6 relative before:absolute before:left-5 before:top-4 before:bottom-4 before:w-0.5 before:bg-outline-variant/40">
           <!-- Dynamically Populated by renderOrder() -->
@@ -380,6 +381,52 @@
     </div>
 
   </div>
+
+
+<!-- Modal: Customer Re-upload Payment Proof -->
+<div id="customerResubmitModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md hidden items-center justify-center p-4">
+  <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-[24px] max-w-lg w-full p-6 md:p-8 shadow-2xl relative">
+    <button onclick="closeCustomerResubmitModal()" class="absolute right-5 top-5 p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <div class="flex items-center gap-2 mb-1">
+      <span class="material-symbols-outlined text-primary text-[20px]">upload_file</span>
+      <span class="text-xs font-bold uppercase tracking-wider text-primary">Candaba Workshop Payment Audit</span>
+    </div>
+    <h3 class="font-headline text-2xl text-on-surface mb-2">Re-Upload Payment Confirmation</h3>
+    <p class="text-xs text-on-surface-variant mb-6">Attach a clear, full screenshot of your completed GCash or Maya payment to resume workshop cutting and joinery.</p>
+
+    <form onsubmit="handleCustomerResubmit(event)" class="space-y-4">
+      <div>
+        <label class="text-xs font-bold text-on-surface block mb-1">New / Corrected Reference Number</label>
+        <input type="text" id="resubmitRefInput" required placeholder="e.g. 9021-8841-2910 or 13-digit code" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-sm font-mono font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-on-surface block mb-1">Payment Receipt Screenshot</label>
+        <div class="border-2 border-dashed border-outline-variant/50 hover:border-primary rounded-xl p-4 text-center bg-surface transition-all">
+          <span class="material-symbols-outlined text-outline text-[32px] block mb-1">add_photo_alternate</span>
+          <span class="text-xs text-on-surface font-semibold block">Click to select new screenshot</span>
+          <span class="text-[10px] text-outline mt-0.5 block">JPG, PNG up to 10MB</span>
+          <input type="file" id="resubmitFileInput" accept="image/*" class="w-full text-xs text-outline mt-2 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-primary file:text-white cursor-pointer"/>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-on-surface block mb-1">Note for Workshop Auditor (Optional)</label>
+        <input type="text" id="resubmitNoteInput" placeholder="e.g. Attached the correct full receipt showing timestamp" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeCustomerResubmitModal()" class="w-1/2 py-2.5 rounded-xl border border-outline-variant text-xs font-bold text-on-surface hover:bg-surface-container transition-all">
+          Cancel
+        </button>
+        <button type="submit" class="w-1/2 py-2.5 bg-primary hover:bg-primary-container text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm">
+          <span class="material-symbols-outlined text-sm">send</span>
+          Submit for Re-Audit
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
 </main>
 
@@ -579,6 +626,45 @@ function handleHeaderUserClick() {
   }
 }
 
+
+let pendingResubmitOrderId = null;
+
+function openCustomerResubmitModal(orderId) {
+  pendingResubmitOrderId = orderId;
+  const ord = window.ecohaven ? (window.ecohaven.orders[orderId] || window.ecohaven.getOrder(orderId)) : null;
+  if (ord) {
+    document.getElementById('resubmitRefInput').value = ord.gcashRef || '';
+  }
+  document.getElementById('customerResubmitModal').classList.remove('hidden');
+  document.getElementById('customerResubmitModal').classList.add('flex');
+}
+
+function closeCustomerResubmitModal() {
+  document.getElementById('customerResubmitModal').classList.add('hidden');
+  document.getElementById('customerResubmitModal').classList.remove('flex');
+}
+
+async function handleCustomerResubmit(event) {
+  if (event) event.preventDefault();
+  if (!pendingResubmitOrderId || !window.ecohaven) return;
+
+  const newRef = document.getElementById('resubmitRefInput').value.trim();
+  const note = document.getElementById('resubmitNoteInput').value.trim();
+
+  await window.ecohaven.resubmitPaymentProof(pendingResubmitOrderId, {
+    reference: newRef,
+    receiptFile: '../assets/images/Screenshot_2026-07-30-16-10-31-954_com.globe.gcash.android.jpg',
+    note
+  });
+
+  if (typeof window.showEcoHavenToast === 'function') {
+    window.showEcoHavenToast(`✅ Payment proof for #${pendingResubmitOrderId} resubmitted! Workshop team will re-audit.`, 'success');
+  }
+
+  closeCustomerResubmitModal();
+  executeTrackQuery(pendingResubmitOrderId);
+}
+
 function renderOrder(order) {
   if (!order) return;
   currentActiveOrderId = order.orderId;
@@ -593,8 +679,43 @@ function renderOrder(order) {
   document.getElementById('trackOrderStatusTag').innerText = order.orderStatus || 'Fabrication Queue Reserved';
   document.getElementById('trackGcashRef').innerText = order.gatewayReference || order.gcashRef || 'Direct Escrow Verified';
 
+  const isFlagged = order.orderStatus && order.orderStatus.includes('Flagged');
   const isFullPayment = (order.paymentMode === 'full') || (order.balanceDue === 0);
-  if (isFullPayment) {
+
+  const flagContainer = document.getElementById('flaggedAlertContainer');
+  if (flagContainer) {
+    if (isFlagged) {
+      flagContainer.innerHTML = `
+        <div class="p-4 rounded-2xl bg-red-50 border border-red-200 flex items-start gap-3 shadow-xs">
+          <span class="material-symbols-outlined text-red-600 text-[24px] flex-shrink-0 mt-0.5">warning</span>
+          <div class="flex-grow">
+            <h4 class="text-xs font-bold text-red-800 uppercase tracking-wider flex items-center gap-1.5">
+              <span>Payment Verification Notice</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+              <span class="text-[10px] text-red-700 font-normal">Candaba Workshop Finance</span>
+            </h4>
+            <p class="text-xs text-red-800 font-bold mt-1">Reason: ${order.rejectionReason || 'Receipt Unverified'}</p>
+            <div class="text-xs text-on-surface mt-1.5 leading-relaxed bg-white/80 p-3 rounded-xl border border-red-100 font-medium">
+              ${order.rejectionNotes || 'Please re-upload a clear screenshot showing full transaction details.'}
+            </div>
+            <div class="mt-3 flex gap-2">
+              <button type="button" onclick="openCustomerResubmitModal('${order.orderId}')" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
+                <span class="material-symbols-outlined text-sm">upload_file</span>
+                <span>Re-Upload Valid Receipt</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      flagContainer.innerHTML = '';
+    }
+  }
+
+  if (isFlagged) {
+    document.getElementById('trackPaymentStatusTag').className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-200";
+    document.getElementById('trackPaymentStatusTag').innerText = "⚠️ Payment Proof Flagged";
+  } else if (isFullPayment) {
     document.getElementById('trackPaymentStatusTag').className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800";
     document.getElementById('trackPaymentStatusTag').innerText = "100% Full Payment Settled";
   } else if (order.stage >= 2 || order.downPaymentPaid > 0 || order.amountPaid > 0) {
@@ -799,6 +920,14 @@ function initTracker() {
 // Listen to Real-time updates
 window.addEventListener('ecohaven_orders_updated', (e) => {
   const orders = e.detail;
+  if (!currentActiveOrderId) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetId = urlParams.get('orderId') || urlParams.get('tracking');
+    if (targetId && targetId.trim()) {
+      executeTrackQuery(targetId.trim());
+      return;
+    }
+  }
   if (currentActiveOrderId && orders && orders[currentActiveOrderId]) {
     const prevStage = window._lastTrackedStage;
     const ord = orders[currentActiveOrderId];
