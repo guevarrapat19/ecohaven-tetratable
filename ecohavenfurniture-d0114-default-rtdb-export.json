@@ -452,7 +452,8 @@
           "totalAmount": 7184
         },
         "stage": 2,
-        "stageName": "Mahogany Sourced & Solignum Treated"
+        "stageName": "Mahogany Sourced & Solignum Treated",
+        "totalAmount": 7184
       },
       "EH-2026-88123": {
         "address": "Villa 8, Marquee Residences, Pulung Maragul, Angeles City, Pampanga, 2009",
@@ -539,7 +540,8 @@
             "title": "White-Glove In-Home Delivery & Inspection"
           }
         ],
-        "updatedAt": "2026-11-01T10:30:00Z"
+        "updatedAt": "2026-11-01T10:30:00Z",
+        "totalAmount": 7184
       },
       "EH-2026-88130": {
         "address": "Block 4, Lot 12, Villa Gloria, San Fernando, Pampanga",
@@ -577,7 +579,8 @@
         },
         "stage": 1,
         "stageName": "Awaiting Payment Review",
-        "updatedAt": "2026-11-01T09:10:00Z"
+        "updatedAt": "2026-11-01T09:10:00Z",
+        "totalAmount": 7184
       }
     },
     "products": {

@@ -335,7 +335,8 @@
           }
         ],
         "createdAt": "2026-10-31T14:40:00Z",
-        "updatedAt": "2026-11-01T10:30:00Z"
+        "updatedAt": "2026-11-01T10:30:00Z",
+        "totalAmount": 7184
       },
       "EH-2026-88130": {
         "orderId": "EH-2026-88130",
@@ -373,7 +374,8 @@
         "stageName": "Awaiting Payment Review",
         "orderStatus": "Pending Review",
         "createdAt": "2026-11-01T09:10:00Z",
-        "updatedAt": "2026-11-01T09:10:00Z"
+        "updatedAt": "2026-11-01T09:10:00Z",
+        "totalAmount": 7184
       },
       "EH-2026-88099": {
         "orderId": "EH-2026-88099",
@@ -405,7 +407,8 @@
         "stage": 2,
         "stageName": "Mahogany Sourced & Solignum Treated",
         "orderStatus": "In Production",
-        "createdAt": "2026-10-30T11:00:00Z"
+        "createdAt": "2026-10-30T11:00:00Z",
+        "totalAmount": 7184
       }
     },
     "inventory": {

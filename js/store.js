@@ -610,11 +610,15 @@ class EcoHavenStore {
 
     // 3. CRAFTSMAN PAYMENT APPROVAL (UPDATES CLOUD FIREBASE LIVE)
     async approveOrderPayment(orderId) {
+        const ord = this.orders[orderId] || this.getOrder(orderId) || {};
+        const total = ord.totalAmount || (ord.pricing && ord.pricing.totalAmount) || 7184.00;
         const updates = {
             'orderStatus': 'In Production',
             'stage': 2,
             'stageName': 'Mahogany Lumber Cut & Solignum Treated',
-            'updatedAt': new Date().toISOString()
+            'updatedAt': new Date().toISOString(),
+            'totalAmount': total,
+            'customerName': ord.customerName || 'Customer'
         };
 
         if (window.ecoHavenDb) {
@@ -627,9 +631,7 @@ class EcoHavenStore {
         }
 
         if (this.orders[orderId]) {
-            this.orders[orderId].orderStatus = 'In Production';
-            this.orders[orderId].stage = 2;
-            this.orders[orderId].stageName = 'Mahogany Lumber Cut & Solignum Treated';
+            Object.assign(this.orders[orderId], updates);
             this.saveLocalBackup('ecohaven_cloud_orders_cache', this.orders);
             window.dispatchEvent(new CustomEvent('ecohaven_orders_updated', { detail: this.orders }));
         }
@@ -637,10 +639,14 @@ class EcoHavenStore {
 
     // 4. ADVANCE ORDER TO NEXT STAGE
     async advanceOrderStage(orderId, nextStage, nextStageName) {
+        const ord = this.orders[orderId] || this.getOrder(orderId) || {};
+        const total = ord.totalAmount || (ord.pricing && ord.pricing.totalAmount) || 7184.00;
         const updates = {
             'stage': nextStage,
             'stageName': nextStageName,
-            'updatedAt': new Date().toISOString()
+            'updatedAt': new Date().toISOString(),
+            'totalAmount': total,
+            'customerName': ord.customerName || 'Customer'
         };
 
         if (nextStage >= 4) {
@@ -653,6 +659,7 @@ class EcoHavenStore {
         if (window.ecoHavenDb) {
             try {
                 await window.ecoHavenDb.ref('ecohaven/orders/' + orderId).update(updates);
+                console.log("✅ Order", orderId, "advanced to stage", nextStage, "in Firebase Cloud Database!");
             } catch (err) {
                 console.error("Firebase advance error:", err);
             }
@@ -755,6 +762,7 @@ class EcoHavenStore {
         const ord = this.orders[orderId] || this.getOrder(orderId);
         if (!ord) return;
 
+        const total = ord.totalAmount || (ord.pricing && ord.pricing.totalAmount) || 7184.00;
         const updates = {
             orderStatus: "Payment Flagged (Action Required)",
             stage: 1,
@@ -762,7 +770,9 @@ class EcoHavenStore {
             rejectionReason: reason || "Unverified Payment Proof",
             rejectionCode: code || "invalid_reference",
             rejectionNotes: notes || "Please re-upload a clear transaction screenshot.",
-            flaggedAt: new Date().toISOString()
+            flaggedAt: new Date().toISOString(),
+            totalAmount: total,
+            customerName: ord.customerName || 'Customer'
         };
 
         if (window.ecoHavenDb) {
@@ -785,6 +795,7 @@ class EcoHavenStore {
         const ord = this.orders[orderId] || this.getOrder(orderId);
         if (!ord) return;
 
+        const total = ord.totalAmount || (ord.pricing && ord.pricing.totalAmount) || 7184.00;
         const updates = {
             orderStatus: "Pending Review",
             stage: 1,
@@ -794,7 +805,9 @@ class EcoHavenStore {
             rejectionCode: "",
             gcashRef: reference || ord.gcashRef,
             resubmittedAt: new Date().toISOString(),
-            customerResubmitNote: note || "Resubmitted by customer"
+            customerResubmitNote: note || "Resubmitted by customer",
+            totalAmount: total,
+            customerName: ord.customerName || 'Customer'
         };
         if (receiptFile) {
             updates.receiptFile = receiptFile;
