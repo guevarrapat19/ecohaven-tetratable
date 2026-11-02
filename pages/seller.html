@@ -1,131 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><title>Craftsman & Seller Hub — EcoHaven Furniture</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com">
-let pendingDispatchOrderId = null;
-
-function promptCourierDispatch(orderId) {
-    pendingDispatchOrderId = orderId;
-    document.getElementById('dispatchCodeInput').value = 'TRK-CANDABA-' + orderId.replace('EH-2026-', '');
-    document.getElementById('courierModal').classList.remove('hidden');
-    document.getElementById('courierModal').classList.add('flex');
-}
-
-function closeCourierModal() {
-    document.getElementById('courierModal').classList.add('hidden');
-    document.getElementById('courierModal').classList.remove('flex');
-}
-
-async function confirmDispatch(event) {
-    if (event) event.preventDefault();
-    if (!pendingDispatchOrderId || !window.ecohaven) return;
-    
-    const driver = document.getElementById('driverNameInput').value || 'Mang Juan S.';
-    const plate = document.getElementById('driverPlateInput').value || 'CBD-4821';
-    
-    await window.ecohaven.advanceOrderStage(pendingDispatchOrderId, 4, 'Quality Inspected & Dispatched via Fleet (' + plate + ')');
-    
-    // Dispatch natural e-commerce customer notification
-    if (typeof window.addEcoHavenNotification === 'function') {
-        window.addEcoHavenNotification({
-            type: 'order',
-            title: `🚚 Order #${pendingDispatchOrderId} Out for Delivery`,
-            body: `Your order has passed white-glove quality inspection and is dispatched with Driver ${driver} (Vehicle Plate: ${plate}). On the way to your delivery address!`,
-            orderId: pendingDispatchOrderId,
-            icon: 'local_shipping',
-            badgeColor: 'bg-amber-100 text-amber-800'
-        });
-    }
-
-    // Dispatch Simulated Email & SMS Dispatch Alert
-    if (typeof window.simulateEmailNotification === 'function') {
-        window.simulateEmailNotification({
-            to: 'paolo.magisa@gmail.com',
-            subject: `🚚 Out for Delivery: Order #${pendingDispatchOrderId} via Workshop Fleet`,
-            body: `Mabuhay!\n\nYour order #${pendingDispatchOrderId} has passed white-glove quality control and is now in transit with Driver ${driver} (Fleet Plate: ${plate}).\n\nExpected Delivery Window: Today before 5:00 PM PHT. Please prepare the remaining balance upon handover.`,
-            orderId: pendingDispatchOrderId,
-            category: 'Delivery Dispatch'
-        });
-    }
-    if (typeof window.simulateSmsNotification === 'function') {
-        window.simulateSmsNotification({
-            to: '09812558028',
-            message: `[EcoHaven PH] Driver ${driver} (${plate}) is ON THE WAY with Order #${pendingDispatchOrderId}! Please prepare remaining balance upon handover.`,
-            orderId: pendingDispatchOrderId,
-            category: 'Delivery Dispatch'
-        });
-    }
-
-    closeCourierModal();
-    if (typeof window.showEcoHavenToast === 'function') {
-        window.showEcoHavenToast(`🚚 Order #${pendingDispatchOrderId} dispatched! Driver: ${driver} (${plate}) — Customer notified in real-time.`, 'amber');
-    }
-    renderKanban();
-}
-
-</script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primary": "#ffffff", "on-secondary-fixed-variant": "#623f18", "tertiary": "#415d42", "on-background": "#26190f", "secondary-container": "#ffca98", "on-primary-fixed": "#301400", "outline-variant": "#d9c2b5", "on-error-container": "#93000a", "secondary-fixed-dim": "#f0bd8b", "inverse-primary": "#ffb785", "tertiary-container": "#597659", "surface": "#fff8f5", "primary-fixed": "#ffdcc6", "secondary-fixed": "#ffdcbd", "inverse-on-surface": "#ffede4", "secondary": "#7d562d", "surface-bright": "#fff8f5", "primary-fixed-dim": "#ffb785", "on-tertiary": "#ffffff", "background": "#fff8f5", "on-secondary": "#ffffff", "surface-variant": "#f8ddce", "on-primary-fixed-variant": "#713700", "on-secondary-fixed": "#2c1600", "tertiary-fixed": "#caebc8", "on-surface-variant": "#53443a", "primary": "#86450d", "outline": "#867368", "on-surface": "#26190f", "surface-container": "#ffeade", "surface-container-lowest": "#ffffff", "surface-container-highest": "#f8ddce", "on-tertiary-container": "#dbfcd8", "on-error": "#ffffff", "on-tertiary-fixed-variant": "#314d33", "surface-container-high": "#fee3d3", "on-secondary-container": "#7a532a", "inverse-surface": "#3d2d23", "error": "#ba1a1a", "error-container": "#ffdad6", "on-primary-container": "#fff1e9", "surface-dim": "#efd5c6", "surface-container-low": "#fff1ea", "surface-tint": "#904d15", "primary-container": "#a45d25", "tertiary-fixed-dim": "#afcfad", "on-tertiary-fixed": "#05210b" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter-mobile": "1rem", "space-xl": "3.5rem", "gutter": "1.5rem", "space-lg": "2rem", "margin": "3rem", "space-xs": "0.375rem", "space-md": "1.25rem", "margin-mobile": "1.25rem", "space-sm": "0.75rem" }, "fontFamily": { "headline-lg": [ "Playfair Display" ], "body-sm": [ "Plus Jakarta Sans" ], "caption": [ "Plus Jakarta Sans" ], "headline-lg-mobile": [ "Playfair Display" ], "body-lg": [ "Plus Jakarta Sans" ], "title-md": [ "Plus Jakarta Sans" ], "label-md": [ "Plus Jakarta Sans" ], "body-md": [ "Plus Jakarta Sans" ], "headline-md": [ "Playfair Display" ], "headline-sm": [ "Playfair Display" ], "label-caps": [ "Plus Jakarta Sans" ], "display-hero-mobile": [ "Playfair Display" ], "display-hero": [ "Playfair Display" ], "display-hero": [ "Playfair Display" ] }, "fontSize": { "headline-lg": [ "2.5rem", { "lineHeight": "1.2", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "body-sm": [ "0.8125rem", { "lineHeight": "1.5", "fontWeight": "400" } ], "caption": [ "0.75rem", { "lineHeight": "1.4", "fontWeight": "500" } ], "headline-lg-mobile": [ "1.75rem", { "lineHeight": "1.25", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "body-lg": [ "1.0625rem", { "lineHeight": "1.6", "fontWeight": "400" } ], "title-md": [ "1.125rem", { "lineHeight": "1.4", "fontWeight": "600" } ], "label-md": [ "0.875rem", { "lineHeight": "1.3", "letterSpacing": "0.01em", "fontWeight": "600" } ], "body-md": [ "0.9375rem", { "lineHeight": "1.55", "fontWeight": "400" } ], "headline-md": [ "1.75rem", { "lineHeight": "1.3", "fontWeight": "500" } ], "headline-sm": [ "1.25rem", { "lineHeight": "1.35", "fontWeight": "500" } ], "label-caps": [ "0.6875rem", { "lineHeight": "1.2", "letterSpacing": "0.08em", "fontWeight": "700" } ], "display-hero-mobile": [ "2.25rem", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "display-hero": [ "3.75rem", { "lineHeight": "1.15", "letterSpacing": "-0.02em", "fontWeight": "600" } ] } } } };
-let pendingDispatchOrderId = null;
-
-function promptCourierDispatch(orderId) {
-    pendingDispatchOrderId = orderId;
-    document.getElementById('dispatchCodeInput').value = 'TRK-CANDABA-' + orderId.replace('EH-2026-', '');
-    document.getElementById('courierModal').classList.remove('hidden');
-    document.getElementById('courierModal').classList.add('flex');
-}
-
-function closeCourierModal() {
-    document.getElementById('courierModal').classList.add('hidden');
-    document.getElementById('courierModal').classList.remove('flex');
-}
-
-async function confirmDispatch(event) {
-    if (event) event.preventDefault();
-    if (!pendingDispatchOrderId || !window.ecohaven) return;
-    
-    const driver = document.getElementById('driverNameInput').value || 'Mang Juan S.';
-    const plate = document.getElementById('driverPlateInput').value || 'CBD-4821';
-    
-    await window.ecohaven.advanceOrderStage(pendingDispatchOrderId, 4, 'Quality Inspected & Dispatched via Fleet (' + plate + ')');
-    
-    // Dispatch natural e-commerce customer notification
-    if (typeof window.addEcoHavenNotification === 'function') {
-        window.addEcoHavenNotification({
-            type: 'order',
-            title: `🚚 Order #${pendingDispatchOrderId} Out for Delivery`,
-            body: `Your order has passed white-glove quality inspection and is dispatched with Driver ${driver} (Vehicle Plate: ${plate}). On the way to your delivery address!`,
-            orderId: pendingDispatchOrderId,
-            icon: 'local_shipping',
-            badgeColor: 'bg-amber-100 text-amber-800'
-        });
-    }
-
-    // Dispatch Simulated Email & SMS Dispatch Alert
-    if (typeof window.simulateEmailNotification === 'function') {
-        window.simulateEmailNotification({
-            to: 'paolo.magisa@gmail.com',
-            subject: `🚚 Out for Delivery: Order #${pendingDispatchOrderId} via Workshop Fleet`,
-            body: `Mabuhay!\n\nYour order #${pendingDispatchOrderId} has passed white-glove quality control and is now in transit with Driver ${driver} (Fleet Plate: ${plate}).\n\nExpected Delivery Window: Today before 5:00 PM PHT. Please prepare the remaining balance upon handover.`,
-            orderId: pendingDispatchOrderId,
-            category: 'Delivery Dispatch'
-        });
-    }
-    if (typeof window.simulateSmsNotification === 'function') {
-        window.simulateSmsNotification({
-            to: '09812558028',
-            message: `[EcoHaven PH] Driver ${driver} (${plate}) is ON THE WAY with Order #${pendingDispatchOrderId}! Please prepare remaining balance upon handover.`,
-            orderId: pendingDispatchOrderId,
-            category: 'Delivery Dispatch'
-        });
-    }
-
-    closeCourierModal();
-    if (typeof window.showEcoHavenToast === 'function') {
-        window.showEcoHavenToast(`🚚 Order #${pendingDispatchOrderId} dispatched! Driver: ${driver} (${plate}) — Customer notified in real-time.`, 'amber');
-    }
-    renderKanban();
-}
-
-</script></head>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script>
+<script id="tailwind-config">
+tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primary": "#ffffff", "on-secondary-fixed-variant": "#623f18", "tertiary": "#415d42", "on-background": "#26190f", "secondary-container": "#ffca98", "on-primary-fixed": "#301400", "outline-variant": "#d9c2b5", "on-error-container": "#93000a", "secondary-fixed-dim": "#f0bd8b", "inverse-primary": "#ffb785", "tertiary-container": "#597659", "surface": "#fff8f5", "primary-fixed": "#ffdcc6", "secondary-fixed": "#ffdcbd", "inverse-on-surface": "#ffede4", "secondary": "#7d562d", "surface-bright": "#fff8f5", "primary-fixed-dim": "#ffb785", "on-tertiary": "#ffffff", "background": "#fff8f5", "on-secondary": "#ffffff", "surface-variant": "#f8ddce", "on-primary-fixed-variant": "#713700", "on-secondary-fixed": "#2c1600", "tertiary-fixed": "#caebc8", "on-surface-variant": "#53443a", "primary": "#86450d", "outline": "#867368", "on-surface": "#26190f", "surface-container": "#ffeade", "surface-container-lowest": "#ffffff", "surface-container-highest": "#f8ddce", "on-tertiary-container": "#dbfcd8", "on-error": "#ffffff", "on-tertiary-fixed-variant": "#314d33", "surface-container-high": "#fee3d3", "on-secondary-container": "#7a532a", "inverse-surface": "#3d2d23", "error": "#ba1a1a", "error-container": "#ffdad6", "on-primary-container": "#fff1e9", "surface-dim": "#efd5c6", "surface-container-low": "#fff1ea", "surface-tint": "#904d15", "primary-container": "#a45d25", "tertiary-fixed-dim": "#afcfad", "on-tertiary-fixed": "#05210b" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter-mobile": "1rem", "space-xl": "3.5rem", "gutter": "1.5rem", "space-lg": "2rem", "margin": "3rem", "space-xs": "0.375rem", "space-md": "1.25rem", "margin-mobile": "1.25rem", "space-sm": "0.75rem" }, "fontFamily": { "headline-lg": [ "Playfair Display" ], "body-sm": [ "Plus Jakarta Sans" ], "caption": [ "Plus Jakarta Sans" ], "headline-lg-mobile": [ "Playfair Display" ], "body-lg": [ "Plus Jakarta Sans" ], "title-md": [ "Plus Jakarta Sans" ], "label-md": [ "Plus Jakarta Sans" ], "body-md": [ "Plus Jakarta Sans" ], "headline-md": [ "Playfair Display" ], "headline-sm": [ "Playfair Display" ], "label-caps": [ "Plus Jakarta Sans" ], "display-hero-mobile": [ "Playfair Display" ], "display-hero": [ "Playfair Display" ], "display-hero": [ "Playfair Display" ] }, "fontSize": { "headline-lg": [ "2.5rem", { "lineHeight": "1.2", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "body-sm": [ "0.8125rem", { "lineHeight": "1.5", "fontWeight": "400" } ], "caption": [ "0.75rem", { "lineHeight": "1.4", "fontWeight": "500" } ], "headline-lg-mobile": [ "1.75rem", { "lineHeight": "1.25", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "body-lg": [ "1.0625rem", { "lineHeight": "1.6", "fontWeight": "400" } ], "title-md": [ "1.125rem", { "lineHeight": "1.4", "fontWeight": "600" } ], "label-md": [ "0.875rem", { "lineHeight": "1.3", "letterSpacing": "0.01em", "fontWeight": "600" } ], "body-md": [ "0.9375rem", { "lineHeight": "1.55", "fontWeight": "400" } ], "headline-md": [ "1.75rem", { "lineHeight": "1.3", "fontWeight": "500" } ], "headline-sm": [ "1.25rem", { "lineHeight": "1.35", "fontWeight": "500" } ], "label-caps": [ "0.6875rem", { "lineHeight": "1.2", "letterSpacing": "0.08em", "fontWeight": "700" } ], "display-hero-mobile": [ "2.25rem", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "display-hero": [ "3.75rem", { "lineHeight": "1.15", "letterSpacing": "-0.02em", "fontWeight": "600" } ] } } } };
+</script>
+</head>
 <body class="bg-background text-on-surface antialiased font-body-md min-h-screen flex flex-col">
 <header class="fixed top-0 left-0 w-full z-50"><div class="w-full bg-inverse-surface text-inverse-on-surface"><div class="max-w-7xl mx-auto px-gutter flex items-center justify-between h-9"><div class="flex items-center gap-space-md"><span class="flex items-center gap-space-xs font-caption text-caption text-primary-fixed-dim"><span class="material-symbols-outlined text-[14px] text-tertiary-fixed">water_drop</span>Candaba Workshop MC: <strong class="font-label-md text-label-md text-inverse-on-surface font-semibold">11.4% • Kiln Stabilized</strong></span><span class="hidden md:inline-block w-1 h-1 rounded-full bg-outline"></span><span class="hidden md:flex items-center gap-space-xs font-caption text-caption text-inverse-on-surface/80"><span class="material-symbols-outlined text-[14px] text-tertiary-fixed">verified_user</span>Solignum Anti-Termite Certified</span></div><div class="flex items-center gap-space-md"><span class="font-caption text-caption text-inverse-on-surface/80 hidden sm:flex items-center gap-space-xs"><span class="material-symbols-outlined text-[14px] text-primary-fixed-dim">store</span>DTI Reg. #4918230</span><span class="hidden sm:inline-block w-1 h-1 rounded-full bg-outline"></span><span class="font-label-caps text-label-caps tracking-widest text-primary-fixed">PAMPANGA CRAFTED</span></div></div></div><div class="w-full bg-surface/90 backdrop-blur-xl shadow-[0_10px_30px_rgba(46,31,22,0.05)]"><div class="max-w-7xl mx-auto px-gutter h-20 flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-sm flex-shrink-0"><img alt="EcoHaven Furniture Emblem" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WoMmLqUdcp17_0K7-4RU3j_laJKFuB71tIYvo-2PL2jhAcZH749676gu7fQWloblAKrXLnjtrDm7cmDLa4_OGy5SO-WatR_aBQpdDN0K2Bp6LZLKKxNxFLcFB1WDJaz2oG_ycj2LROrpKw9eiaDGzfF-wXFdhm7wzyX7JBN_KzsFFfDSN_mIJx2ADuxlhZHSpu8qhuPImA1uzZy04pyRsDNRGhCYwcwDRbrWqtTrzRhg"/><div class="flex flex-col leading-none"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight font-semibold">EcoHaven Furniture</span><span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Candaba Workshop</span></div></div><nav class="hidden xl:flex items-center gap-space-xs p-1 rounded-lg bg-surface-container-low" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg"><a aria-current="page" class="px-space-sm py-2 transition-colors bg-primary-container text-on-primary-container font-semibold rounded-lg" data-path="home" href="../index.html">Home / Showroom</a><a class="px-space-sm py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="tetratable-4-in-1" href="tetratable.html">TetraTable 4-in-1</a><a class="px-space-sm py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="furniture-catalog" href="shop.html">Collection Catalog</a><a class="px-space-sm py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="production-tracker" href="track.html">Production Tracker</a><a class="px-space-sm py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="sourcing-story" href="sourcing.html">Sourcing Story</a></nav><div class="flex items-center gap-space-xs sm:gap-space-sm flex-shrink-0">
   <!-- 1. Inventory of Products (Seller Only, before Notification) -->
@@ -487,9 +367,21 @@ async function confirmDispatch(event) {
     </div>
 </div>
 
-<!-- CRAFTSMAN KANBAN REAL-TIME CONTROLLER -->
+</main>
+<footer class="w-full bg-inverse-surface text-inverse-on-surface pt-space-xl pb-space-lg"><div class="max-w-7xl mx-auto px-gutter"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg pb-space-lg"><div class="flex flex-col gap-space-sm"><div class="flex items-center gap-space-xs"><img alt="EcoHaven Furniture Emblem" class="h-8 w-auto object-contain brightness-200" src="https://lh3.googleusercontent.com/aida/AEtjO1WoMmLqUdcp17_0K7-4RU3j_laJKFuB71tIYvo-2PL2jhAcZH749676gu7fQWloblAKrXLnjtrDm7cmDLa4_OGy5SO-WatR_aBQpdDN0K2Bp6LZLKKxNxFLcFB1WDJaz2oG_ycj2LROrpKw9eiaDGzfF-wXFdhm7wzyX7JBN_KzsFFfDSN_mIJx2ADuxlhZHSpu8qhuPImA1uzZy04pyRsDNRGhCYwcwDRbrWqtTrzRhg"/><span class="font-headline-sm text-headline-sm text-surface tracking-tight font-semibold">EcoHaven</span></div><p class="font-body-sm text-body-sm text-inverse-on-surface/80 leading-relaxed">Architectural Japandi woodworking synthesis with traditional Filipino joinery. Crafted with intention in our dedicated Candaba workshop.</p><div class="flex items-center gap-space-xs pt-1"><span class="font-caption text-caption text-primary-fixed bg-surface-container-highest/20 px-2 py-1 rounded">FSC Certified Narra &amp; Teak</span><span class="font-caption text-caption text-tertiary-fixed bg-surface-container-highest/20 px-2 py-1 rounded">Zero-VOC Oils</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Workshop &amp; Coordinates</span><div class="flex items-start gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed mt-0.5">location_on</span><span>Dalan Batu, Pasig, Candaba, Pampanga 2013, Philippines</span></div><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed">call</span><span>Direct Hotline: +63 981 255 8028</span></div><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed">schedule</span><span>Monday to Sunday: 8:00 AM – 5:00 PM PHT</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Workshop Collections</span><div class="flex flex-col gap-2 font-body-sm text-body-sm text-inverse-on-surface/80"><a class="hover:text-primary-fixed transition-colors" data-path="tetratable-4-in-1" href="tetratable.html">TetraTable 4-in-1 Modular</a><a class="hover:text-primary-fixed transition-colors" data-path="furniture-catalog" href="#">Tansu Credenzas &amp; Consoles</a><a class="hover:text-primary-fixed transition-colors" data-path="furniture-catalog" href="#">Live Edge Dining Tables</a><a class="hover:text-primary-fixed transition-colors" data-path="production-tracker" href="#">Kiln Drying &amp; Batch Status</a><a class="hover:text-primary-fixed transition-colors" data-path="seller-portal" href="#">Workshop Artisan Portal</a></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Follow Our Craft</span><p class="font-body-sm text-body-sm text-inverse-on-surface/80">Connect with us on official social media channels for live workshop demonstrations and customer photos.</p><div class="flex items-center gap-3 pt-1"><a href="https://www.facebook.com/profile.php?id=61588914923992&rdid=JkQTafkpCiS2BW1d&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1CBMxNxPbk%2F#" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#1877F2] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Facebook"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a><a href="https://www.tiktok.com/@ecohavenfurnitureph" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-black hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="TikTok (@ecohavenfurnitureph)"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.97v7.54c.03 2.5-1.28 4.9-3.4 6.13-2.15 1.25-4.94 1.19-7.03-.15-2.07-1.32-3.13-3.76-2.69-6.17.43-2.39 2.37-4.27 4.79-4.67.65-.11 1.31-.1 1.96.01v4.06c-.46-.17-.97-.2-1.45-.1-.99.2-1.77.96-1.99 1.94-.22.98.15 2.02.94 2.63.78.61 1.86.68 2.7.18.84-.49 1.34-1.41 1.32-2.38V.02h-.01z"/></svg></a><a href="https://www.instagram.com/ecohavenfuniture?psln=bHN3dzI4dW1oMnY3" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#E4405F] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Instagram (@ecohavenfuniture)"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a></div></div></div></div><div class="pt-space-md flex flex-col sm:flex-row items-center justify-between gap-space-sm"><p class="font-caption text-caption text-inverse-on-surface/60">© 2024 EcoHaven Furniture. All rights reserved. Dalan Batu, Pasig, Candaba, Pampanga.</p><div class="flex items-center gap-space-md font-caption text-caption text-inverse-on-surface/70"><a class="hover:text-primary-fixed transition-colors" href="#">Privacy Framework</a><a class="hover:text-primary-fixed transition-colors" href="#">Warranty Terms</a><a class="hover:text-primary-fixed transition-colors" href="#">Bespoke Commission Agreement</a></div></div></div></footer>
+<!-- Firebase Realtime Database SDK (Official CDN - Zero Build Step) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="../js/firebase-config.js"></script>
+<script src="../js/store.js"></script>
+<script src="../assets/simulated-comms.js"></script>
+<script src="../assets/notifications.js"></script>
+<script src="../assets/auth-modal.js"></script>
+
 <script>
 let activeVerificationOrderId = null;
+let pendingDispatchOrderId = null;
 
 function renderKanban() {
     if (!window.ecohaven) return;
@@ -499,6 +391,8 @@ function renderKanban() {
     const col2 = document.getElementById('kanbanCol2');
     const col3 = document.getElementById('kanbanCol3');
     const col4 = document.getElementById('kanbanCol4');
+
+    if (!col1 || !col2 || !col3 || !col4) return;
 
     col1.innerHTML = '';
     col2.innerHTML = '';
@@ -512,33 +406,40 @@ function renderKanban() {
 
     orderList.forEach(ord => {
         const stage = ord.stage || 1;
-        const total = ord.totalAmount || 7184.00;
-        const paid = ord.downPaymentPaid || 3467.00;
+        const total = ord.totalAmount || (ord.pricing ? ord.pricing.totalAmount : 7184.00);
+        const paid = ord.downPaymentPaid || (ord.pricing ? ord.pricing.downPaymentPaid : 3467.00);
         const bal = ord.balanceDue !== undefined ? ord.balanceDue : (total - paid);
         revTotal += paid;
         balTotal += bal;
 
         const card = document.createElement('div');
-        card.className = "bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/30 shadow-xs hover:border-primary/50 transition-all";
+        card.className = "bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/40 shadow-xs flex flex-col justify-between";
 
         if (stage === 1) {
             c1++;
+            const isFull = ord.paymentMode === 'full' || (ord.pricing && !ord.pricing.isDownPayment);
             card.innerHTML = `
                 <div class="flex justify-between items-start mb-2">
                     <span class="text-xs font-mono font-bold text-primary">#${ord.orderId}</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">50% DP</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isFull ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${isFull ? '100% Full Paid' : '50% DP'}</span>
                 </div>
                 <h4 class="font-title-md text-sm text-on-surface font-semibold">${ord.customerName}</h4>
-                <p class="text-xs text-on-surface-variant mb-2">${ord.address ? ord.address.split(',')[1] || ord.address : 'Pampanga'} • 1x TetraTable</p>
+                <p class="text-xs text-on-surface-variant mb-2">${ord.address ? ord.address.split(',')[1] || ord.address : 'Pampanga'}</p>
                 <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline mb-3">
-                    GCash Ref: ${ord.gcashRef || '9021-8841-2910'}<br/>
+                    Ref: ${ord.gcashRef || (ord.payment && ord.payment.reference) || '9021-8841-2910'}<br/>
                     Amount: ₱${paid.toLocaleString('en-PH', {minimumFractionDigits: 2})}
                 </div>
-                <button onclick="openVerificationModal('${ord.orderId}')" 
-                        class="w-full py-2 bg-primary text-on-primary rounded-lg text-xs font-bold hover:bg-primary-container transition-all flex items-center justify-center gap-1 shadow-xs">
-                    <span class="material-symbols-outlined text-sm">image</span>
-                    Verify GCash Proof
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="openVerificationModal('${ord.orderId}')" 
+                            class="flex-1 py-2 bg-primary text-on-primary rounded-lg text-xs font-bold hover:bg-primary-container transition-all flex items-center justify-center gap-1 shadow-xs">
+                        <span class="material-symbols-outlined text-sm">verified_user</span>
+                        <span>Audit Proof</span>
+                    </button>
+                    <button onclick="rejectPaymentForOrder('${ord.orderId}')" 
+                            class="px-2.5 py-2 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg text-xs font-bold transition-all" title="Flag / Reject Payment">
+                        <span class="material-symbols-outlined text-sm">block</span>
+                    </button>
+                </div>
             `;
             col1.appendChild(card);
         } else if (stage === 2) {
@@ -611,18 +512,22 @@ function renderKanban() {
     });
 
     // Update Counts & KPIs
-    document.getElementById('colCount1').innerText = c1;
-    document.getElementById('colCount2').innerText = c2;
-    document.getElementById('colCount3').innerText = c3;
-    document.getElementById('colCount4').innerText = c4;
+    const elC1 = document.getElementById('colCount1');
+    const elC2 = document.getElementById('colCount2');
+    const elC3 = document.getElementById('colCount3');
+    const elC4 = document.getElementById('colCount4');
 
-    document.getElementById('kpiTotalOrders').innerText = orderList.length;
-    document.getElementById('kpiPendingReview').innerText = c1;
-    document.getElementById('kpiTimberCutting').innerText = c2;
-    document.getElementById('kpiInJoinery').innerText = c3;
-    document.getElementById('kpiInTransit').innerText = c4;
-    document.getElementById('kpiRevenue').innerText = `₱${(revTotal / 1000).toFixed(1)}k`;
-    document.getElementById('kpiBalanceDue').innerText = `₱${(balTotal / 1000).toFixed(1)}k`;
+    if (elC1) elC1.innerText = c1;
+    if (elC2) elC2.innerText = c2;
+    if (elC3) elC3.innerText = c3;
+    if (elC4) elC4.innerText = c4;
+
+    const kpiTotal = document.getElementById('kpiTotalOrders');
+    const kpiRev = document.getElementById('kpiRevenue');
+    const kpiBal = document.getElementById('kpiBalanceDue');
+    if (kpiTotal) kpiTotal.innerText = orderList.length;
+    if (kpiRev) kpiRev.innerText = `₱${(revTotal / 1000).toFixed(1)}k`;
+    if (kpiBal) kpiBal.innerText = `₱${(balTotal / 1000).toFixed(1)}k`;
 }
 
 function openVerificationModal(orderId) {
@@ -633,9 +538,9 @@ function openVerificationModal(orderId) {
     activeVerificationOrderId = ord.orderId;
     document.getElementById('modalOrderId').innerText = '#' + ord.orderId;
     document.getElementById('modalCustomerName').innerText = ord.customerName;
-    const paid = ord.downPaymentPaid || 3467.00;
+    const paid = ord.downPaymentPaid || (ord.pricing ? ord.pricing.downPaymentPaid : 3467.00);
     document.getElementById('modalAmount').innerText = `₱${paid.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
-    document.getElementById('modalRef').innerText = ord.gcashRef || '9021-8841-2910';
+    document.getElementById('modalRef').innerText = ord.gcashRef || (ord.payment && ord.payment.reference) || '9021-8841-2910';
 
     if (ord.receiptFile && ord.receiptFile.startsWith('.')) {
         document.getElementById('modalReceiptImg').src = ord.receiptFile;
@@ -652,9 +557,10 @@ function closeVerificationModal() {
 
 async function approvePayment() {
     if (!activeVerificationOrderId || !window.ecohaven) return;
+    const ord = window.ecohaven.orders[activeVerificationOrderId] || window.ecohaven.getOrder(activeVerificationOrderId) || {};
     await window.ecohaven.approveOrderPayment(activeVerificationOrderId);
     
-    // Dispatch natural e-commerce customer notification
+    // Dispatch natural in-app customer notification
     if (typeof window.addEcoHavenNotification === 'function') {
         window.addEcoHavenNotification({
             type: 'payment',
@@ -669,17 +575,21 @@ async function approvePayment() {
     // Dispatch Simulated Email & SMS to customer
     if (typeof window.simulateEmailNotification === 'function') {
         window.simulateEmailNotification({
-            to: 'paolo.magisa@gmail.com',
+            to: ord.email || 'mariasantos.pampanga@gmail.com',
             subject: `✅ Down Payment Verified for Order #${activeVerificationOrderId}`,
-            body: `Mabuhay!\n\nYour 50% reservation payment for Order #${activeVerificationOrderId} has been verified by the Candaba workshop.\n\nSolid Philippine Mahogany batch #PMP-2026-ND-491 (11.4% moisture content) has been allocated and Solignum anti-termite treated. Cutting and joinery are underway.`,
+            body: `Mabuhay ${ord.customerName || 'Customer'}!
+
+Your payment for Order #${activeVerificationOrderId} has been verified by the Candaba workshop.
+
+Solid Philippine Mahogany batch #PMP-2026-ND-491 (11.4% moisture content) has been allocated and Solignum anti-termite treated. Cutting and joinery are underway.`,
             orderId: activeVerificationOrderId,
             category: 'Payment Verified'
         });
     }
     if (typeof window.simulateSmsNotification === 'function') {
         window.simulateSmsNotification({
-            to: '09812558028',
-            message: `[EcoHaven PH] Payment verified for #${activeVerificationOrderId}! Solid Philippine Mahogany cutting has started in Candaba. Live tracking: ecohaven.ph/track`,
+            to: ord.phone || '09175548921',
+            message: `[EcoHaven PH] Payment verified for #${activeVerificationOrderId}! Solid Philippine Mahogany cutting has started in Candaba. Live tracking: ecohaven.ph/track?orderId=${activeVerificationOrderId}`,
             orderId: activeVerificationOrderId,
             category: 'Payment Verified'
         });
@@ -692,16 +602,59 @@ async function approvePayment() {
     renderKanban();
 }
 
-function rejectPayment() {
-    window.showEcoHavenToast(`⚠️ Payment flagged. Re-upload request dispatched to client.`, 'amber');
+function rejectPaymentForOrder(orderId) {
+    const ord = window.ecohaven ? (window.ecohaven.orders[orderId] || window.ecohaven.getOrder(orderId)) : null;
+    if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast(`⚠️ Payment for #${orderId} flagged/rejected. Customer notified to re-upload proof.`, 'amber');
+    }
+
+    // Dispatch Simulated Email & SMS Notice for rejected/flagged payment
+    if (typeof window.simulateEmailNotification === 'function') {
+        window.simulateEmailNotification({
+            to: (ord && ord.email) || 'mariasantos.pampanga@gmail.com',
+            subject: `⚠️ Action Required: Payment Proof Flagged for Order #${orderId}`,
+            body: `Mabuhay ${(ord && ord.customerName) || 'Customer'},
+
+Our Candaba workshop finance auditor could not verify the attached payment proof screenshot for Order #${orderId}.
+
+Please log in and re-upload your valid GCash or Maya transaction confirmation screenshot so we can begin workshop fabrication.`,
+            orderId: orderId,
+            category: 'Payment Flagged'
+        });
+    }
+    if (typeof window.simulateSmsNotification === 'function') {
+        window.simulateSmsNotification({
+            to: (ord && ord.phone) || '09175548921',
+            message: `[EcoHaven PH] Alert: Payment proof for #${orderId} was flagged. Please re-upload your transaction receipt at ecohaven.ph/track?orderId=${orderId}`,
+            orderId: orderId,
+            category: 'Payment Flagged'
+        });
+    }
+
+    // Update order status in store
+    if (ord) {
+        ord.orderStatus = "Payment Flagged (Action Required)";
+        ord.stageName = "Payment Rejected / Re-upload Required";
+        if (window.ecoHavenDb) {
+            window.ecoHavenDb.ref('ecohaven/orders/' + orderId).set(ord);
+        }
+    }
     closeVerificationModal();
+    renderKanban();
+}
+
+function rejectPayment() {
+    if (activeVerificationOrderId) {
+        rejectPaymentForOrder(activeVerificationOrderId);
+    }
 }
 
 async function advanceToStage(orderId, nextStage, nextStageName) {
     if (!window.ecohaven) return;
+    const ord = window.ecohaven.orders[orderId] || window.ecohaven.getOrder(orderId) || {};
     await window.ecohaven.advanceOrderStage(orderId, nextStage, nextStageName);
     
-    // Dispatch natural e-commerce customer notification
+    // Dispatch natural in-app customer notification
     if (typeof window.addEcoHavenNotification === 'function') {
         const isCompleted = nextStage === 5;
         window.addEcoHavenNotification({
@@ -719,7 +672,7 @@ async function advanceToStage(orderId, nextStage, nextStageName) {
     if (typeof window.simulateSmsNotification === 'function') {
         const isDone = nextStage === 5;
         window.simulateSmsNotification({
-            to: '09812558028',
+            to: ord.phone || '09175548921',
             message: isDone 
                 ? `[EcoHaven PH] Order #${orderId} fulfilled! Salamat sa pagtitiwala sa Candaba workshop. Lifetime structural warranty active.`
                 : `[EcoHaven PH] Workshop Milestone: Order #${orderId} moved to "${nextStageName}" with lead artisan Mang Ronaldo.`,
@@ -730,9 +683,13 @@ async function advanceToStage(orderId, nextStage, nextStageName) {
 
     if (nextStage === 5 && typeof window.simulateEmailNotification === 'function') {
         window.simulateEmailNotification({
-            to: 'paolo.magisa@gmail.com',
+            to: ord.email || 'mariasantos.pampanga@gmail.com',
             subject: `🎉 Order #${orderId} Delivered — Lifetime Warranty Certificate`,
-            body: `Mabuhay!\n\nYour handcrafted modular suite is now delivered and assembled in your home.\n\nYour DTI-backed Lifetime Structural Joinery Warranty is registered under certificate #EH-W-2026-${orderId.replace('EH-2026-', '')}. Learn how to care for your wood at ecohaven.ph/care.`,
+            body: `Mabuhay ${ord.customerName || 'Customer'}!
+
+Your handcrafted modular suite is now delivered and assembled in your home.
+
+Your DTI-backed Lifetime Structural Joinery Warranty is registered under certificate #EH-W-2026-${orderId.replace('EH-2026-', '')}. Learn how to care for your wood at ecohaven.ph/care.`,
             orderId: orderId,
             category: 'Order Complete'
         });
@@ -744,147 +701,75 @@ async function advanceToStage(orderId, nextStage, nextStageName) {
     renderKanban();
 }
 
+function promptCourierDispatch(orderId) {
+    pendingDispatchOrderId = orderId;
+    document.getElementById('dispatchCodeInput').value = 'TRK-CANDABA-' + orderId.replace('EH-2026-', '');
+    document.getElementById('courierModal').classList.remove('hidden');
+    document.getElementById('courierModal').classList.add('flex');
+}
+
+function closeCourierModal() {
+    document.getElementById('courierModal').classList.add('hidden');
+    document.getElementById('courierModal').classList.remove('flex');
+}
+
+async function confirmDispatch(event) {
+    if (event) event.preventDefault();
+    if (!pendingDispatchOrderId || !window.ecohaven) return;
+    
+    const driver = document.getElementById('driverNameInput').value || 'Mang Juan S.';
+    const plate = document.getElementById('driverPlateInput').value || 'CBD-4821';
+    const ord = window.ecohaven.orders[pendingDispatchOrderId] || window.ecohaven.getOrder(pendingDispatchOrderId) || {};
+    
+    await window.ecohaven.advanceOrderStage(pendingDispatchOrderId, 4, 'Quality Inspected & Dispatched via Fleet (' + plate + ')');
+    
+    // Dispatch in-app notification
+    if (typeof window.addEcoHavenNotification === 'function') {
+        window.addEcoHavenNotification({
+            type: 'order',
+            title: `🚚 Order #${pendingDispatchOrderId} Out for Delivery`,
+            body: `Your order has passed white-glove quality inspection and is dispatched with Driver ${driver} (Vehicle Plate: ${plate}). On the way to your delivery address!`,
+            orderId: pendingDispatchOrderId,
+            icon: 'local_shipping',
+            badgeColor: 'bg-amber-100 text-amber-800'
+        });
+    }
+
+    // Dispatch Simulated Email & SMS Dispatch Alert
+    if (typeof window.simulateEmailNotification === 'function') {
+        window.simulateEmailNotification({
+            to: ord.email || 'mariasantos.pampanga@gmail.com',
+            subject: `🚚 Out for Delivery: Order #${pendingDispatchOrderId} via Workshop Fleet`,
+            body: `Mabuhay ${ord.customerName || 'Customer'}!
+
+Your order #${pendingDispatchOrderId} has passed white-glove quality control and is now in transit with Driver ${driver} (Fleet Plate: ${plate}).
+
+Expected Delivery Window: Today before 5:00 PM PHT. Please prepare the remaining balance upon handover.`,
+            orderId: pendingDispatchOrderId,
+            category: 'Delivery Dispatch'
+        });
+    }
+    if (typeof window.simulateSmsNotification === 'function') {
+        window.simulateSmsNotification({
+            to: ord.phone || '09175548921',
+            message: `[EcoHaven PH] Driver ${driver} (${plate}) is ON THE WAY with Order #${pendingDispatchOrderId}! Please prepare remaining balance upon handover.`,
+            orderId: pendingDispatchOrderId,
+            category: 'Delivery Dispatch'
+        });
+    }
+
+    closeCourierModal();
+    if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast(`🚚 Order #${pendingDispatchOrderId} dispatched! Driver: ${driver} (${plate}) — Customer notified in real-time.`, 'amber');
+    }
+    renderKanban();
+}
+
 // Reactivity
 window.addEventListener('ecohaven_orders_updated', renderKanban);
 window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(renderKanban, 200);
+    setTimeout(renderKanban, 250);
 });
-
-let pendingDispatchOrderId = null;
-
-function promptCourierDispatch(orderId) {
-    pendingDispatchOrderId = orderId;
-    document.getElementById('dispatchCodeInput').value = 'TRK-CANDABA-' + orderId.replace('EH-2026-', '');
-    document.getElementById('courierModal').classList.remove('hidden');
-    document.getElementById('courierModal').classList.add('flex');
-}
-
-function closeCourierModal() {
-    document.getElementById('courierModal').classList.add('hidden');
-    document.getElementById('courierModal').classList.remove('flex');
-}
-
-async function confirmDispatch(event) {
-    if (event) event.preventDefault();
-    if (!pendingDispatchOrderId || !window.ecohaven) return;
-    
-    const driver = document.getElementById('driverNameInput').value || 'Mang Juan S.';
-    const plate = document.getElementById('driverPlateInput').value || 'CBD-4821';
-    
-    await window.ecohaven.advanceOrderStage(pendingDispatchOrderId, 4, 'Quality Inspected & Dispatched via Fleet (' + plate + ')');
-    
-    // Dispatch natural e-commerce customer notification
-    if (typeof window.addEcoHavenNotification === 'function') {
-        window.addEcoHavenNotification({
-            type: 'order',
-            title: `🚚 Order #${pendingDispatchOrderId} Out for Delivery`,
-            body: `Your order has passed white-glove quality inspection and is dispatched with Driver ${driver} (Vehicle Plate: ${plate}). On the way to your delivery address!`,
-            orderId: pendingDispatchOrderId,
-            icon: 'local_shipping',
-            badgeColor: 'bg-amber-100 text-amber-800'
-        });
-    }
-
-    // Dispatch Simulated Email & SMS Dispatch Alert
-    if (typeof window.simulateEmailNotification === 'function') {
-        window.simulateEmailNotification({
-            to: 'paolo.magisa@gmail.com',
-            subject: `🚚 Out for Delivery: Order #${pendingDispatchOrderId} via Workshop Fleet`,
-            body: `Mabuhay!\n\nYour order #${pendingDispatchOrderId} has passed white-glove quality control and is now in transit with Driver ${driver} (Fleet Plate: ${plate}).\n\nExpected Delivery Window: Today before 5:00 PM PHT. Please prepare the remaining balance upon handover.`,
-            orderId: pendingDispatchOrderId,
-            category: 'Delivery Dispatch'
-        });
-    }
-    if (typeof window.simulateSmsNotification === 'function') {
-        window.simulateSmsNotification({
-            to: '09812558028',
-            message: `[EcoHaven PH] Driver ${driver} (${plate}) is ON THE WAY with Order #${pendingDispatchOrderId}! Please prepare remaining balance upon handover.`,
-            orderId: pendingDispatchOrderId,
-            category: 'Delivery Dispatch'
-        });
-    }
-
-    closeCourierModal();
-    if (typeof window.showEcoHavenToast === 'function') {
-        window.showEcoHavenToast(`🚚 Order #${pendingDispatchOrderId} dispatched! Driver: ${driver} (${plate}) — Customer notified in real-time.`, 'amber');
-    }
-    renderKanban();
-}
-
-</script>
-</main>
-<footer class="w-full bg-inverse-surface text-inverse-on-surface pt-space-xl pb-space-lg"><div class="max-w-7xl mx-auto px-gutter"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg pb-space-lg"><div class="flex flex-col gap-space-sm"><div class="flex items-center gap-space-xs"><img alt="EcoHaven Furniture Emblem" class="h-8 w-auto object-contain brightness-200" src="https://lh3.googleusercontent.com/aida/AEtjO1WoMmLqUdcp17_0K7-4RU3j_laJKFuB71tIYvo-2PL2jhAcZH749676gu7fQWloblAKrXLnjtrDm7cmDLa4_OGy5SO-WatR_aBQpdDN0K2Bp6LZLKKxNxFLcFB1WDJaz2oG_ycj2LROrpKw9eiaDGzfF-wXFdhm7wzyX7JBN_KzsFFfDSN_mIJx2ADuxlhZHSpu8qhuPImA1uzZy04pyRsDNRGhCYwcwDRbrWqtTrzRhg"/><span class="font-headline-sm text-headline-sm text-surface tracking-tight font-semibold">EcoHaven</span></div><p class="font-body-sm text-body-sm text-inverse-on-surface/80 leading-relaxed">Architectural Japandi woodworking synthesis with traditional Filipino joinery. Crafted with intention in our dedicated Candaba workshop.</p><div class="flex items-center gap-space-xs pt-1"><span class="font-caption text-caption text-primary-fixed bg-surface-container-highest/20 px-2 py-1 rounded">FSC Certified Narra &amp; Teak</span><span class="font-caption text-caption text-tertiary-fixed bg-surface-container-highest/20 px-2 py-1 rounded">Zero-VOC Oils</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Workshop &amp; Coordinates</span><div class="flex items-start gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed mt-0.5">location_on</span><span>Dalan Batu, Pasig, Candaba, Pampanga 2013, Philippines</span></div><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed">call</span><span>Direct Hotline: +63 981 255 8028</span></div><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed">schedule</span><span>Monday to Sunday: 8:00 AM – 5:00 PM PHT</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Workshop Collections</span><div class="flex flex-col gap-2 font-body-sm text-body-sm text-inverse-on-surface/80"><a class="hover:text-primary-fixed transition-colors" data-path="tetratable-4-in-1" href="tetratable.html">TetraTable 4-in-1 Modular</a><a class="hover:text-primary-fixed transition-colors" data-path="furniture-catalog" href="#">Tansu Credenzas &amp; Consoles</a><a class="hover:text-primary-fixed transition-colors" data-path="furniture-catalog" href="#">Live Edge Dining Tables</a><a class="hover:text-primary-fixed transition-colors" data-path="production-tracker" href="#">Kiln Drying &amp; Batch Status</a><a class="hover:text-primary-fixed transition-colors" data-path="seller-portal" href="#">Workshop Artisan Portal</a></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Follow Our Craft</span><p class="font-body-sm text-body-sm text-inverse-on-surface/80">Connect with us on official social media channels for live workshop demonstrations and customer photos.</p><div class="flex items-center gap-3 pt-1"><a href="https://www.facebook.com/profile.php?id=61588914923992&rdid=JkQTafkpCiS2BW1d&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1CBMxNxPbk%2F#" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#1877F2] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Facebook"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a><a href="https://www.tiktok.com/@ecohavenfurnitureph" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-black hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="TikTok (@ecohavenfurnitureph)"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.97v7.54c.03 2.5-1.28 4.9-3.4 6.13-2.15 1.25-4.94 1.19-7.03-.15-2.07-1.32-3.13-3.76-2.69-6.17.43-2.39 2.37-4.27 4.79-4.67.65-.11 1.31-.1 1.96.01v4.06c-.46-.17-.97-.2-1.45-.1-.99.2-1.77.96-1.99 1.94-.22.98.15 2.02.94 2.63.78.61 1.86.68 2.7.18.84-.49 1.34-1.41 1.32-2.38V.02h-.01z"/></svg></a><a href="https://www.instagram.com/ecohavenfuniture?psln=bHN3dzI4dW1oMnY3" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#E4405F] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Instagram (@ecohavenfuniture)"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a></div></div></div></div><div class="pt-space-md flex flex-col sm:flex-row items-center justify-between gap-space-sm"><p class="font-caption text-caption text-inverse-on-surface/60">© 2024 EcoHaven Furniture. All rights reserved. Dalan Batu, Pasig, Candaba, Pampanga.</p><div class="flex items-center gap-space-md font-caption text-caption text-inverse-on-surface/70"><a class="hover:text-primary-fixed transition-colors" href="#">Privacy Framework</a><a class="hover:text-primary-fixed transition-colors" href="#">Warranty Terms</a><a class="hover:text-primary-fixed transition-colors" href="#">Bespoke Commission Agreement</a></div></div></div></footer>
-<!-- Firebase Realtime Database SDK (Official CDN - Zero Build Step) -->
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="../js/firebase-config.js"></script>
-<script src="../js/store.js"></script>
-<script src="../assets/simulated-comms.js"></script>
-  <script src="../assets/notifications.js"></script>
-  <script src="../assets/auth-modal.js"></script>
-
-<script>
-let pendingDispatchOrderId = null;
-
-function promptCourierDispatch(orderId) {
-    pendingDispatchOrderId = orderId;
-    document.getElementById('dispatchCodeInput').value = 'TRK-CANDABA-' + orderId.replace('EH-2026-', '');
-    document.getElementById('courierModal').classList.remove('hidden');
-    document.getElementById('courierModal').classList.add('flex');
-}
-
-function closeCourierModal() {
-    document.getElementById('courierModal').classList.add('hidden');
-    document.getElementById('courierModal').classList.remove('flex');
-}
-
-async function confirmDispatch(event) {
-    if (event) event.preventDefault();
-    if (!pendingDispatchOrderId || !window.ecohaven) return;
-    
-    const driver = document.getElementById('driverNameInput').value || 'Mang Juan S.';
-    const plate = document.getElementById('driverPlateInput').value || 'CBD-4821';
-    
-    await window.ecohaven.advanceOrderStage(pendingDispatchOrderId, 4, 'Quality Inspected & Dispatched via Fleet (' + plate + ')');
-    
-    // Dispatch natural e-commerce customer notification
-    if (typeof window.addEcoHavenNotification === 'function') {
-        window.addEcoHavenNotification({
-            type: 'order',
-            title: `🚚 Order #${pendingDispatchOrderId} Out for Delivery`,
-            body: `Your order has passed white-glove quality inspection and is dispatched with Driver ${driver} (Vehicle Plate: ${plate}). On the way to your delivery address!`,
-            orderId: pendingDispatchOrderId,
-            icon: 'local_shipping',
-            badgeColor: 'bg-amber-100 text-amber-800'
-        });
-    }
-
-    // Dispatch Simulated Email & SMS Dispatch Alert
-    if (typeof window.simulateEmailNotification === 'function') {
-        window.simulateEmailNotification({
-            to: 'paolo.magisa@gmail.com',
-            subject: `🚚 Out for Delivery: Order #${pendingDispatchOrderId} via Workshop Fleet`,
-            body: `Mabuhay!\n\nYour order #${pendingDispatchOrderId} has passed white-glove quality control and is now in transit with Driver ${driver} (Fleet Plate: ${plate}).\n\nExpected Delivery Window: Today before 5:00 PM PHT. Please prepare the remaining balance upon handover.`,
-            orderId: pendingDispatchOrderId,
-            category: 'Delivery Dispatch'
-        });
-    }
-    if (typeof window.simulateSmsNotification === 'function') {
-        window.simulateSmsNotification({
-            to: '09812558028',
-            message: `[EcoHaven PH] Driver ${driver} (${plate}) is ON THE WAY with Order #${pendingDispatchOrderId}! Please prepare remaining balance upon handover.`,
-            orderId: pendingDispatchOrderId,
-            category: 'Delivery Dispatch'
-        });
-    }
-
-    closeCourierModal();
-    if (typeof window.showEcoHavenToast === 'function') {
-        window.showEcoHavenToast(`🚚 Order #${pendingDispatchOrderId} dispatched! Driver: ${driver} (${plate}) — Customer notified in real-time.`, 'amber');
-    }
-    renderKanban();
-}
 
 // Seller Profile Session Sync
 (function() {
