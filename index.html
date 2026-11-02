@@ -198,30 +198,30 @@
       <!-- Right Header Actions (Alert, User, Cart, CTA) -->
       <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
   <!-- 1. Inventory of Products (Seller Only, before Notification) -->
-  <a href="pages/seller.html#inventory" id="headerInventoryBtn" class="hidden relative w-10 h-10 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-all shadow-sm active:scale-95" aria-label="Workshop Inventory & Products" title="Workshop Inventory & Products">
+  <a href="pages/seller.html#inventory" id="headerInventoryBtn" class="hidden relative w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-all shadow-sm active:scale-95" aria-label="Workshop Inventory & Products" title="Workshop Inventory & Products">
     <span class="material-symbols-outlined text-[20px]">inventory_2</span>
     <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-600 rounded-full ring-2 ring-surface"></span>
   </a>
 
   <!-- 2. Notification Bell -->
-  <button type="button" id="headerAlertBtn" onclick="handleHeaderAlertClick()" class="relative w-10 h-10 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-all shadow-sm active:scale-95" aria-label="Notifications & Order Updates" title="Notifications & Order Updates">
+  <button type="button" id="headerAlertBtn" onclick="handleHeaderAlertClick()" class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-all shadow-sm active:scale-95" aria-label="Notifications & Order Updates" title="Notifications & Order Updates">
     <span class="material-symbols-outlined text-[20px]">notifications</span>
     <span id="headerAlertBadge" class="header-alert-badge absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-[#BA1A1A] text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-surface shadow-xs hidden">0</span>
   </button>
 
   <!-- 3. Orders Dashboard (In between Notification and User Icon, when user is logged in) -->
-  <a href="pages/dashboard.html" id="headerOrdersBtn" class="hidden relative w-10 h-10 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-all shadow-sm active:scale-95" aria-label="Orders Dashboard" title="Orders Dashboard">
+  <a href="pages/dashboard.html" id="headerOrdersBtn" class="hidden relative w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-all shadow-sm active:scale-95" aria-label="Orders Dashboard" title="Orders Dashboard">
     <span class="material-symbols-outlined text-[20px]">receipt_long</span>
     <span id="headerOrdersBadge" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-surface shadow-xs leading-none">1</span>
   </a>
 
   <!-- 4. User Account Icon -->
-  <button type="button" id="headerUserBtn" onclick="handleHeaderUserClick()" class="w-10 h-10 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-all shadow-sm active:scale-95" aria-label="EcoHaven Account" title="EcoHaven Account">
+  <button type="button" id="headerUserBtn" onclick="handleHeaderUserClick()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-all shadow-sm active:scale-95" aria-label="EcoHaven Account" title="EcoHaven Account">
     <span class="material-symbols-outlined text-[20px]">person</span>
   </button>
 
   <!-- 5. Cart / Order Queue -->
-  <button type="button" id="headerCartBtn" onclick="openCartDrawer()" class="relative w-10 h-10 rounded-full bg-secondary-container text-on-surface hover:bg-primary hover:text-white transition-all shadow-sm flex items-center justify-center active:scale-95" aria-label="View Shopping Cart" title="View Order Queue">
+  <button type="button" id="headerCartBtn" onclick="openCartDrawer()" class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-secondary-container text-on-surface hover:bg-primary hover:text-white transition-all shadow-sm flex items-center justify-center active:scale-95" aria-label="View Shopping Cart" title="View Order Queue">
     <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
     <span id="cartBadge" class="cart-count-badge absolute -top-1 -right-1 min-w-[20px] h-5 px-1 bg-primary text-white text-[11px] font-bold rounded-full flex items-center justify-center border-2 border-surface">0</span>
   </button>
