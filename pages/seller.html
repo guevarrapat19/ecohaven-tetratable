@@ -100,6 +100,23 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
     </div>
 </div>
 
+<!-- Visual Workshop Kanban Board Header & Controls -->
+<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+    <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[22px]">view_kanban</span>
+        <div>
+            <h2 class="font-title-md text-base md:text-lg font-bold text-on-surface">Candaba Live Production Kanban</h2>
+            <p class="text-xs text-on-surface-variant hidden sm:block">Compact order cards with collapsible details — space-optimized for high order volumes</p>
+        </div>
+    </div>
+    <div class="flex items-center gap-2">
+        <button type="button" onclick="toggleAllKanbanDetails()" id="btnToggleAllDetails" class="px-3.5 py-1.5 rounded-xl border border-outline-variant/50 bg-surface-container-lowest hover:bg-surface-container text-xs font-semibold text-on-surface transition-all flex items-center gap-1.5 shadow-xs active:scale-95" title="Expand or collapse details on all Kanban order cards">
+            <span class="material-symbols-outlined text-[16px]" id="iconToggleAllDetails">unfold_more</span>
+            <span id="textToggleAllDetails">Expand All Cards</span>
+        </button>
+    </div>
+</div>
+
 <!-- 4-Column Visual Workshop Kanban Board -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
 
@@ -864,6 +881,53 @@ Please log in to your account and re-upload your valid payment screenshot at eco
 
 // pendingDispatchOrderId already declared above
 
+window.expandedOrderCards = window.expandedOrderCards || new Set();
+window.kanbanAllExpanded = false;
+
+function toggleOrderCardDetails(orderId, event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    const details = document.getElementById('details-' + orderId);
+    const icon = document.getElementById('toggleIcon-' + orderId);
+    const text = document.getElementById('toggleText-' + orderId);
+    if (!details) return;
+
+    const isCurrentlyHidden = details.classList.contains('hidden');
+    if (isCurrentlyHidden) {
+        window.expandedOrderCards.add(orderId);
+        details.classList.remove('hidden');
+        if (icon) icon.innerText = 'expand_less';
+        if (text) text.innerText = 'Hide Details';
+    } else {
+        window.expandedOrderCards.delete(orderId);
+        details.classList.add('hidden');
+        if (icon) icon.innerText = 'expand_more';
+        if (text) text.innerText = 'Show Details';
+    }
+}
+
+function toggleAllKanbanDetails() {
+    window.kanbanAllExpanded = !window.kanbanAllExpanded;
+    const btnText = document.getElementById('textToggleAllDetails');
+    const btnIcon = document.getElementById('iconToggleAllDetails');
+    
+    const orders = window.ecohaven ? (window.ecohaven.orders || {}) : {};
+    const allIds = Object.keys(orders);
+    
+    if (window.kanbanAllExpanded) {
+        if (btnText) btnText.innerText = 'Collapse All Cards';
+        if (btnIcon) btnIcon.innerText = 'unfold_less';
+        allIds.forEach(id => window.expandedOrderCards.add(id));
+    } else {
+        if (btnText) btnText.innerText = 'Expand All Cards';
+        if (btnIcon) btnIcon.innerText = 'unfold_more';
+        window.expandedOrderCards.clear();
+    }
+    renderKanban();
+}
+
 function renderKanban() {
     if (!window.ecohaven) return;
     const orders = window.ecohaven.orders || {};
@@ -893,36 +957,67 @@ function renderKanban() {
         revTotal += paid;
         balTotal += bal;
 
+        const isExpanded = !!(window.kanbanAllExpanded || (window.expandedOrderCards && window.expandedOrderCards.has(ord.orderId)));
+
         const card = document.createElement('div');
-        card.className = "bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/40 shadow-xs flex flex-col justify-between";
+        card.id = 'order-card-' + ord.orderId;
+        card.className = "bg-surface-container-lowest p-3.5 rounded-xl border border-outline-variant/40 shadow-xs flex flex-col justify-between transition-all duration-200 hover:shadow-sm";
+
+        const itemsSummary = (ord.items && Array.isArray(ord.items) && ord.items.length > 0)
+            ? ord.items.map(it => '<div class="text-[11px] text-on-surface truncate">• ' + it.name + ' <span class="text-outline">(' + (it.quantity || 1) + 'x' + (it.finish ? ', ' + it.finish : '') + ')</span></div>').join('')
+            : '<div class="text-[11px] text-on-surface-variant italic">• TetraTable 4-in-1 Suite (1x)</div>';
 
         if (stage === 1) {
             c1++;
             const isFull = ord.paymentMode === 'full' || (ord.pricing && !ord.pricing.isDownPayment);
             const isFlagged = ord.orderStatus && ord.orderStatus.includes('Flagged');
             card.innerHTML = `
-                <div class="flex justify-between items-start mb-2">
+                <div class="flex justify-between items-start mb-1.5">
                     <span class="text-xs font-mono font-bold text-primary">#${ord.orderId}</span>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isFlagged ? 'bg-red-100 text-red-800 border border-red-200' : (isFull ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800')}">
                         ${isFlagged ? '⚠️ Flagged' : (isFull ? '100% Full Paid' : '50% DP')}
                     </span>
                 </div>
-                <h4 class="font-title-md text-sm text-on-surface font-semibold">${ord.customerName}</h4>
-                <p class="text-xs text-on-surface-variant mb-2">${ord.address ? ord.address.split(',')[1] || ord.address : 'Pampanga'}</p>
+                <h4 class="font-title-md text-sm text-on-surface font-semibold truncate">${ord.customerName}</h4>
+                <div class="flex items-center justify-between text-xs text-on-surface-variant font-mono mt-0.5 mb-1.5">
+                    <span>₱${paid.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>
+                    <span class="text-[11px] text-outline truncate max-w-[120px]">${ord.address ? ord.address.split(',')[1] || ord.address : 'Pampanga'}</span>
+                </div>
                 
-                ${isFlagged ? `
-                <div class="bg-red-50 border border-red-200 p-2 rounded-lg text-[11px] text-red-800 mb-3 leading-snug">
-                    <strong>Reason:</strong> ${ord.rejectionReason || 'Receipt Unverified'}<br/>
-                    <span class="text-[10px] text-red-700">Awaiting customer resubmission</span>
-                </div>
-                ` : `
-                <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline mb-3">
-                    Ref: ${ord.gcashRef || (ord.payment && ord.payment.reference) || '9021-8841-2910'}<br/>
-                    Amount: ₱${paid.toLocaleString('en-PH', {minimumFractionDigits: 2})}
-                </div>
-                `}
+                <!-- Collapsible Details Drawer -->
+                <div id="details-${ord.orderId}" class="order-details-drawer space-y-2 pt-2 border-t border-outline-variant/30 text-xs ${isExpanded ? '' : 'hidden'}">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-outline block">Delivery Destination:</span>
+                        <p class="text-xs text-on-surface font-medium leading-relaxed">${ord.address || 'Candaba Workshop Direct'}</p>
+                        ${ord.phone ? `<p class="text-[11px] text-on-surface-variant mt-0.5">📞 ${ord.phone}${ord.email ? ' • ' + ord.email : ''}</p>` : ''}
+                    </div>
 
-                <div class="flex gap-2">
+                    <div class="bg-surface-container-low p-2 rounded-lg border border-outline-variant/20">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-primary block mb-0.5">Ordered Items:</span>
+                        ${itemsSummary}
+                    </div>
+
+                    ${isFlagged ? `
+                    <div class="bg-red-50 border border-red-200 p-2 rounded-lg text-[11px] text-red-800 leading-snug">
+                        <strong>Reason:</strong> ${ord.rejectionReason || 'Receipt Unverified'}<br/>
+                        <span class="text-[10px] text-red-700">Awaiting customer resubmission</span>
+                    </div>
+                    ` : `
+                    <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline">
+                        Ref: ${ord.gcashRef || (ord.payment && ord.payment.reference) || '9021-8841-2910'}<br/>
+                        Amount Paid: ₱${paid.toLocaleString('en-PH', {minimumFractionDigits: 2})}<br/>
+                        Order Total: ₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})}
+                    </div>
+                    `}
+                </div>
+
+                <!-- Show / Hide Details Toggle Button -->
+                <button type="button" onclick="toggleOrderCardDetails('${ord.orderId}', event)" class="w-full text-center py-1 my-2 text-[11px] font-semibold text-primary hover:text-primary-container flex items-center justify-center gap-1 bg-surface hover:bg-surface-container rounded-lg border border-outline-variant/30 transition-all">
+                    <span class="material-symbols-outlined text-[15px]" id="toggleIcon-${ord.orderId}">${isExpanded ? 'expand_less' : 'expand_more'}</span>
+                    <span id="toggleText-${ord.orderId}">${isExpanded ? 'Hide Details' : 'Show Details'}</span>
+                </button>
+
+                <div class="flex gap-2 pt-0.5">
                     <button onclick="openVerificationModal('${ord.orderId}')" 
                             class="flex-1 py-2 bg-primary text-on-primary rounded-lg text-xs font-bold hover:bg-primary-container transition-all flex items-center justify-center gap-1 shadow-xs">
                         <span class="material-symbols-outlined text-sm">verified_user</span>
@@ -938,16 +1033,40 @@ function renderKanban() {
         } else if (stage === 2) {
             c2++;
             card.innerHTML = `
-                <div class="flex justify-between items-start mb-2">
+                <div class="flex justify-between items-start mb-1.5">
                     <span class="text-xs font-mono font-bold text-primary">#${ord.orderId}</span>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-surface-container text-on-surface font-semibold">Stage 2</span>
                 </div>
-                <h4 class="font-title-md text-sm text-on-surface font-semibold">${ord.customerName}</h4>
-                <p class="text-xs text-on-surface-variant mb-2">Timber Selected (11.4% MC) • Solignum Soaking</p>
-                <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline mb-3">
-                    Timber: PH-Mahogany Batch #491<br/>
-                    Status: Cutting in progress
+                <h4 class="font-title-md text-sm text-on-surface font-semibold truncate">${ord.customerName}</h4>
+                <div class="flex items-center justify-between text-xs text-on-surface-variant mt-0.5 mb-1.5">
+                    <span class="font-mono text-tertiary font-medium">11.4% MC • Kiln</span>
+                    <span class="text-[11px] text-outline truncate max-w-[120px]">${ord.address ? ord.address.split(',')[1] || ord.address : 'Pampanga'}</span>
                 </div>
+
+                <!-- Collapsible Details Drawer -->
+                <div id="details-${ord.orderId}" class="order-details-drawer space-y-2 pt-2 border-t border-outline-variant/30 text-xs ${isExpanded ? '' : 'hidden'}">
+                    <p class="text-xs text-on-surface-variant font-medium">Timber Selected (11.4% MC) • Solignum Soaking</p>
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-outline block">Destination:</span>
+                        <p class="text-xs text-on-surface font-medium leading-relaxed">${ord.address || 'Candaba Workshop Direct'}</p>
+                    </div>
+                    <div class="bg-surface-container-low p-2 rounded-lg border border-outline-variant/20">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-primary block mb-0.5">Ordered Items:</span>
+                        ${itemsSummary}
+                    </div>
+                    <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline">
+                        Timber: PH-Mahogany Batch #491<br/>
+                        Status: Cutting in progress<br/>
+                        Preservative: Solignum Immersion
+                    </div>
+                </div>
+
+                <!-- Show / Hide Details Toggle Button -->
+                <button type="button" onclick="toggleOrderCardDetails('${ord.orderId}', event)" class="w-full text-center py-1 my-2 text-[11px] font-semibold text-primary hover:text-primary-container flex items-center justify-center gap-1 bg-surface hover:bg-surface-container rounded-lg border border-outline-variant/30 transition-all">
+                    <span class="material-symbols-outlined text-[15px]" id="toggleIcon-${ord.orderId}">${isExpanded ? 'expand_less' : 'expand_more'}</span>
+                    <span id="toggleText-${ord.orderId}">${isExpanded ? 'Hide Details' : 'Show Details'}</span>
+                </button>
+
                 <button onclick="advanceToStage('${ord.orderId}', 3, 'Precision Joinery Assembly & Sanding')" 
                         class="w-full py-2 bg-surface-container hover:bg-surface-container-high text-on-surface rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1">
                     <span>Move to Joinery Assembly</span>
@@ -958,16 +1077,40 @@ function renderKanban() {
         } else if (stage === 3) {
             c3++;
             card.innerHTML = `
-                <div class="flex justify-between items-start mb-2">
+                <div class="flex justify-between items-start mb-1.5">
                     <span class="text-xs font-mono font-bold text-primary">#${ord.orderId}</span>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-semibold">In Joinery</span>
                 </div>
-                <h4 class="font-title-md text-sm text-on-surface font-semibold">${ord.customerName}</h4>
-                <p class="text-xs text-on-surface-variant mb-2">Mortise Fitting &amp; Pioneer Epoxy Bonding</p>
-                <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline mb-3">
-                    Lead: Mang Ronaldo<br/>
-                    Sanding: 320-grit Natural Barnis
+                <h4 class="font-title-md text-sm text-on-surface font-semibold truncate">${ord.customerName}</h4>
+                <div class="flex items-center justify-between text-xs text-on-surface-variant mt-0.5 mb-1.5">
+                    <span class="font-medium text-primary">Lead: Mang Ronaldo</span>
+                    <span class="text-[11px] text-outline truncate max-w-[120px]">${ord.address ? ord.address.split(',')[1] || ord.address : 'Pampanga'}</span>
                 </div>
+
+                <!-- Collapsible Details Drawer -->
+                <div id="details-${ord.orderId}" class="order-details-drawer space-y-2 pt-2 border-t border-outline-variant/30 text-xs ${isExpanded ? '' : 'hidden'}">
+                    <p class="text-xs text-on-surface-variant font-medium">Mortise Fitting &amp; Pioneer Epoxy Bonding</p>
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-outline block">Destination:</span>
+                        <p class="text-xs text-on-surface font-medium leading-relaxed">${ord.address || 'Candaba Workshop Direct'}</p>
+                    </div>
+                    <div class="bg-surface-container-low p-2 rounded-lg border border-outline-variant/20">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-primary block mb-0.5">Ordered Items:</span>
+                        ${itemsSummary}
+                    </div>
+                    <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline">
+                        Lead: Mang Ronaldo<br/>
+                        Sanding: 320-grit Natural Barnis<br/>
+                        Epoxy: Pioneer High-Tensile Marine
+                    </div>
+                </div>
+
+                <!-- Show / Hide Details Toggle Button -->
+                <button type="button" onclick="toggleOrderCardDetails('${ord.orderId}', event)" class="w-full text-center py-1 my-2 text-[11px] font-semibold text-primary hover:text-primary-container flex items-center justify-center gap-1 bg-surface hover:bg-surface-container rounded-lg border border-outline-variant/30 transition-all">
+                    <span class="material-symbols-outlined text-[15px]" id="toggleIcon-${ord.orderId}">${isExpanded ? 'expand_less' : 'expand_more'}</span>
+                    <span id="toggleText-${ord.orderId}">${isExpanded ? 'Hide Details' : 'Show Details'}</span>
+                </button>
+
                 <button onclick="promptCourierDispatch('${ord.orderId}')" 
                         class="w-full py-2 bg-primary text-on-primary rounded-lg text-xs font-bold hover:bg-primary-container transition-all flex items-center justify-center gap-1 shadow-xs">
                     <span>Pass QC &amp; Dispatch Fleet</span>
@@ -979,18 +1122,42 @@ function renderKanban() {
             c4++;
             const isDone = stage === 5;
             card.innerHTML = `
-                <div class="flex justify-between items-start mb-2">
+                <div class="flex justify-between items-start mb-1.5">
                     <span class="text-xs font-mono font-bold text-tertiary">#${ord.orderId}</span>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isDone ? 'bg-tertiary-fixed text-on-tertiary-fixed' : 'bg-primary-fixed text-on-primary-fixed'}">
                         ${isDone ? 'Delivered & Complete' : 'In Transit'}
                     </span>
                 </div>
-                <h4 class="font-title-md text-sm text-on-surface font-semibold">${ord.customerName}</h4>
-                <p class="text-xs text-on-surface-variant mb-2">Destination: ${ord.address || 'Pampanga'}</p>
-                <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline mb-3">
-                    Balance Due: ₱${bal.toLocaleString('en-PH', {minimumFractionDigits: 2})}<br/>
-                    Courier: Workshop Fleet (CBD 4821)
+                <h4 class="font-title-md text-sm text-on-surface font-semibold truncate">${ord.customerName}</h4>
+                <div class="flex items-center justify-between text-xs text-on-surface-variant mt-0.5 mb-1.5">
+                    <span class="font-mono font-semibold text-primary">Bal: ₱${bal.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>
+                    <span class="text-[11px] text-outline truncate max-w-[120px]">${ord.address ? ord.address.split(',')[1] || ord.address : 'Pampanga'}</span>
                 </div>
+
+                <!-- Collapsible Details Drawer -->
+                <div id="details-${ord.orderId}" class="order-details-drawer space-y-2 pt-2 border-t border-outline-variant/30 text-xs ${isExpanded ? '' : 'hidden'}">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-outline block">Destination:</span>
+                        <p class="text-xs text-on-surface font-medium leading-relaxed">${ord.address || 'Pampanga'}</p>
+                        ${ord.phone ? `<p class="text-[11px] text-on-surface-variant mt-0.5">📞 ${ord.phone}</p>` : ''}
+                    </div>
+                    <div class="bg-surface-container-low p-2 rounded-lg border border-outline-variant/20">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-primary block mb-0.5">Ordered Items:</span>
+                        ${itemsSummary}
+                    </div>
+                    <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline">
+                        Balance Due: ₱${bal.toLocaleString('en-PH', {minimumFractionDigits: 2})}<br/>
+                        Courier: Workshop Fleet (CBD 4821)<br/>
+                        Driver: Mang Ronaldo Santos
+                    </div>
+                </div>
+
+                <!-- Show / Hide Details Toggle Button -->
+                <button type="button" onclick="toggleOrderCardDetails('${ord.orderId}', event)" class="w-full text-center py-1 my-2 text-[11px] font-semibold text-primary hover:text-primary-container flex items-center justify-center gap-1 bg-surface hover:bg-surface-container rounded-lg border border-outline-variant/30 transition-all">
+                    <span class="material-symbols-outlined text-[15px]" id="toggleIcon-${ord.orderId}">${isExpanded ? 'expand_less' : 'expand_more'}</span>
+                    <span id="toggleText-${ord.orderId}">${isExpanded ? 'Hide Details' : 'Show Details'}</span>
+                </button>
+
                 ${!isDone ? `
                 <button onclick="advanceToStage('${ord.orderId}', 5, 'Delivered & Complete')" 
                         class="w-full py-2 bg-tertiary text-on-tertiary rounded-lg text-xs font-bold hover:bg-tertiary-container transition-all flex items-center justify-center gap-1 shadow-xs">
@@ -1019,8 +1186,8 @@ function renderKanban() {
     const kpiRev = document.getElementById('kpiRevenue');
     const kpiBal = document.getElementById('kpiBalanceDue');
     if (kpiTotal) kpiTotal.innerText = orderList.length;
-    if (kpiRev) kpiRev.innerText = `₱${(revTotal / 1000).toFixed(1)}k`;
-    if (kpiBal) kpiBal.innerText = `₱${(balTotal / 1000).toFixed(1)}k`;
+    if (kpiRev) kpiRev.innerText = '₱' + (revTotal / 1000).toFixed(1) + 'k';
+    if (kpiBal) kpiBal.innerText = '₱' + (balTotal / 1000).toFixed(1) + 'k';
 }
 
 function openVerificationModal(orderId) {
