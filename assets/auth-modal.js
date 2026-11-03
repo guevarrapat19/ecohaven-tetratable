@@ -794,7 +794,9 @@
           ordersBtn.classList.remove('hidden');
           ordersBtn.classList.add('flex');
           if (role === 'seller' || role === 'admin') {
-            const count = window.ecohaven && window.ecohaven.orders ? Object.keys(window.ecohaven.orders).length : 0;
+            const count = window.ecohaven && window.ecohaven.orders
+              ? Object.values(window.ecohaven.orders).filter(o => o && !o.archived).length
+              : 0;
             ordersBtn.href = isPagesDir ? 'seller.html' : 'pages/seller.html';
             ordersBtn.title = 'Artisan Orders & Fabrication Pipeline';
             ordersBtn.setAttribute('aria-label', 'Artisan Orders & Fabrication Pipeline');
@@ -811,7 +813,7 @@
               const uName = (u.displayName || u.fullName || '').toLowerCase().trim();
               const uUid = u.uid || '';
               custCount = Object.values(window.ecohaven.orders).filter(o => {
-                if (!o) return false;
+                if (!o || o.archived) return false;
                 if (o.userId && uUid && o.userId === uUid) return true;
                 if (o.email && uEmail && o.email.toLowerCase().trim() === uEmail) return true;
                 if (o.customerEmail && uEmail && o.customerEmail.toLowerCase().trim() === uEmail) return true;

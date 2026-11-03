@@ -1896,6 +1896,25 @@ function renderKanban() {
     if (kpiTransit) kpiTransit.innerText = countTransit;
     if (kpiCompleted) kpiCompleted.innerText = countComplete;
 
+    // Synchronize top navbar orders badge strictly with active unarchived orders count
+    const headerBadge = document.getElementById('headerOrdersBadge');
+    const ordersBtn = document.getElementById('headerOrdersBtn');
+    const unarchivedCount = orderList.filter(o => o && !o.archived).length;
+    if (headerBadge) {
+        if (unarchivedCount > 0) {
+            headerBadge.innerText = unarchivedCount;
+            headerBadge.classList.remove('hidden');
+        } else {
+            headerBadge.classList.add('hidden');
+        }
+    } else if (ordersBtn && unarchivedCount > 0) {
+        const badge = document.createElement('span');
+        badge.id = 'headerOrdersBadge';
+        badge.className = 'absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-amber-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-surface shadow-xs leading-none';
+        badge.innerText = unarchivedCount;
+        ordersBtn.appendChild(badge);
+    }
+
     function formatCurrencyK(val) {
         if (!val || val <= 0) return '₱0';
         if (val >= 1000000) return '₱' + (val / 1000000).toFixed(2) + 'M';
