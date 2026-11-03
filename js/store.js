@@ -749,20 +749,50 @@ class EcoHavenStore {
         return this.inventory.materials[materialData.id];
     }
 
-    // Craftsman Rejection with Specific Reason & Guidance
-    async flagOrderPayment(orderId, { reason, code, notes }) {
+    // Craftsman Order Rejection & Automatic Downpayment Refund
+    async rejectAndRefundOrder(orderId, { reason, code, notes }) {
         const ord = this.orders[orderId] || this.getOrder(orderId);
         if (!ord) return;
 
-        const total = ord.totalAmount || (ord.pricing && ord.pricing.totalAmount) || 7184.00;
+        const total = parseFloat(ord.totalAmount || (ord.pricing && ord.pricing.totalAmount) || 7184.00) || 0;
+        const isCod = ord.paymentMode === 'cod' || ord.paymentMethod === 'cod';
+
+        // Calculate paid downpayment / earnest deposit
+        let downpaymentPaid = parseFloat(ord.downPaymentPaid !== undefined ? ord.downPaymentPaid : (ord.amountPaid !== undefined ? ord.amountPaid : (ord.pricing ? ord.pricing.downPaymentPaid : 0))) || 0;
+        if (!isCod && downpaymentPaid === 0 && ord.paymentMode !== 'cod') {
+            downpaymentPaid = ord.paymentMode === 'full' ? total : (total / 2);
+        }
+
+        const hasRefund = !isCod && downpaymentPaid > 0;
+        const refundAmount = hasRefund ? downpaymentPaid : 0;
+        const refundRef = hasRefund ? ("REF-CANDABA-" + Math.floor(100000 + Math.random() * 900000)) : "N/A (Cash on Delivery)";
+        const refundChannel = ord.paymentMethod === 'gcash' 
+            ? "GCash (09662447106 / Registered Mobile)" 
+            : (ord.paymentMethod || "Original Payment Channel");
+        const refundStatus = hasRefund 
+            ? "Refund Issued / Credited Back to Customer" 
+            : "No Refund Due (Cash on Delivery - Zero Advance Payment Collected)";
+
         const updates = {
-            orderStatus: "Payment Flagged (Action Required)",
+            orderStatus: hasRefund ? "Order Rejected & Refunded" : "Order Rejected (Cancelled)",
             stage: 1,
-            stageName: "Payment Flagged: " + (reason || "Action Required"),
-            rejectionReason: reason || "Unverified Payment Proof",
-            rejectionCode: code || "invalid_reference",
-            rejectionNotes: notes || "Please re-upload a clear transaction screenshot.",
+            stageName: "Order Rejected: " + (reason || "Action Required") + (hasRefund ? ` (₱${refundAmount.toLocaleString('en-PH', {minimumFractionDigits: 2})} Refunded)` : ""),
+            rejectionReason: reason || "Insufficient Raw Timber / Materials in Workshop",
+            rejectionCode: code || "insufficient_materials",
+            rejectionNotes: notes || (hasRefund 
+                ? "Your earnest downpayment has been 100% refunded and credited back to your payment account." 
+                : "Your order has been cancelled per workshop review."),
+            rejectedAt: new Date().toISOString(),
             flaggedAt: new Date().toISOString(),
+            // Money is refunded back to the customer (less the refund / back on customer)
+            refundStatus: refundStatus,
+            refundAmount: refundAmount,
+            refundRef: refundRef,
+            refundChannel: refundChannel,
+            refundDate: new Date().toISOString(),
+            amountPaid: 0,        // Zeroed out because it was refunded back to customer
+            downPaymentPaid: 0,   // Zeroed out because it was refunded back to customer
+            balanceDue: 0,        // Closed
             totalAmount: total,
             customerName: ord.customerName || 'Customer'
         };
@@ -770,9 +800,9 @@ class EcoHavenStore {
         if (window.ecoHavenDb) {
             try {
                 await window.ecoHavenDb.ref('ecohaven/orders/' + orderId).update(updates);
-                console.log("⚠️ Order", orderId, "flagged with reason in Firebase RTDB:", reason);
+                console.log("🔴 Order", orderId, "rejected & refunded in Firebase RTDB:", updates);
             } catch (err) {
-                console.error("Firebase flag error:", err);
+                console.error("Firebase reject & refund error:", err);
             }
         }
 
@@ -780,6 +810,11 @@ class EcoHavenStore {
         this.saveLocalBackup('ecohaven_cloud_orders_cache', this.orders);
         window.dispatchEvent(new CustomEvent('ecohaven_orders_updated', { detail: this.orders }));
         return ord;
+    }
+
+    // Craftsman Rejection with Specific Reason & Guidance (Backward-compatible alias)
+    async flagOrderPayment(orderId, { reason, code, notes }) {
+        return await this.rejectAndRefundOrder(orderId, { reason, code, notes });
     }
 
     // Customer Resubmission of Payment Proof
