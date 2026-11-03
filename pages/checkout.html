@@ -2256,6 +2256,13 @@
         orderId = await window.ecohaven.submitOrder(orderData);
       }
 
+      // Explicitly clear Order Queue (Cart) upon successful order creation
+      if (window.ecohaven && typeof window.ecohaven.clearCart === 'function') {
+        window.ecohaven.clearCart();
+      } else {
+        localStorage.setItem('ecohaven_cart', '[]');
+      }
+
       if (typeof window.addEcoHavenNotification === 'function') {
         window.addEcoHavenNotification({
           type: 'order',

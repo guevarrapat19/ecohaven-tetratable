@@ -669,6 +669,29 @@ async function handleCustomerResubmit(event) {
 function renderOrder(order) {
   if (!order) return;
   currentActiveOrderId = order.orderId;
+
+  // Auto-clear Order Queue if user just placed this order or if queue still holds items from this order
+  try {
+    const rawCart = localStorage.getItem('ecohaven_cart');
+    if (rawCart) {
+      const parsedCart = JSON.parse(rawCart);
+      if (Array.isArray(parsedCart) && parsedCart.length > 0) {
+        const lastPlaced = localStorage.getItem('ecohaven_last_order_id');
+        const cartNames = parsedCart.map(i => (i.name || i.title || '').trim().toLowerCase()).sort().join('|');
+        const orderNames = (order.items || []).map(i => (i.name || i.title || '').trim().toLowerCase()).sort().join('|');
+        
+        if (lastPlaced === order.orderId || cartNames === orderNames) {
+          if (window.ecohaven && typeof window.ecohaven.clearCart === 'function') {
+            window.ecohaven.clearCart();
+          } else {
+            localStorage.setItem('ecohaven_cart', '[]');
+            const badge = document.getElementById('cartBadge');
+            if (badge) badge.style.display = 'none';
+          }
+        }
+      }
+    }
+  } catch(e) {}
   
   // Update header text
   document.getElementById('trackOrderIdTitle').innerText = 'Order #' + order.orderId;

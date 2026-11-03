@@ -615,6 +615,9 @@ class EcoHavenStore {
         localStorage.setItem('ecohaven_last_order_id', orderId);
         window.dispatchEvent(new CustomEvent('ecohaven_orders_updated', { detail: this.orders }));
 
+        // Clear Order Queue / Cart upon order placement
+        this.clearCart();
+
         return orderId;
     }
 
@@ -942,6 +945,14 @@ class EcoHavenStore {
             this.saveCart();
             window.showEcoHavenToast(`Removed "${removed[0]?.name || 'Item'}" from Order Queue`, 'info');
         }
+    }
+
+    clearCart() {
+        this.cart = [];
+        this.saveCart();
+        this.updateCartBadge();
+        this.renderCartDrawer();
+        console.log("🛒 EcoHaven: Order Queue / Cart successfully cleared after order submission.");
     }
 
     // ==========================================================
@@ -1631,6 +1642,14 @@ window.showEcoHavenToast = function(message, type = 'info', title = null) {
 };
 
 // Global Drawer Forwarders for Backward Compatibility
+window.clearCart = function() {
+    if (window.ecohaven) window.ecohaven.clearCart();
+    else {
+        localStorage.setItem('ecohaven_cart', '[]');
+        window.dispatchEvent(new CustomEvent('ecohaven_cart_updated', { detail: [] }));
+    }
+};
+
 window.openCartDrawer = function() {
     if (window.ecohaven) window.ecohaven.openCartDrawer();
 };
