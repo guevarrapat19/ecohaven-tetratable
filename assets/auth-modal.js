@@ -40,7 +40,7 @@
     if (document.getElementById('ecohavenAuthModal')) return;
 
     const modalHTML = `
-      <div id="ecohavenAuthModalBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden transition-opacity duration-300 opacity-0" onclick="closeAuthModal()"></div>
+      <div id="ecohavenAuthModalBackdrop" class="fixed inset-0 bg-black/25 backdrop-blur-[3px] z-50 hidden transition-opacity duration-300 opacity-0" onclick="closeAuthModal()"></div>
       <div id="ecohavenAuthModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none hidden">
         <div class="relative w-full max-w-md bg-surface rounded-3xl shadow-2xl border border-outline-variant/40 p-6 sm:p-8 pointer-events-auto transition-all duration-300 transform scale-95 opacity-0 max-h-[92vh] overflow-y-auto no-scrollbar" id="ecohavenAuthCard">
           

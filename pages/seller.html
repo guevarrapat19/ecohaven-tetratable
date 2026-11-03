@@ -230,7 +230,7 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
 </div>
 
 <!-- Modal: GCash Receipt Screenshot Verification Lightbox -->
-<div id="verifyModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md hidden items-center justify-center p-4">
+<div id="verifyModal" class="fixed inset-0 z-50 bg-black/25 backdrop-blur-[3px] hidden items-center justify-center p-4">
     <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-[24px] max-w-2xl w-full p-6 md:p-8 shadow-2xl relative">
         <button onclick="closeVerificationModal()" class="absolute right-5 top-5 p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors">
             <span class="material-symbols-outlined">close</span>
@@ -281,7 +281,7 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
 
 
 <!-- Modal: Courier & Fleet Dispatch Assignment (Layer 2) -->
-<div id="courierModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md hidden items-center justify-center p-4 transition-all">
+<div id="courierModal" class="fixed inset-0 z-50 bg-black/25 backdrop-blur-[3px] hidden items-center justify-center p-4 transition-all">
     <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-[24px] max-w-lg w-full p-6 md:p-8 shadow-2xl relative animate-fadeIn">
         <button onclick="closeCourierModal()" class="absolute right-5 top-5 p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors">
             <span class="material-symbols-outlined">close</span>
@@ -331,7 +331,7 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
 
 
 <!-- Modal 1: Rejection Reason Selection & Actionable Guidance -->
-<div id="rejectReasonModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md hidden items-center justify-center p-4">
+<div id="rejectReasonModal" class="fixed inset-0 z-50 bg-black/25 backdrop-blur-[3px] hidden items-center justify-center p-4">
     <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-[24px] max-w-xl w-full p-6 md:p-8 shadow-2xl relative">
         <button onclick="closeRejectReasonModal()" class="absolute right-5 top-5 p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors">
             <span class="material-symbols-outlined">close</span>
@@ -449,7 +449,7 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
 </div>
 
 <!-- Modal 2: Add Finished Product to Inventory -->
-<div id="addProductModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md hidden items-center justify-center p-4">
+<div id="addProductModal" class="fixed inset-0 z-50 bg-black/25 backdrop-blur-[3px] hidden items-center justify-center p-4">
     <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-[24px] max-w-lg w-full p-6 md:p-8 shadow-2xl relative">
         <button onclick="closeAddProductModal()" class="absolute right-5 top-5 p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors">
             <span class="material-symbols-outlined">close</span>
@@ -513,7 +513,7 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
 </div>
 
 <!-- Modal 3: Log & Restock Raw Material -->
-<div id="addMaterialModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md hidden items-center justify-center p-4">
+<div id="addMaterialModal" class="fixed inset-0 z-50 bg-black/25 backdrop-blur-[3px] hidden items-center justify-center p-4">
     <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-[24px] max-w-lg w-full p-6 md:p-8 shadow-2xl relative">
         <button onclick="closeAddMaterialModal()" class="absolute right-5 top-5 p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors">
             <span class="material-symbols-outlined">close</span>
@@ -573,7 +573,7 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
 
 
 <!-- Modal 6: Edit Order & Clear Space (Artisan Full Control) -->
-<div id="editOrderModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+<div id="editOrderModal" class="fixed inset-0 z-50 bg-black/25 backdrop-blur-[3px] hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-[24px] max-w-xl w-full p-5 sm:p-7 shadow-2xl relative my-auto max-h-[92vh] flex flex-col">
         <!-- Close button -->
         <button type="button" onclick="closeEditOrderModal()" class="absolute right-4 top-4 p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors" title="Close">
@@ -761,7 +761,7 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
 
 
 <!-- Modal 7: Delete Order Confirmation Dialog (Native EcoHaven Styled) -->
-<div id="deleteConfirmModal" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md hidden items-center justify-center p-4 transition-opacity duration-200" onclick="if (event.target === this) closeDeleteConfirmModal();">
+<div id="deleteConfirmModal" class="fixed inset-0 z-[100] bg-black/25 backdrop-blur-[3px] hidden items-center justify-center p-4 transition-opacity duration-200" onclick="if (event.target === this) closeDeleteConfirmModal();">
     <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-[28px] max-w-md w-full p-6 sm:p-7 shadow-2xl relative transform transition-all duration-200 scale-95 flex flex-col text-center">
         <!-- Close button -->
         <button type="button" onclick="closeDeleteConfirmModal()" class="absolute right-4 top-4 p-2 rounded-full hover:bg-surface-container text-on-surface-variant transition-colors" title="Cancel">
@@ -780,7 +780,11 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
         </p>
 
         <!-- Order Snapshot Box -->
-        <div class="bg-surface-container-low rounded-xl p-3 border border-outline-variant/30 text-left text-xs mb-5 space-y-1.5">
+        <div class="bg-surface-container-low rounded-xl p-3.5 border border-outline-variant/30 text-left text-xs mb-5 space-y-2">
+            <div class="flex justify-between items-start text-on-surface-variant gap-2 pb-1.5 border-b border-outline-variant/20">
+                <span class="flex-shrink-0">Order Items:</span>
+                <span id="deleteModalItems" class="font-semibold text-on-surface text-right truncate max-w-[210px]">Handcrafted Furniture</span>
+            </div>
             <div class="flex justify-between items-center text-on-surface-variant">
                 <span>Production Phase:</span>
                 <span id="deleteModalStage" class="font-bold text-on-surface">Payment Review</span>
@@ -1360,6 +1364,21 @@ function promptDeleteOrder(orderId, event) {
     const custTag = document.getElementById('deleteModalCustomerName');
     const stageTag = document.getElementById('deleteModalStage');
     const amtTag = document.getElementById('deleteModalAmount');
+    const itemsTag = document.getElementById('deleteModalItems');
+
+    if (itemsTag) {
+        if (ord.items && Array.isArray(ord.items) && ord.items.length > 0) {
+            const itemNames = ord.items.map(it => `${it.quantity || 1}x ${it.title || it.name || "Handcrafted Piece"}`).join(", ");
+            itemsTag.innerText = itemNames;
+            itemsTag.title = itemNames;
+        } else if (ord.productName || ord.furnitureName) {
+            itemsTag.innerText = ord.productName || ord.furnitureName;
+            itemsTag.title = itemsTag.innerText;
+        } else {
+            itemsTag.innerText = "Handcrafted Candaba Furniture";
+            itemsTag.title = itemsTag.innerText;
+        }
+    }
 
     if (idTag) idTag.innerText = '#' + ord.orderId;
     if (custTag) custTag.innerText = ord.customerName || 'Customer';
@@ -1400,6 +1419,10 @@ function closeDeleteConfirmModal() {
 async function executeDeleteConfirmedOrder() {
     if (!pendingDeleteOrderId || !window.ecohaven) return;
     const orderToDelete = pendingDeleteOrderId;
+    const ord = window.ecohaven.orders ? window.ecohaven.orders[orderToDelete] : (window.ecohaven.getOrder ? window.ecohaven.getOrder(orderToDelete) : null);
+    const customerName = ord?.customerName || "Customer";
+    const total = ord?.totalAmount || (ord?.pricing ? ord.pricing.totalAmount : 7184);
+
     const btn = document.getElementById('btnConfirmDeleteOrder');
     if (btn) {
         btn.disabled = true;
@@ -1412,6 +1435,23 @@ async function executeDeleteConfirmedOrder() {
         }
     } catch (e) {
         console.error("Error deleting order:", e);
+    }
+
+    // DISPATCH ALERT NOTIFICATION TO ECOHAVEN NOTIFICATION CENTER (BELL ALERT DRAWER)
+    if (typeof window.addEcoHavenNotification === "function") {
+        window.addEcoHavenNotification({
+            type: "alert",
+            title: `🗑️ Order #${orderToDelete} Deleted`,
+            body: `Order #${orderToDelete} (${customerName} • ₱${total.toLocaleString("en-PH", {minimumFractionDigits: 2})}) was permanently removed and board space cleared.`,
+            orderId: orderToDelete,
+            customerName: customerName,
+            customerEmail: ord?.email || null,
+            userId: ord?.userId || null,
+            icon: "delete_forever",
+            badgeColor: "bg-red-100 text-red-700",
+            isDeleted: true,
+            silentToast: true
+        });
     }
 
     if (btn) {

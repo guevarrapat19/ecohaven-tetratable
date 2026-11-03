@@ -1435,6 +1435,12 @@ class EcoHavenStore {
 
     async deleteOrder(orderId) {
         if (!orderId) return false;
+        const ord = this.orders ? this.orders[orderId] : null;
+        const custName = ord?.customerName || 'Customer';
+        const custEmail = ord?.email || null;
+        const userId = ord?.userId || null;
+        const total = ord?.totalAmount || (ord?.pricing ? ord.pricing.totalAmount : 0);
+
         if (window.ecoHavenDb) {
             try {
                 await window.ecoHavenDb.ref('ecohaven/orders/' + orderId).remove();
@@ -1449,6 +1455,23 @@ class EcoHavenStore {
         }
         this.saveLocalBackup('ecohaven_cloud_orders_cache', this.orders);
         window.dispatchEvent(new CustomEvent('ecohaven_orders_updated', { detail: this.orders }));
+
+        // Dispatch alert notification to EcoHaven Notification Center (Bell Alert Drawer)
+        if (typeof window.addEcoHavenNotification === 'function') {
+            window.addEcoHavenNotification({
+                type: 'alert',
+                title: `🗑️ Order #${orderId} Deleted`,
+                body: `Order #${orderId} (${custName} • ₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})}) was permanently removed and board space cleared.`,
+                orderId: orderId,
+                customerName: custName,
+                customerEmail: custEmail,
+                userId: userId,
+                icon: 'delete_forever',
+                badgeColor: 'bg-red-100 text-red-700',
+                isDeleted: true,
+                silentToast: true
+            });
+        }
 
         if (typeof window.showEcoHavenToast === 'function') {
             window.showEcoHavenToast("Order #" + orderId + " permanently deleted and board space cleared.", "error", "Order Deleted");

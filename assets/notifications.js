@@ -44,6 +44,8 @@
 
   // Check if current user is seller/craftsman
   function isSellerUser(user) {
+    const isSellerPage = typeof window !== 'undefined' && window.location && (window.location.pathname.includes('seller.html') || window.location.pathname.includes('/seller'));
+    if (isSellerPage) return true;
     if (!user) return false;
     const role = (user.role || '').toLowerCase();
     const email = (user.email || '').toLowerCase();
@@ -137,7 +139,7 @@
 
     let filtered = list;
     if (activeTab === 'orders') {
-      filtered = list.filter(n => n.type === 'order' || n.type === 'payment' || n.type === 'alert');
+      filtered = list.filter(n => n.type === 'order' || n.type === 'payment' || n.type === 'alert' || n.type === 'deletion');
     } else if (activeTab === 'workshop') {
       filtered = list.filter(n => n.type === 'workshop');
     }
@@ -190,10 +192,17 @@
             
             ${item.orderId ? `
               <div class="mt-2.5 flex items-center gap-2">
-                <a href="${trackPath}?orderId=${encodeURIComponent(item.orderId)}" onclick="window.markEcoHavenNotificationRead('${item.id}')" class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-primary text-white text-[11px] font-bold hover:bg-primary-container transition-all shadow-xs">
-                  <span class="material-symbols-outlined text-[14px]">local_shipping</span>
-                  <span>Track Order #${item.orderId.replace('EH-2026-', '')}</span>
-                </a>
+                ${item.isDeleted ? `
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-100 text-red-700 text-[11px] font-bold">
+                    <span class="material-symbols-outlined text-[14px]">delete_forever</span>
+                    <span>Order Deleted &amp; Space Cleared</span>
+                  </span>
+                ` : `
+                  <a href="${trackPath}?orderId=${encodeURIComponent(item.orderId)}" onclick="window.markEcoHavenNotificationRead('${item.id}')" class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-primary text-white text-[11px] font-bold hover:bg-primary-container transition-all shadow-xs">
+                    <span class="material-symbols-outlined text-[14px]">local_shipping</span>
+                    <span>Track Order #${item.orderId.replace('EH-2026-', '')}</span>
+                  </a>
+                `}
                 ${!item.read ? `
                   <button type="button" onclick="window.markEcoHavenNotificationRead('${item.id}')" class="text-[11px] text-on-surface-variant hover:text-primary font-medium px-2 py-1">
                     Mark as read
@@ -386,6 +395,7 @@
       title: notif.title || 'Order Update',
       body: notif.body || '',
       orderId: notif.orderId || null,
+      isDeleted: !!notif.isDeleted,
       customerName: customerName,
       customerEmail: customerEmail,
       userId: userId,
@@ -417,8 +427,9 @@
       }
     }
 
-    if (shouldToast && typeof window.showEcoHavenToast === 'function') {
-      window.showEcoHavenToast(newEntry.title, 'info');
+    if (!notif.silentToast && shouldToast && typeof window.showEcoHavenToast === 'function') {
+      const toastType = notif.type === 'alert' || notif.isDeleted ? 'error' : 'info';
+      window.showEcoHavenToast(newEntry.title, toastType);
     }
   };
 

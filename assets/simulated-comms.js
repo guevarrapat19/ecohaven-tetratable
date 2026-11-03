@@ -174,7 +174,7 @@
     if (document.getElementById('ecohavenCommsModal')) return;
 
     const modalHTML = `
-      <div id="ecohavenCommsModalBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden transition-opacity duration-300 opacity-0" onclick="window.closeSimulatedCommsModal()"></div>
+      <div id="ecohavenCommsModalBackdrop" class="fixed inset-0 bg-black/25 backdrop-blur-[3px] z-50 hidden transition-opacity duration-300 opacity-0" onclick="window.closeSimulatedCommsModal()"></div>
       <div id="ecohavenCommsModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 pointer-events-none hidden">
         <div class="relative w-full max-w-4xl bg-surface rounded-3xl shadow-2xl border border-outline-variant/40 pointer-events-auto transition-all duration-300 transform scale-95 opacity-0 max-h-[90vh] flex flex-col overflow-hidden" id="ecohavenCommsModalCard">
           
