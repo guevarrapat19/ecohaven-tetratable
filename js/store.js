@@ -944,92 +944,101 @@ class EcoHavenStore {
 
             const isPages = window.location.pathname.includes('/pages/') || window.location.pathname.includes('\\pages\\');
             const checkoutUrl = isPages ? 'checkout.html' : 'pages/checkout.html';
+            const shopUrl = isPages ? 'shop.html' : 'pages/shop.html';
             const imgPath = isPages ? '../assets/images/' : 'assets/images/';
 
             const drawerHtml = `
-            <!-- GLOBAL SLIDE-OUT Order Queue DRAWER -->
-            <div id="cartDrawerBackdrop" onclick="window.ecohaven.closeCartDrawer()" class="fixed inset-0 z-[9998] bg-inverse-surface/60 backdrop-blur-sm transition-opacity duration-300 opacity-0 pointer-events-none"></div>
-            <div id="cartDrawer" class="fixed top-0 right-0 z-[9999] w-full sm:w-[480px] h-full bg-surface-container-lowest shadow-2xl flex flex-col justify-between transform translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]">
+            <!-- GLOBAL SLIDE-OUT ORDER QUEUE DRAWER -->
+            <div id="cartDrawerBackdrop" onclick="window.ecohaven.closeCartDrawer()" class="fixed inset-0 z-[9998] bg-[#26190f]/60 backdrop-blur-sm transition-opacity duration-300 opacity-0 pointer-events-none"></div>
+            <div id="cartDrawer" class="fixed top-0 right-0 z-[9999] w-full sm:w-[480px] h-full bg-[#ffffff] shadow-2xl flex flex-col justify-between transform translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans">
                 <!-- Drawer Header -->
-                <div class="p-space-md bg-surface-container-low flex items-center justify-between border-b border-outline-variant/30">
-                    <div class="flex items-center gap-space-xs">
-                        <span class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                            <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+                <div class="px-5 py-4 bg-[#fff1ea] flex items-center justify-between border-b border-[#d9c2b5]/40 flex-shrink-0">
+                    <div class="flex items-center gap-3">
+                        <span class="w-10 h-10 rounded-full bg-[#86450d]/10 flex items-center justify-center text-[#86450d]">
+                            <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
                         </span>
                         <div>
-                            <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight">Workshop Order Queue</h3>
-                            <span class="font-caption text-caption text-on-surface-variant">Dalan Batu, Pasig Fabrication Queue</span>
+                            <h3 class="font-serif text-lg text-[#26190f] font-bold leading-tight">Workshop Order Queue</h3>
+                            <span class="text-xs text-[#53443a] block">Dalan Batu, Pasig Fabrication Queue</span>
                         </div>
                     </div>
-                    <button aria-label="Close Order Queue" class="w-9 h-9 rounded-full bg-surface-container hover:bg-surface-variant flex items-center justify-center text-on-surface transition-transform active:scale-90" onclick="window.ecohaven.closeCartDrawer()">
+                    <button aria-label="Close Order Queue" class="w-9 h-9 rounded-full bg-[#ffeade] hover:bg-[#f8ddce] flex items-center justify-center text-[#26190f] transition-all active:scale-90" onclick="window.ecohaven.closeCartDrawer()">
                         <span class="material-symbols-outlined text-[20px]">close</span>
                     </button>
                 </div>
 
                 <!-- Drawer Body: Cart Items List -->
-                <div class="p-space-md flex-1 overflow-y-auto space-y-space-md" id="cartDrawerScrollArea">
-                    <div id="cartDrawerItemsList" class="space-y-space-sm">
+                <div class="p-5 flex-1 overflow-y-auto space-y-4" id="cartDrawerScrollArea">
+                    <div id="cartDrawerItemsList" class="space-y-3">
                         <!-- Dynamic items injected here -->
                     </div>
 
                     <!-- Payment Modality Toggle -->
-                    <div class="p-space-md rounded-xl bg-surface-container" id="drawerPaymentModalitySection">
-                        <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider block mb-2 font-semibold" id="drawerModalityTitle">Payment Settlement Modality</span>
-                        <label id="drawerOptionFifty" class="flex items-center justify-between p-3 rounded-lg bg-surface-container-lowest cursor-pointer mb-2 border border-primary/20">
-                            <div class="flex items-center gap-space-xs">
-                                <input checked class="accent-primary w-4 h-4 cursor-pointer" name="globalDrawerPaymentOption" onchange="window.ecohaven.setDrawerPaymentMode('fifty')" type="radio" value="fifty"/>
+                    <div class="p-4 rounded-2xl bg-[#ffeade]/60 border border-[#d9c2b5]/40 space-y-2.5 transition-all" id="drawerPaymentModalitySection">
+                        <div class="flex items-center justify-between pb-1 border-b border-[#d9c2b5]/30">
+                            <span class="text-[11px] font-bold text-[#53443a] uppercase tracking-wider block" id="drawerModalityTitle">Payment Settlement Modality</span>
+                            <span class="text-[10px] text-[#415d42] font-semibold bg-[#caebc8]/50 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[12px]">verified</span> Escrow Protected
+                            </span>
+                        </div>
+                        
+                        <label id="drawerOptionFifty" class="flex items-center justify-between p-3 rounded-xl bg-white cursor-pointer border border-[#86450d]/30 transition-all shadow-sm hover:border-[#86450d]">
+                            <div class="flex items-center gap-3">
+                                <input checked class="accent-[#86450d] w-4 h-4 cursor-pointer" name="globalDrawerPaymentOption" onchange="window.ecohaven.setDrawerPaymentMode('fifty')" type="radio" value="fifty"/>
                                 <div>
-                                    <span class="font-label-md text-label-md text-on-surface font-bold block" id="drawerFiftyTitle">50% Earnest Down Payment</span>
-                                    <span class="font-caption text-caption text-on-surface-variant" id="drawerFiftySubtext">Remaining 50% due upon white-glove inspection</span>
+                                    <span class="text-xs text-[#26190f] font-bold block" id="drawerFiftyTitle">50% Earnest Down Payment</span>
+                                    <span class="text-[11px] text-[#53443a] block" id="drawerFiftySubtext">Remaining 50% due upon white-glove inspection</span>
                                 </div>
                             </div>
-                            <span class="font-label-md text-label-md text-primary font-bold" id="drawerHalfAmountDisplay">₱3,467.00</span>
+                            <span class="text-xs text-[#86450d] font-bold ml-2 flex-shrink-0" id="drawerHalfAmountDisplay">₱0.00</span>
                         </label>
-                        <label id="drawerOptionFull" class="flex items-center justify-between p-3 rounded-lg bg-surface-container-lowest cursor-pointer mb-2 border border-outline-variant/30">
-                            <div class="flex items-center gap-space-xs">
-                                <input class="accent-primary w-4 h-4 cursor-pointer" name="globalDrawerPaymentOption" onchange="window.ecohaven.setDrawerPaymentMode('full')" type="radio" value="full"/>
+
+                        <label id="drawerOptionFull" class="flex items-center justify-between p-3 rounded-xl bg-white cursor-pointer border border-[#d9c2b5]/40 transition-all shadow-sm hover:border-[#86450d]">
+                            <div class="flex items-center gap-3">
+                                <input class="accent-[#86450d] w-4 h-4 cursor-pointer" name="globalDrawerPaymentOption" onchange="window.ecohaven.setDrawerPaymentMode('full')" type="radio" value="full"/>
                                 <div>
-                                    <span class="font-label-md text-label-md text-on-surface font-bold block">100% Full Payment</span>
-                                    <span class="font-caption text-caption text-on-surface-variant">Priority bench queue + free wood care balm</span>
+                                    <span class="text-xs text-[#26190f] font-bold block">100% Full Payment</span>
+                                    <span class="text-[11px] text-[#53443a] block">Priority bench queue + free wood care balm</span>
                                 </div>
                             </div>
-                            <span class="font-label-md text-label-md text-on-surface font-bold" id="drawerFullAmountDisplay">₱6,934.00</span>
+                            <span class="text-xs text-[#26190f] font-bold ml-2 flex-shrink-0" id="drawerFullAmountDisplay">₱0.00</span>
                         </label>
-                        <label id="drawerOptionCod" class="hidden flex items-center justify-between p-3 rounded-lg bg-surface-container-lowest cursor-pointer border border-outline-variant/30">
-                            <div class="flex items-center gap-space-xs">
-                                <input class="accent-primary w-4 h-4 cursor-pointer" name="globalDrawerPaymentOption" onchange="window.ecohaven.setDrawerPaymentMode('cod')" type="radio" value="cod"/>
+
+                        <label id="drawerOptionCod" class="hidden flex items-center justify-between p-3 rounded-xl bg-white cursor-pointer border border-[#d9c2b5]/40 transition-all shadow-sm hover:border-[#86450d]">
+                            <div class="flex items-center gap-3">
+                                <input class="accent-[#86450d] w-4 h-4 cursor-pointer" name="globalDrawerPaymentOption" onchange="window.ecohaven.setDrawerPaymentMode('cod')" type="radio" value="cod"/>
                                 <div>
-                                    <span class="font-label-md text-label-md text-on-surface font-bold block">Cash on Delivery</span>
-                                    <span class="font-caption text-caption text-on-surface-variant">Zero down payment • Settle upon handover</span>
+                                    <span class="text-xs text-[#26190f] font-bold block">Cash on Delivery (COD)</span>
+                                    <span class="text-[11px] text-[#53443a] block">Zero down payment • Settle upon handover</span>
                                 </div>
                             </div>
-                            <span class="font-label-md text-label-md text-tertiary font-bold" id="drawerCodAmountDisplay">₱0.00 today</span>
+                            <span class="text-xs text-[#415d42] font-bold ml-2 flex-shrink-0" id="drawerCodAmountDisplay">₱0.00 today</span>
                         </label>
                     </div>
 
                     <!-- Workshop Compliance Seals -->
-                    <div class="space-y-1.5 p-space-xs rounded-lg bg-surface-container-low text-caption font-caption text-on-surface-variant">
-                        <div class="flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[16px] text-tertiary">verified</span>
-                            <span>DTI Registered Candaba Workshop (#4918230)</span>
+                    <div id="drawerComplianceSeals" class="space-y-2 p-3.5 rounded-xl bg-[#fff1ea] text-xs text-[#53443a] border border-[#d9c2b5]/30">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[17px] text-[#415d42]">verified</span>
+                            <span class="font-medium">DTI Registered Candaba Workshop (#4918230)</span>
                         </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[16px] text-tertiary">local_shipping</span>
-                            <span>Direct Workshop Delivery: Pampanga, Bulacan, Clark, NCR</span>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[17px] text-[#415d42]">local_shipping</span>
+                            <span class="font-medium">Direct Workshop Delivery: Pampanga, Bulacan, Clark, NCR</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Drawer Footer -->
-                <div class="p-space-md bg-surface-container-low border-t border-outline-variant/30">
-                    <div class="flex items-baseline justify-between mb-space-sm">
-                        <span class="font-label-md text-label-md text-on-surface-variant font-medium">Due Today at Reservation:</span>
-                        <span class="font-headline-md text-headline-md text-primary font-bold" id="drawerDueAmount">₱3,467.00</span>
+                <div id="drawerFooterSection" class="p-5 bg-[#fff1ea] border-t border-[#d9c2b5]/40 flex-shrink-0 space-y-3">
+                    <div id="drawerDueRow" class="flex items-baseline justify-between">
+                        <span class="text-xs text-[#53443a] font-medium">Due Today at Reservation:</span>
+                        <span class="font-serif text-xl text-[#86450d] font-bold" id="drawerDueAmount">₱0.00</span>
                     </div>
-                    <a id="drawerCheckoutBtn" href="${checkoutUrl}" class="w-full py-3.5 px-4 rounded-xl bg-primary hover:bg-on-primary-fixed text-on-primary font-label-md text-label-md font-bold flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-98">
+                    <a id="drawerCheckoutBtn" href="${checkoutUrl}" class="w-full py-3.5 px-4 rounded-xl bg-[#86450d] hover:bg-[#713700] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all active:scale-98">
                         <span>Proceed to Logistics & Checkout →</span>
                     </a>
-                    <p class="text-center font-caption text-caption text-on-surface-variant mt-2">
+                    <p id="drawerFooterNote" class="text-center text-[11px] text-[#53443a]">
                         Philippine Hardwood Joinery • 50% Earnest Escrow Guarantee
                     </p>
                 </div>
@@ -1094,6 +1103,8 @@ class EcoHavenStore {
         const listContainer = document.getElementById('cartDrawerItemsList') || document.getElementById('cart-items-container');
         const isPages = window.location.pathname.includes('/pages/') || window.location.pathname.includes('\\pages\\');
         const defaultImg = isPages ? '../assets/images/product pic.png' : 'assets/images/product pic.png';
+        const shopUrl = isPages ? 'shop.html' : 'pages/shop.html';
+        const checkoutUrl = isPages ? 'checkout.html' : 'pages/checkout.html';
 
         const subtotal = this.getCartSubtotal();
         const half = subtotal / 2;
@@ -1102,11 +1113,64 @@ class EcoHavenStore {
         const isTier2 = subtotal >= 2000 && subtotal <= 5000;
         const isTier3 = subtotal > 5000;
 
+        const modalitySection = document.getElementById('drawerPaymentModalitySection');
+        const complianceSeals = document.getElementById('drawerComplianceSeals');
+        const dueRow = document.getElementById('drawerDueRow');
+        const footerNote = document.getElementById('drawerFooterNote');
+        const drawerBtn = document.getElementById('drawerCheckoutBtn');
+
         const optFifty = document.getElementById('drawerOptionFifty');
         const optFull = document.getElementById('drawerOptionFull');
         const optCod = document.getElementById('drawerOptionCod');
         const fiftyTitle = document.getElementById('drawerFiftyTitle');
         const fiftySub = document.getElementById('drawerFiftySubtext');
+
+        if (this.cart.length === 0) {
+            // HIDE Payment Modality, Compliance Badges, and Due Row when Order Queue is empty
+            if (modalitySection) modalitySection.classList.add('hidden');
+            if (complianceSeals) complianceSeals.classList.add('hidden');
+            if (dueRow) dueRow.classList.add('hidden');
+            if (footerNote) footerNote.classList.add('hidden');
+
+            if (drawerBtn) {
+                drawerBtn.href = shopUrl;
+                drawerBtn.className = "w-full py-3 px-4 rounded-xl bg-[#ffca98] hover:bg-[#f0bd8b] text-[#2c1600] text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all active:scale-98";
+                drawerBtn.onclick = () => this.closeCartDrawer();
+                drawerBtn.innerHTML = `<span>Explore Collection Catalog →</span>`;
+            }
+
+            if (listContainer) {
+                listContainer.innerHTML = `
+                    <div class="py-12 sm:py-16 px-4 flex flex-col items-center justify-center text-center">
+                        <div class="w-16 h-16 rounded-full bg-[#ffeade] flex items-center justify-center text-[#86450d] mb-4 shadow-inner">
+                            <span class="material-symbols-outlined text-[32px]">shopping_bag</span>
+                        </div>
+                        <h4 class="font-serif text-lg font-bold text-[#26190f] mb-1">Your Order Queue is empty</h4>
+                        <p class="text-xs text-[#53443a] max-w-[280px] leading-relaxed mb-6 font-sans">
+                            Explore our handcrafted Candaba solid hardwood furniture pieces to reserve your workshop bench slot.
+                        </p>
+                        <a href="${shopUrl}" onclick="window.ecohaven.closeCartDrawer()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#86450d] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#713700] shadow transition-all active:scale-95">
+                            <span>Explore Collection Catalog</span>
+                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                        </a>
+                    </div>
+                `;
+            }
+            return;
+        }
+
+        // UNHIDE Sections when cart has active items
+        if (modalitySection) modalitySection.classList.remove('hidden');
+        if (complianceSeals) complianceSeals.classList.remove('hidden');
+        if (dueRow) dueRow.classList.remove('hidden');
+        if (footerNote) footerNote.classList.remove('hidden');
+
+        if (drawerBtn) {
+            drawerBtn.href = checkoutUrl;
+            drawerBtn.onclick = null;
+            drawerBtn.className = "w-full py-3.5 px-4 rounded-xl bg-[#86450d] hover:bg-[#713700] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all active:scale-98";
+            drawerBtn.innerHTML = `<span>Proceed to Logistics & Checkout →</span>`;
+        }
 
         if (isTier1) {
             if (optFifty) optFifty.classList.add('hidden');
@@ -1151,9 +1215,7 @@ class EcoHavenStore {
         // Update displays
         const dueDisplay = document.getElementById('drawerDueAmount');
         if (dueDisplay) {
-            if (this.cart.length === 0) {
-                dueDisplay.innerText = '₱0.00';
-            } else if (this.drawerPaymentMode === 'cod') {
+            if (this.drawerPaymentMode === 'cod') {
                 dueDisplay.innerText = '₱0.00 (Pay on Handover)';
             } else {
                 dueDisplay.innerText = `₱${dueAmount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
@@ -1161,10 +1223,10 @@ class EcoHavenStore {
         }
 
         const halfDisplay = document.getElementById('drawerHalfAmountDisplay');
-        if (halfDisplay) halfDisplay.innerText = this.cart.length === 0 ? '₱0.00' : `₱${half.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        if (halfDisplay) halfDisplay.innerText = `₱${half.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
         const fullDisplay = document.getElementById('drawerFullAmountDisplay');
-        if (fullDisplay) fullDisplay.innerText = this.cart.length === 0 ? '₱0.00' : `₱${subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        if (fullDisplay) fullDisplay.innerText = `₱${subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
         const codDisplay = document.getElementById('drawerCodAmountDisplay');
         if (codDisplay) codDisplay.innerText = '₱0.00 today';
@@ -1177,53 +1239,29 @@ class EcoHavenStore {
 
         if (!listContainer) return;
 
-        const drawerBtn = document.getElementById('drawerCheckoutBtn');
-        if (drawerBtn) {
-            if (this.cart.length === 0) {
-                drawerBtn.href = isPages ? 'shop.html' : 'pages/shop.html';
-                drawerBtn.className = "w-full py-3.5 px-4 rounded-xl bg-secondary-container text-on-secondary-container hover:bg-secondary-fixed font-label-md text-label-md font-bold flex items-center justify-center gap-2 shadow-sm transition-transform active:scale-98";
-                drawerBtn.innerHTML = `<span>Explore Collection Catalog →</span>`;
-            } else {
-                drawerBtn.href = isPages ? 'checkout.html' : 'pages/checkout.html';
-                drawerBtn.className = "w-full py-3.5 px-4 rounded-xl bg-primary hover:bg-on-primary-fixed text-on-primary font-label-md text-label-md font-bold flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-98";
-                drawerBtn.innerHTML = `<span>Proceed to Logistics & Checkout →</span>`;
-            }
-        }
-
-        if (this.cart.length === 0) {
-            listContainer.innerHTML = `
-                <div class="text-center py-8 text-on-surface-variant">
-                    <span class="material-symbols-outlined text-[36px] text-outline mb-2">shopping_bag</span>
-                    <p class="font-body-md text-sm">Your Order Queue is empty.</p>
-                    <p class="font-caption text-xs text-outline mt-1">Explore our handcrafted Candaba furniture pieces.</p>
-                </div>
-            `;
-            return;
-        }
-
         listContainer.innerHTML = this.cart.map((item, idx) => {
             const itemPrice = parseFloat(item.price) || 6934;
             const itemHalf = itemPrice / 2;
             const imgUrl = item.image ? (item.image.startsWith('http') || item.image.startsWith('.') ? item.image : (isPages ? '../assets/images/' + item.image : 'assets/images/' + item.image)) : defaultImg;
 
             return `
-            <div class="p-space-sm rounded-xl bg-surface-container-low flex gap-space-sm items-center border border-outline-variant/30">
-                <div class="w-16 h-16 rounded-lg overflow-hidden bg-surface-container flex-shrink-0">
+            <div class="p-3.5 rounded-xl bg-[#fff1ea] flex gap-3.5 items-center border border-[#d9c2b5]/40 shadow-sm">
+                <div class="w-16 h-16 rounded-lg overflow-hidden bg-white flex-shrink-0 border border-[#d9c2b5]/30">
                     <img class="w-full h-full object-cover" src="${imgUrl}" alt="${item.name}" onerror="this.src='${defaultImg}'"/>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="flex items-start justify-between gap-1">
-                        <h4 class="font-label-md text-label-md text-on-surface font-bold truncate">${item.name}</h4>
-                        <span class="font-label-md text-label-md text-primary font-bold flex-shrink-0">₱${itemPrice.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>
+                    <div class="flex items-start justify-between gap-2">
+                        <h4 class="text-sm text-[#26190f] font-bold truncate leading-tight">${item.name}</h4>
+                        <span class="text-sm text-[#86450d] font-bold flex-shrink-0">₱${itemPrice.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>
                     </div>
-                    <span class="font-caption text-caption text-on-surface-variant block mt-0.5 truncate">${item.finish || item.wood || '100% Solid Philippine Hardwood'}</span>
-                    <div class="flex items-center justify-between mt-1">
+                    <span class="text-xs text-[#53443a] block mt-0.5 truncate">${item.finish || item.wood || '100% Solid Philippine Hardwood'}</span>
+                    <div class="flex items-center justify-between mt-2">
                         ${(itemPrice < 2000)
     ? `<span class="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span> Paid in Full / COD</span>`
     : (itemPrice <= 5000)
         ? `<span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1">50% DP / Full / COD</span>`
-        : `<span class="text-[11px] font-semibold text-tertiary">50% DP: ₱${itemHalf.toLocaleString('en-PH', {minimumFractionDigits: 2})} (Downpayment Required)</span>`}
-                        <button type="button" class="text-outline hover:text-error transition-colors p-1" onclick="window.ecohaven.removeFromCart(${idx})" title="Remove item">
+        : `<span class="text-[11px] font-semibold text-[#415d42] bg-[#caebc8]/60 px-2 py-0.5 rounded-full flex items-center gap-1">50% DP: ₱${itemHalf.toLocaleString('en-PH', {minimumFractionDigits: 2})} (Mandatory)</span>`}
+                        <button type="button" class="text-[#867368] hover:text-[#ba1a1a] transition-colors p-1" onclick="window.ecohaven.removeFromCart(${idx})" title="Remove item">
                             <span class="material-symbols-outlined text-[18px]">delete</span>
                         </button>
                     </div>

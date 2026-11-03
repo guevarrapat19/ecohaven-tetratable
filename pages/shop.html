@@ -770,82 +770,6 @@
         </div>
       </div>
     </div>
-    <!-- Interactive Slide-out Order Queue Drawer Markup -->
-    <div
-      class="fixed inset-0 bg-inverse-surface/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"
-      id="cart-drawer-backdrop"></div>
-    <aside
-      class="fixed top-0 right-0 h-full w-full max-w-md bg-surface-container-lowest z-50 shadow-2xl flex flex-col translate-x-full transition-transform duration-300 ease-in-out"
-      id="cart-drawer">
-      <!-- Drawer Header -->
-      <div class="p-space-lg bg-surface-container-low flex items-center justify-between">
-        <div class="flex items-center gap-space-xs">
-          <span class="material-symbols-outlined text-primary text-[24px]">inventory_2</span>
-          <div>
-            <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Workshop Order Queue</h3>
-            <span class="font-caption text-caption text-on-surface-variant">Dalan Batu, Pasig Dispatch Queue</span>
-          </div>
-        </div>
-        <button
-          class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors"
-          onclick="toggleCartDrawer(false)">
-          <span class="material-symbols-outlined text-[20px]">close</span>
-        </button>
-      </div>
-      <!-- Active Items List -->
-      <div class="flex-1 overflow-y-auto p-space-lg flex flex-col gap-space-md" id="cart-items-container">
-        <!-- Item Template Initial Render -->
-        <div class="p-space-sm rounded-lg bg-surface-container-low flex gap-space-sm items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-14 h-14 rounded-lg bg-surface-container overflow-hidden flex-shrink-0">
-              <img class="w-full h-full object-cover"
-                data-alt="Close up corner profile of the handcrafted TetraTable 4-in-1 nested together showing mortise joint details."
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwe-CC8AilakvMCrWS9a1tbrGXWLWCjCn3klCHIIhrM72vfaHVSEYCd2vDxj9dPPlnrGEZzx8bixIfa4BCAmUD8l547rNze-0QzwM17nyX7Io12AHh8Z8ll4zWpp8k1ZGLMfg2fTnxl8eNMDCgy5G6W-4LOqZftINj5q0nbtZfFbimHPJhJF1lL2hqv4QXinxPW6uNAPmQLcduqpNyoPYAPJ6ZaavMEPYQprT8azsp" />
-            </div>
-            <div class="flex flex-col">
-              <span class="font-label-md text-label-md font-semibold text-on-surface">TetraTable 4-in-1 Suite</span>
-              <span class="font-caption text-caption text-secondary font-medium">50% Downpayment Slot</span>
-              <span class="font-label-md text-label-md font-bold text-primary mt-0.5">₱3,467.00</span>
-            </div>
-          </div>
-          <button class="text-outline hover:text-error transition-colors p-1"
-            onclick="this.parentElement.remove(); updateCartBadge();">
-            <span class="material-symbols-outlined text-[18px]">delete</span>
-          </button>
-        </div>
-      </div>
-      <!-- GCash & Financial Summary Footer -->
-      <div class="p-space-lg bg-surface-container-low flex flex-col gap-space-sm">
-        <div class="flex items-center justify-between font-body-sm text-body-sm text-on-surface-variant">
-          <span>Production Subtotal</span>
-          <span class="font-semibold text-on-surface" id="cart-subtotal">₱3,467.00</span>
-        </div>
-        <div class="flex items-center justify-between font-caption text-caption text-tertiary">
-          <span class="flex items-center gap-1">
-            <span class="material-symbols-outlined text-[14px]">local_shipping</span>
-            Pampanga &amp; Bulacan Freight
-          </span>
-          <span class="font-bold">Waived (Complimentary)</span>
-        </div>
-        <div class="pt-2 flex items-center justify-between font-headline-sm text-headline-sm font-bold text-on-surface">
-          <span>Order Queue Total</span>
-          <span class="text-primary" id="cart-total">₱3,467.00</span>
-        </div>
-        <p class="font-caption text-[11px] text-on-surface-variant leading-relaxed">
-          *Full balance (₱3,467.00) is paid via GCash or Cash-on-Delivery upon home handover and inspection
-          certification.
-        </p>
-        <a class="w-full py-3.5 px-4 rounded-lg bg-primary hover:bg-on-primary-fixed text-on-primary font-label-md text-label-md font-bold flex items-center justify-center gap-2 shadow-md transition-all text-center mt-1"
-          data-path="checkout" href="checkout.html">
-          <span>Proceed to Secure GCash Checkout</span>
-          <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-        </a>
-        <div class="flex items-center justify-center gap-2 pt-1 text-on-surface-variant font-caption text-[11px]">
-          <span class="material-symbols-outlined text-[14px] text-tertiary">lock</span>
-          <span>GCash Merchant Verified • DTI Reg #4918230</span>
-        </div>
-      </div>
-    </aside>
     <!-- Notification Toast -->
     <div
       class="fixed bottom-6 right-6 z-50 bg-inverse-surface text-inverse-on-surface px-4 py-3 rounded-lg shadow-xl flex items-center gap-3 translate-y-20 opacity-0 pointer-events-none transition-all duration-300"
@@ -1010,23 +934,16 @@
       }
 
       // Cart Drawer Controls & Interactivity
-      const drawer = document.getElementById('cart-drawer');
-      const backdrop = document.getElementById('cart-drawer-backdrop');
-      const toast = document.getElementById('cart-toast');
-      const toastMsg = document.getElementById('toast-message');
-
       function toggleCartDrawer(open) {
         if (open) {
-          backdrop.classList.remove('opacity-0', 'pointer-events-none');
-          drawer.classList.remove('translate-x-full');
+          if (window.ecohaven && typeof window.ecohaven.openCartDrawer === 'function') {
+            window.ecohaven.openCartDrawer();
+          }
         } else {
-          backdrop.classList.add('opacity-0', 'pointer-events-none');
-          drawer.classList.add('translate-x-full');
+          if (window.ecohaven && typeof window.ecohaven.closeCartDrawer === 'function') {
+            window.ecohaven.closeCartDrawer();
+          }
         }
-      }
-
-      if (backdrop) {
-        backdrop.addEventListener('click', () => toggleCartDrawer(false));
       }
 
       // Attach trigger to Shell Cart Pill if exists in DOM

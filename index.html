@@ -14,6 +14,8 @@
       darkMode: "class",
       theme: {
         extend: {
+          "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+          "spacing": { "gutter-mobile": "1rem", "space-xl": "3.5rem", "gutter": "1.5rem", "space-lg": "2rem", "margin": "3rem", "space-xs": "0.375rem", "space-md": "1.25rem", "margin-mobile": "1.25rem", "space-sm": "0.75rem" },
           colors: {
             primary: "#86450D",
             "primary-container": "#A45D25",
@@ -705,82 +707,6 @@
     </div>
   </footer>
 
-  <!-- ======================================================== -->
-  <!-- CART DRAWER & CHECKOUT SLIDEOUT -->
-  <!-- ======================================================== -->
-  <div id="cartDrawerBackdrop" onclick="closeCartDrawer()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
-
-  <div id="cartDrawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-surface z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col justify-between border-l border-outline-variant/40">
-    <!-- Drawer Header -->
-    <div class="p-4 sm:p-6 border-b border-outline-variant/30 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-primary text-[24px]">shopping_bag</span>
-        <h3 class="font-headline text-xl font-bold text-on-surface">Your Shopping Cart</h3>
-      </div>
-      <button type="button" onclick="closeCartDrawer()" class="p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors" aria-label="Close cart">
-        <span class="material-symbols-outlined text-[20px]">close</span>
-      </button>
-    </div>
-
-    <!-- Drawer Body -->
-    <div class="p-4 sm:p-6 flex-1 overflow-y-auto space-y-4">
-      <div id="cartDrawerItemsList" class="space-y-3">
-        <!-- Populated dynamically via store.js -->
-      </div>
-
-      <!-- Payment Modality Selector (50% Downpayment vs 100% Full) -->
-      <div class="p-4 rounded-2xl bg-surface-container border border-outline-variant/40 space-y-2">
-        <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant block">Payment Settlement Option</span>
-        
-        <label class="flex items-center justify-between p-3 rounded-xl bg-surface-container-lowest cursor-pointer border border-primary/30">
-          <div class="flex items-center gap-2.5">
-            <input type="radio" name="indexPaymentOption" value="fifty" checked onchange="window.ecohaven ? window.ecohaven.setDrawerPaymentMode('fifty') : null" class="accent-primary w-4 h-4"/>
-            <div>
-              <span class="text-xs font-bold text-on-surface block">50% Reservation Downpayment</span>
-              <span class="text-[11px] text-on-surface-variant">Pay balance upon Candaba delivery</span>
-            </div>
-          </div>
-          <span class="text-xs font-bold text-primary" id="drawerHalfAmountDisplay">₱3,467.00</span>
-        </label>
-
-        <label class="flex items-center justify-between p-3 rounded-xl bg-surface-container-lowest cursor-pointer border border-outline-variant/30">
-          <div class="flex items-center gap-2.5">
-            <input type="radio" name="indexPaymentOption" value="full" onchange="window.ecohaven ? window.ecohaven.setDrawerPaymentMode('full') : null" class="accent-primary w-4 h-4"/>
-            <div>
-              <span class="text-xs font-bold text-on-surface block">100% Full Payment</span>
-              <span class="text-[11px] text-on-surface-variant">Immediate workshop queue priority</span>
-            </div>
-          </div>
-          <span class="text-xs font-bold text-on-surface" id="drawerFullAmountDisplay">₱6,934.00</span>
-        </label>
-      </div>
-
-      <!-- Guarantees -->
-      <div class="p-3 rounded-xl bg-surface-container-low text-[11px] text-on-surface-variant space-y-1">
-        <p class="flex items-center gap-1.5 font-medium">
-          <span class="material-symbols-outlined text-primary text-[15px]">verified</span>
-          <span>DTI Registered Enterprise #4918230</span>
-        </p>
-        <p class="flex items-center gap-1.5 font-medium">
-          <span class="material-symbols-outlined text-tertiary text-[15px]">local_shipping</span>
-          <span>Fast Direct Delivery to Pampanga, Bulacan, & NCR</span>
-        </p>
-      </div>
-    </div>
-
-    <!-- Drawer Footer -->
-    <div class="p-4 sm:p-6 bg-surface-container-low border-t border-outline-variant/30 space-y-3">
-      <div class="flex items-baseline justify-between">
-        <span class="text-xs font-medium text-on-surface-variant">Amount Due Today:</span>
-        <span id="drawerDueAmount" class="font-headline text-2xl font-bold text-primary">₱3,467.00</span>
-      </div>
-      <a href="pages/checkout.html" class="w-full py-3.5 px-4 rounded-full bg-primary hover:bg-primary-container text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-95">
-        <span class="material-symbols-outlined text-[18px]">lock</span>
-        <span>Proceed to Checkout →</span>
-      </a>
-    </div>
-  </div>
-
   <!-- FIREBASE & STORE SCRIPTS -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
@@ -953,31 +879,14 @@
     }
 
     function openCartDrawer() {
-      const drawer = document.getElementById('cartDrawer');
-      const backdrop = document.getElementById('cartDrawerBackdrop');
-      if (backdrop) {
-        backdrop.classList.remove('opacity-0', 'pointer-events-none');
-        backdrop.classList.add('opacity-100');
-      }
-      if (drawer) {
-        drawer.classList.remove('translate-x-full');
-        drawer.classList.add('translate-x-0');
-      }
-      if (window.ecohaven && typeof window.ecohaven.renderCartDrawer === 'function') {
-        window.ecohaven.renderCartDrawer();
+      if (window.ecohaven && typeof window.ecohaven.openCartDrawer === 'function') {
+        window.ecohaven.openCartDrawer();
       }
     }
 
     function closeCartDrawer() {
-      const drawer = document.getElementById('cartDrawer');
-      const backdrop = document.getElementById('cartDrawerBackdrop');
-      if (backdrop) {
-        backdrop.classList.add('opacity-0', 'pointer-events-none');
-        backdrop.classList.remove('opacity-100');
-      }
-      if (drawer) {
-        drawer.classList.add('translate-x-full');
-        drawer.classList.remove('translate-x-0');
+      if (window.ecohaven && typeof window.ecohaven.closeCartDrawer === 'function') {
+        window.ecohaven.closeCartDrawer();
       }
     }
 
