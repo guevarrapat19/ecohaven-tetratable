@@ -198,6 +198,44 @@
             </div>
             <p id="walletSubtext" class="text-[11px] text-outline">Connected via 1-Tap Merchant Deep-Linking for instant order checkout.</p>
         </div>
+
+        <!-- My Vouchers & Perks Card (10% Welcome Voucher) -->
+        <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-[20px] p-6 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+                <h3 class="font-title-md text-on-surface font-semibold flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[20px]">confirmation_number</span>
+                    <span>My Vouchers &amp; Perks</span>
+                </h3>
+                <span id="dashVoucherCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">1 Available</span>
+            </div>
+
+            <div id="dashVoucherCard" class="p-3.5 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-700/5 border border-amber-500/30 flex flex-col gap-2 transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                            <span class="material-symbols-outlined text-[17px]">redeem</span>
+                        </span>
+                        <div>
+                            <span class="text-xs font-bold text-on-surface block">10% Welcome Gift</span>
+                            <span class="text-[11px] text-on-surface-variant font-mono">Code: <strong class="text-primary tracking-wider" id="dashVoucherCodeDisplay">WELCOME10</strong></span>
+                        </div>
+                    </div>
+                    <span id="dashVoucherStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">ACTIVE</span>
+                </div>
+                <p id="dashVoucherDescription" class="text-[11px] text-on-surface-variant leading-relaxed">
+                    Enjoy 10% discount on your first solid hardwood suite or workshop accessory order. Valid for one-time use.
+                </p>
+                <div class="flex items-center justify-between pt-1 border-t border-outline-variant/20">
+                    <button type="button" onclick="copyVoucherCode('WELCOME10')" class="text-[11px] font-bold text-primary hover:underline flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">content_copy</span>
+                        <span id="dashCopyBtnText">Copy Code</span>
+                    </button>
+                    <a href="checkout.html" id="dashVoucherActionLink" class="text-[11px] font-bold text-primary hover:underline flex items-center gap-0.5">
+                        <span>Use at Checkout →</span>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Right Main Area: Active Orders & Purchases (8 Cols) -->
@@ -936,6 +974,46 @@ function populateUserProfile() {
             }
         }
 
+        // 4. Vouchers & Perks Card Sync
+        const voucherCountBadge = document.getElementById('dashVoucherCountBadge');
+        const voucherStatusBadge = document.getElementById('dashVoucherStatusBadge');
+        const voucherDesc = document.getElementById('dashVoucherDescription');
+        const voucherLink = document.getElementById('dashVoucherActionLink');
+        const voucherCard = document.getElementById('dashVoucherCard');
+
+        const isVoucherRedeemed = (u.welcomeVoucher && u.welcomeVoucher.used === true) ||
+            (u.email && localStorage.getItem('ecohaven_voucher_used_' + u.email.toLowerCase().trim()) === 'true') ||
+            (localStorage.getItem('ecohaven_voucher_used_WELCOME10') === 'true');
+
+        if (voucherStatusBadge) {
+            if (isVoucherRedeemed) {
+                if (voucherCountBadge) {
+                    voucherCountBadge.textContent = '0 Available';
+                    voucherCountBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container text-outline';
+                }
+                voucherStatusBadge.textContent = 'REDEEMED';
+                voucherStatusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container text-outline border border-outline-variant/30';
+                if (voucherDesc) {
+                    const orderRef = (u.welcomeVoucher && u.welcomeVoucher.usedOrderId) ? ` on Order #${u.welcomeVoucher.usedOrderId}` : '';
+                    voucherDesc.textContent = `Redeemed${orderRef}. Thank you for commissioning Candaba woodcraft artisans!`;
+                }
+                if (voucherLink) voucherLink.classList.add('hidden');
+                if (voucherCard) voucherCard.className = 'p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 flex flex-col gap-2 transition-all opacity-75';
+            } else {
+                if (voucherCountBadge) {
+                    voucherCountBadge.textContent = '1 Available';
+                    voucherCountBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+                }
+                voucherStatusBadge.textContent = 'ACTIVE';
+                voucherStatusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300';
+                if (voucherDesc) {
+                    voucherDesc.textContent = 'Enjoy 10% discount on your first solid hardwood suite or workshop accessory order. Valid for one-time use.';
+                }
+                if (voucherLink) voucherLink.classList.remove('hidden');
+                if (voucherCard) voucherCard.className = 'p-3.5 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-700/5 border border-amber-500/30 flex flex-col gap-2 transition-all';
+            }
+        }
+
         // Auto pre-fill address recipient inputs if empty
         const recEl = document.getElementById('addrRecipient');
         if (recEl && !recEl.value) recEl.value = displayName;
@@ -943,6 +1021,22 @@ function populateUserProfile() {
         if (phEl && !phEl.value && u.phone) phEl.value = u.phone;
     } catch(e) {
         console.warn('Profile population error:', e);
+    }
+}
+
+function copyVoucherCode(code) {
+    try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(code);
+        }
+    } catch(e){}
+    if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast(`Voucher code "${code}" copied to clipboard!`, 'success');
+    }
+    const btnText = document.getElementById('dashCopyBtnText');
+    if (btnText) {
+        btnText.textContent = 'Copied ✓';
+        setTimeout(() => { btnText.textContent = 'Copy Code'; }, 2000);
     }
 }
 document.addEventListener('DOMContentLoaded', populateUserProfile);

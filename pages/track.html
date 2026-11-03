@@ -776,6 +776,18 @@ function renderOrder(order) {
     }
   }
 
+  if (order.discountAmount && order.discountAmount > 0) {
+    itemsContainer.innerHTML += `
+      <div class="flex justify-between items-center text-xs sm:text-sm text-emerald-800 font-semibold bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-200 mt-2">
+        <span class="flex items-center gap-1">
+          <span class="material-symbols-outlined text-[15px] text-emerald-700">sell</span>
+          <span>Voucher Discount (${order.voucherCode || 'WELCOME10'})</span>
+        </span>
+        <span>-₱${parseFloat(order.discountAmount).toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>
+      </div>
+    `;
+  }
+
   // Financial Summary Breakdown
   const total = parseFloat(order.grossTotal || order.totalAmount || 7184);
     const isDone = parseInt(order.stage, 10) === 5 || order.orderStatus === 'Delivered & Complete';

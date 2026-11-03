@@ -1627,7 +1627,7 @@ function renderKanban() {
                     <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline">
                         Ref: ${ord.gcashRef || (ord.payment && ord.payment.reference) || '9021-8841-2910'}<br/>
                         Amount Paid: ₱${paid.toLocaleString('en-PH', {minimumFractionDigits: 2})}<br/>
-                        Order Total: ₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})}
+                        Order Total: ₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})}${ord.discountAmount ? `<br/><span class="text-emerald-700 font-bold">Voucher: ${ord.voucherCode || 'WELCOME10'} (-₱${parseFloat(ord.discountAmount).toLocaleString('en-PH', {minimumFractionDigits: 2})})</span>` : ''}
                     </div>
                     `}
 

@@ -569,11 +569,63 @@
     </label>
   </div>
 
+  <!-- Voucher / Promotional Code Section (Requirement: 10% Welcome Voucher with 1-time enforcement) -->
+  <div class="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant/30 space-y-2.5">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-on-surface">
+        <span class="material-symbols-outlined text-primary text-[17px]">confirmation_number</span>
+        <span>Have a Voucher Code?</span>
+      </div>
+      <span class="text-[10px] text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-full" id="voucherPerkBadge">10% Welcome Perk</span>
+    </div>
+
+    <!-- Active Available Welcome Voucher Quick-Apply Bar -->
+    <div id="voucherAutoSuggestBox" class="hidden p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between transition-all">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-amber-700 text-[18px]">redeem</span>
+        <div>
+          <p class="text-xs font-bold text-amber-900 leading-tight">10% Welcome Voucher Available</p>
+          <p class="text-[11px] text-amber-800">Exclusive 1-time discount for your account</p>
+        </div>
+      </div>
+      <button type="button" onclick="quickApplyWelcomeVoucher()" class="px-3 py-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-[11px] font-bold transition-all shadow-xs flex items-center gap-1 active:scale-95">
+        <span>Apply WELCOME10</span>
+      </button>
+    </div>
+
+    <!-- Voucher Input Field -->
+    <div class="flex gap-2">
+      <div class="relative flex-1">
+        <input type="text" id="voucherCodeInput" placeholder="Enter voucher code (e.g. WELCOME10)" class="w-full pl-3 pr-8 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/40 text-xs font-mono font-bold tracking-wider text-on-surface focus:outline-none focus:ring-2 focus:ring-primary uppercase placeholder:normal-case placeholder:font-sans placeholder:font-normal"/>
+        <button type="button" id="clearVoucherBtn" onclick="clearVoucherInput()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface text-xs">
+          <span class="material-symbols-outlined text-[16px]">close</span>
+        </button>
+      </div>
+      <button type="button" id="applyVoucherBtn" onclick="applyVoucherCode()" class="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1 active:scale-95 flex-shrink-0">
+        <span>Apply</span>
+      </button>
+    </div>
+
+    <!-- Voucher Status / Error / Success Message -->
+    <div id="voucherStatusMsg" class="hidden text-xs font-medium p-2.5 rounded-lg flex items-center justify-between transition-all">
+      <div class="flex items-center gap-1.5" id="voucherStatusContent"></div>
+      <button type="button" id="removeVoucherBtn" onclick="removeVoucherCode()" class="hidden text-[11px] font-bold text-red-700 hover:underline">Remove</button>
+    </div>
+  </div>
+
   <!-- Order Summary Breakdown -->
   <div class="flex flex-col gap-2 pt-2 bg-surface-container-low p-space-md rounded-xl border border-outline-variant/20">
     <div class="flex justify-between font-body-sm text-body-sm text-on-surface-variant">
       <span id="summaryItemsCountLabel">Workshop Pieces Subtotal (1 Item)</span>
       <span class="font-semibold text-on-surface" id="summarySubtotal">₱6,934.00</span>
+    </div>
+    <!-- Voucher Discount Breakdown Row -->
+    <div id="voucherDiscountRow" class="hidden flex justify-between font-body-sm text-body-sm text-emerald-800 font-semibold bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-200/80">
+      <span class="flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px] text-emerald-700">sell</span>
+        <span id="voucherDiscountLabel">Welcome Voucher (10% OFF)</span>
+      </span>
+      <span id="voucherDiscountVal">-₱0.00</span>
     </div>
     <div class="flex justify-between font-body-sm text-body-sm text-on-surface-variant">
       <span id="freightLabel">Luzon Logistics (Zone 1 - Candaba Local)</span>
@@ -1100,6 +1152,197 @@
     let freightCost = 250.00;
     let freightName = 'Zone 1: Candaba Local & Pampanga';
     let paymentMode = 'fifty'; // 'fifty' or 'full'
+    let appliedVoucher = null; // { code: 'WELCOME10', discountPercent: 10 }
+
+    // ==========================================================
+    // VOUCHER CODE & 10% DISCOUNT CONTROLLER (One-Time Use Enforcement)
+    // ==========================================================
+    function initCheckoutVoucher() {
+      let u = null;
+      try {
+        const uStr = localStorage.getItem('ecohaven_user');
+        if (uStr) u = JSON.parse(uStr);
+      } catch(e){}
+
+      const autoSuggestBox = document.getElementById('voucherAutoSuggestBox');
+      const isUsed = isVoucherUsed('WELCOME10', u);
+
+      if (autoSuggestBox) {
+        if (!isUsed) {
+          autoSuggestBox.classList.remove('hidden');
+        } else {
+          autoSuggestBox.classList.add('hidden');
+        }
+      }
+
+      const input = document.getElementById('voucherCodeInput');
+      if (input) {
+        input.addEventListener('input', function() {
+          const clearBtn = document.getElementById('clearVoucherBtn');
+          if (clearBtn) {
+            clearBtn.classList.toggle('hidden', !this.value);
+          }
+        });
+      }
+    }
+
+    function isVoucherUsed(code, user) {
+      if (!code) return false;
+      const cleanCode = code.trim().toUpperCase();
+
+      // Check user profile object
+      if (user && user.welcomeVoucher && user.welcomeVoucher.used === true) {
+        return true;
+      }
+
+      // Check localStorage flags
+      if (user && user.email) {
+        const emailFlag = localStorage.getItem('ecohaven_voucher_used_' + user.email.toLowerCase().trim());
+        if (emailFlag === 'true') return true;
+      }
+      const genericFlag = localStorage.getItem('ecohaven_voucher_used_' + cleanCode);
+      if (genericFlag === 'true') {
+        if (user && user.welcomeVoucher && user.welcomeVoucher.used === true) return true;
+      }
+
+      // Check previous orders in store
+      if (window.ecohaven && window.ecohaven.orders) {
+        const uEmail = user && user.email ? user.email.toLowerCase().trim() : '';
+        const uPhone = user && user.phone ? user.phone.replace(/[^0-9]/g, '') : '';
+        for (const ord of Object.values(window.ecohaven.orders)) {
+          if (!ord) continue;
+          const ordEmail = (ord.email || '').toLowerCase().trim();
+          const ordPhone = (ord.phone || '').replace(/[^0-9]/g, '');
+          const isSameCustomer = (uEmail && ordEmail === uEmail) || (uPhone && ordPhone === uPhone);
+          if (isSameCustomer && (ord.voucherCode === cleanCode || (ord.discountAmount && ord.discountAmount > 0))) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    }
+
+    function applyVoucherCode() {
+      const input = document.getElementById('voucherCodeInput');
+      const statusMsg = document.getElementById('voucherStatusMsg');
+      const statusContent = document.getElementById('voucherStatusContent');
+      const removeBtn = document.getElementById('removeVoucherBtn');
+      const clearBtn = document.getElementById('clearVoucherBtn');
+      if (!input) return;
+
+      const code = input.value.trim().toUpperCase();
+      if (!code) {
+        if (typeof window.showEcoHavenToast === 'function') {
+          window.showEcoHavenToast('Please enter a voucher code.', 'warning');
+        } else {
+          alert('Please enter a voucher code.');
+        }
+        input.focus();
+        return;
+      }
+
+      let u = null;
+      try {
+        const uStr = localStorage.getItem('ecohaven_user');
+        if (uStr) u = JSON.parse(uStr);
+      } catch(e){}
+
+      // Check code validity
+      if (code !== 'WELCOME10' && code !== 'CANDABA10') {
+        if (statusMsg && statusContent) {
+          statusMsg.className = 'text-xs font-medium p-2.5 rounded-lg bg-red-50 text-red-700 border border-red-200 flex items-center justify-between transition-all';
+          statusContent.innerHTML = '<span class="material-symbols-outlined text-[16px] text-red-600">error</span><span>Invalid voucher code. Please check your spelling and try again.</span>';
+          statusMsg.classList.remove('hidden');
+          if (removeBtn) removeBtn.classList.add('hidden');
+        }
+        if (typeof window.showEcoHavenToast === 'function') {
+          window.showEcoHavenToast('⚠️ Invalid voucher code.', 'warning');
+        }
+        appliedVoucher = null;
+        recalculate();
+        return;
+      }
+
+      // Check one-time use enforcement
+      if (isVoucherUsed(code, u)) {
+        if (statusMsg && statusContent) {
+          statusMsg.className = 'text-xs font-medium p-2.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 flex items-center justify-between transition-all';
+          statusContent.innerHTML = '<span class="material-symbols-outlined text-[16px] text-amber-700">warning</span><span>Voucher <strong>' + code + '</strong> has already been redeemed. This voucher is valid for one-time use only.</span>';
+          statusMsg.classList.remove('hidden');
+          if (removeBtn) removeBtn.classList.add('hidden');
+        }
+        if (typeof window.showEcoHavenToast === 'function') {
+          window.showEcoHavenToast('⚠️ Voucher ' + code + ' has already been used.', 'warning');
+        }
+        appliedVoucher = null;
+        recalculate();
+        return;
+      }
+
+      // Apply 10% voucher!
+      appliedVoucher = {
+        code: code,
+        discountPercent: 10
+      };
+
+      input.value = code;
+      if (clearBtn) clearBtn.classList.remove('hidden');
+
+      if (statusMsg && statusContent) {
+        statusMsg.className = 'text-xs font-semibold p-2.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center justify-between transition-all';
+        statusContent.innerHTML = '<span class="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span><span>Voucher <strong>' + code + '</strong> applied! 10% discount deducted from your total.</span>';
+        statusMsg.classList.remove('hidden');
+        if (removeBtn) removeBtn.classList.remove('hidden');
+      }
+
+      const autoBox = document.getElementById('voucherAutoSuggestBox');
+      if (autoBox) autoBox.classList.add('hidden');
+
+      if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast('🌿 10% Welcome Voucher applied successfully!', 'success');
+      }
+
+      recalculate();
+    }
+
+    function quickApplyWelcomeVoucher() {
+      const input = document.getElementById('voucherCodeInput');
+      if (input) input.value = 'WELCOME10';
+      applyVoucherCode();
+    }
+
+    function clearVoucherInput() {
+      const input = document.getElementById('voucherCodeInput');
+      const clearBtn = document.getElementById('clearVoucherBtn');
+      if (input) input.value = '';
+      if (clearBtn) clearBtn.classList.add('hidden');
+    }
+
+    function removeVoucherCode() {
+      appliedVoucher = null;
+      const input = document.getElementById('voucherCodeInput');
+      const statusMsg = document.getElementById('voucherStatusMsg');
+      const clearBtn = document.getElementById('clearVoucherBtn');
+      if (input) input.value = '';
+      if (clearBtn) clearBtn.classList.add('hidden');
+      if (statusMsg) statusMsg.classList.add('hidden');
+
+      let u = null;
+      try {
+        const uStr = localStorage.getItem('ecohaven_user');
+        if (uStr) u = JSON.parse(uStr);
+      } catch(e){}
+      const autoBox = document.getElementById('voucherAutoSuggestBox');
+      if (autoBox && !isVoucherUsed('WELCOME10', u)) {
+        autoBox.classList.remove('hidden');
+      }
+
+      if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast('Voucher removed.', 'info');
+      }
+      recalculate();
+    }
 
     
     // ==========================================================
@@ -1632,12 +1875,28 @@
       const subDisplay = document.getElementById('summarySubtotal');
       if (subDisplay) subDisplay.innerText = `₱${basePrice.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
-      const gross = basePrice + freightCost;
+      // Voucher discount computation (applies to total price computation)
+      let discountAmount = 0;
+      const voucherRow = document.getElementById('voucherDiscountRow');
+      const voucherVal = document.getElementById('voucherDiscountVal');
+      const voucherLabel = document.getElementById('voucherDiscountLabel');
+
+      if (appliedVoucher && basePrice > 0) {
+        discountAmount = Math.round(basePrice * (appliedVoucher.discountPercent / 100) * 100) / 100;
+        if (voucherRow) voucherRow.classList.remove('hidden');
+        if (voucherVal) voucherVal.innerText = `-₱${discountAmount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        if (voucherLabel) voucherLabel.innerText = `${appliedVoucher.code} (${appliedVoucher.discountPercent}% OFF)`;
+      } else {
+        if (voucherRow) voucherRow.classList.add('hidden');
+      }
+
+      const discountedBase = Math.max(0, basePrice - discountAmount);
+      const gross = discountedBase + freightCost;
       document.getElementById('grossTotal').innerText = `₱${gross.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
       document.getElementById('freightVal').innerText = `₱${freightCost.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
       if (paymentMode === 'fifty' && hasFurniture) {
-        const halfBase = basePrice / 2;
+        const halfBase = discountedBase / 2;
         const due = halfBase + freightCost;
         const balance = halfBase;
 
@@ -2329,15 +2588,17 @@
       const email = document.getElementById('customerEmailInput') ? document.getElementById('customerEmailInput').value : "juan.delacruz@email.ph";
       const address = document.getElementById('customerAddressInput') ? document.getElementById('customerAddressInput').value : "Lot 14 Blk 5, Mahogany Hills, Angeles City, Pampanga, 2009";
 
-      const gross = basePrice + freightCost;
+      const discountVal = appliedVoucher ? Math.round(basePrice * (appliedVoucher.discountPercent / 100) * 100) / 100 : 0;
+      const discountedBase = Math.max(0, basePrice - discountVal);
+      const gross = discountedBase + freightCost;
       const isCodOrder = (selectedGateway === 'cod' || paymentMode === 'cod');
       const hasFurniture = activeCart.length === 0
         ? (basePrice >= 2000)
         : activeCart.some(item => (parseFloat(item.price) || 0) >= 2000);
 
       let orderStageName = "50% Down Payment Submitted (Pending Verification)";
-      let orderDownPayment = (paymentMode === 'fifty' && hasFurniture) ? (basePrice / 2 + freightCost) : gross;
-      let orderBalance = (paymentMode === 'fifty' && hasFurniture) ? (basePrice / 2) : 0;
+      let orderDownPayment = (paymentMode === 'fifty' && hasFurniture) ? (discountedBase / 2 + freightCost) : gross;
+      let orderBalance = (paymentMode === 'fifty' && hasFurniture) ? (discountedBase / 2) : 0;
       let orderPaymentMode = paymentMode;
 
       if (isCodOrder) {
@@ -2385,6 +2646,10 @@
         downPaymentPaid: orderDownPayment,
         balanceDue: orderBalance,
         totalAmount: gross,
+        originalSubtotal: basePrice,
+        voucherCode: appliedVoucher ? appliedVoucher.code : null,
+        discountPercent: appliedVoucher ? appliedVoucher.discountPercent : 0,
+        discountAmount: discountVal,
         gcashRef: randRef,
         authToken: isCodOrder ? 'COD-CONFIRMED' : (gcashAuthToken || 'SIMULATED-AUTH'),
         receiptFile: isCodOrder ? '' : (uploadedReceiptName || '../assets/images/Screenshot_2026-07-30-16-10-31-954_com.globe.gcash.android.jpg'),
@@ -2412,6 +2677,32 @@
       let orderId = 'EH-2026-' + Math.floor(10000 + Math.random() * 90000);
       if (window.ecohaven && window.ecohaven.submitOrder) {
         orderId = await window.ecohaven.submitOrder(orderData);
+      }
+
+      // Enforce one-time use of voucher: mark as used on user account & locally
+      if (appliedVoucher) {
+        let u = null;
+        try {
+          const uStr = localStorage.getItem('ecohaven_user');
+          if (uStr) u = JSON.parse(uStr);
+        } catch(e){}
+        if (u) {
+          if (!u.welcomeVoucher) u.welcomeVoucher = {};
+          u.welcomeVoucher.code = appliedVoucher.code;
+          u.welcomeVoucher.used = true;
+          u.welcomeVoucher.usedAt = new Date().toISOString();
+          u.welcomeVoucher.usedOrderId = orderId;
+          localStorage.setItem('ecohaven_user', JSON.stringify(u));
+          localStorage.setItem('currentUser', JSON.stringify(u));
+          if (window.ecoHavenDb && u.uid) {
+            window.ecoHavenDb.ref('users/' + u.uid + '/welcomeVoucher').set(u.welcomeVoucher).catch(() => {});
+            window.ecoHavenDb.ref('ecohaven/users/' + u.uid + '/welcomeVoucher').set(u.welcomeVoucher).catch(() => {});
+          }
+        }
+        if (email) {
+          localStorage.setItem('ecohaven_voucher_used_' + email.toLowerCase().trim(), 'true');
+        }
+        localStorage.setItem('ecohaven_voucher_used_' + appliedVoucher.code, 'true');
       }
 
       // Explicitly clear Order Queue (Cart) upon successful order creation
@@ -2473,6 +2764,7 @@
       renderCheckoutItems();
       initRegionDropdowns();
       renderSavedAddressesDropdown();
+      if (typeof initCheckoutVoucher === 'function') initCheckoutVoucher();
       recalculate();
     }
 

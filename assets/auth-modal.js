@@ -314,6 +314,76 @@ if (document.readyState === 'loading') {
 
         </div>
       </div>
+
+      <!-- WELCOME VOUCHER MODAL (10% OFF EXCLUSIVE NEW ACCOUNT GIFT) -->
+      <div id="ecohavenVoucherModalBackdrop" class="fixed inset-0 bg-black/45 backdrop-blur-sm z-[60] hidden transition-opacity duration-300 opacity-0" onclick="closeWelcomeVoucherModal()"></div>
+      <div id="ecohavenVoucherModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none hidden">
+        <div class="relative w-full max-w-md bg-gradient-to-b from-[#FFFDF9] to-[#FBF7F0] rounded-3xl shadow-2xl border-2 border-primary/30 p-6 sm:p-8 pointer-events-auto transition-all duration-300 transform scale-95 opacity-0 max-h-[92vh] overflow-y-auto no-scrollbar text-center" id="ecohavenVoucherCard">
+          
+          <!-- Close Button -->
+          <button type="button" onclick="closeWelcomeVoucherModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant flex items-center justify-center transition-all active:scale-90" aria-label="Close">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+
+          <!-- Celebratory Badge -->
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-3 border border-emerald-300/60 shadow-2xs">
+            <span class="material-symbols-outlined text-[16px]">celebration</span>
+            <span>Welcome Gift Claimed!</span>
+          </div>
+
+          <h3 class="font-headline text-2xl font-bold text-on-surface leading-tight mb-1">
+            Enjoy 10% OFF Your Order
+          </h3>
+          <p class="text-xs text-on-surface-variant mb-5">
+            Salamat for joining EcoHaven, <span id="voucherModalUserName" class="font-semibold text-on-surface">Artisan Friend</span>! Here is your exclusive 10% welcome voucher for handcrafted solid timber suites and workshop accessories.
+          </p>
+
+          <!-- Perforated Voucher Ticket Card -->
+          <div class="relative bg-white rounded-2xl border-2 border-dashed border-primary/40 p-5 mb-5 shadow-sm overflow-hidden text-left">
+            <!-- Cutout Circles for ticket effect -->
+            <div class="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#FBF7F0] rounded-full border-r-2 border-dashed border-primary/40"></div>
+            <div class="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#FBF7F0] rounded-full border-l-2 border-dashed border-primary/40"></div>
+            
+            <div class="flex items-center justify-between mb-3 border-b border-outline-variant/30 pb-2">
+              <div class="flex items-center gap-1.5 text-primary font-bold text-xs">
+                <span class="material-symbols-outlined text-[18px]">eco</span>
+                <span>EcoHaven Candaba Workshop</span>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-primary/10 text-primary">ONE-TIME USE</span>
+            </div>
+
+            <div class="flex items-baseline justify-between mb-3">
+              <div>
+                <span class="text-3xl font-extrabold text-primary font-headline">10% OFF</span>
+                <p class="text-[11px] text-on-surface-variant">Applied to your total order price</p>
+              </div>
+              <div class="text-right">
+                <span class="text-xs text-outline block">Voucher Code</span>
+                <span class="text-base font-mono font-bold text-on-surface tracking-wider bg-surface-container-low px-2 py-1 rounded border border-outline-variant/40" id="voucherModalCode">WELCOME10</span>
+              </div>
+            </div>
+
+            <div class="text-[11px] text-on-surface-variant flex items-center justify-between pt-1">
+              <span class="flex items-center gap-1 text-emerald-700 font-semibold">
+                <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                Active on your account
+              </span>
+              <span class="text-outline">Valid on 1st order</span>
+            </div>
+          </div>
+
+          <!-- Claim & Action Buttons -->
+          <div class="space-y-2">
+            <button type="button" onclick="claimVoucherAndRedirect()" class="w-full py-3.5 px-4 rounded-2xl bg-primary hover:bg-primary-container text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 active:scale-98">
+              <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+              <span id="claimVoucherBtnText">Claim 10% Voucher & Shop</span>
+            </button>
+            <button type="button" onclick="closeWelcomeVoucherModal()" class="w-full py-2.5 text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-all">
+              I'll use it later at Checkout
+            </button>
+          </div>
+        </div>
+      </div>
     `;
 
     document.body.insertAdjacentHTML('beforeend', modalHTML);
@@ -400,6 +470,83 @@ if (document.readyState === 'loading') {
       backdrop.classList.add('hidden');
       modal.classList.add('hidden');
     }, 280);
+  };
+
+  // ==========================================================
+  // WELCOME VOUCHER CONTROLLER (10% OFF ON REGISTRATION)
+  // ==========================================================
+  window.showWelcomeVoucherModal = function (voucherData = {}) {
+    injectAuthModal();
+    const backdrop = document.getElementById('ecohavenVoucherModalBackdrop');
+    const modal = document.getElementById('ecohavenVoucherModal');
+    const card = document.getElementById('ecohavenVoucherCard');
+    if (!backdrop || !modal || !card) return;
+
+    if (voucherData.name) {
+      const nameEl = document.getElementById('voucherModalUserName');
+      if (nameEl) nameEl.textContent = voucherData.name;
+    }
+
+    backdrop.classList.remove('hidden');
+    modal.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      backdrop.classList.remove('opacity-0');
+      card.classList.remove('scale-95', 'opacity-0');
+      card.classList.add('scale-100', 'opacity-100');
+    });
+  };
+
+  window.closeWelcomeVoucherModal = function () {
+    const backdrop = document.getElementById('ecohavenVoucherModalBackdrop');
+    const modal = document.getElementById('ecohavenVoucherModal');
+    const card = document.getElementById('ecohavenVoucherCard');
+    if (!backdrop || !card) return;
+
+    backdrop.classList.add('opacity-0');
+    card.classList.remove('scale-100', 'opacity-100');
+    card.classList.add('scale-95', 'opacity-0');
+
+    setTimeout(() => {
+      backdrop.classList.add('hidden');
+      modal.classList.add('hidden');
+    }, 280);
+  };
+
+  window.claimVoucherAndRedirect = function () {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText('WELCOME10');
+      }
+    } catch (e) {}
+
+    if (typeof window.showEcoHavenToast === 'function') {
+      window.showEcoHavenToast('🎉 WELCOME10 voucher claimed! 10% discount copied and ready for checkout.', 'success');
+    }
+
+    window.closeWelcomeVoucherModal();
+
+    setTimeout(() => {
+      const isPagesDir = window.location.pathname.includes('/pages/');
+      const currentPath = window.location.pathname.toLowerCase();
+      const rawCart = localStorage.getItem('ecohaven_cart');
+      let cartHasItems = false;
+      try {
+        const parsed = JSON.parse(rawCart);
+        if (Array.isArray(parsed) && parsed.length > 0) cartHasItems = true;
+      } catch (e) {}
+
+      if (currentPath.includes('checkout.html')) {
+        if (typeof applyVoucherCode === 'function') {
+          const input = document.getElementById('voucherCodeInput');
+          if (input) input.value = 'WELCOME10';
+          applyVoucherCode();
+        }
+      } else if (cartHasItems) {
+        window.location.href = isPagesDir ? 'checkout.html' : 'pages/checkout.html';
+      } else {
+        window.location.href = isPagesDir ? 'shop.html' : 'pages/shop.html';
+      }
+    }, 320);
   };
 
   window.switchAuthTab = function (tab) {
@@ -533,7 +680,14 @@ if (document.readyState === 'loading') {
         accountStatus: 'Active',
         emailVerified: false,
         createdAt: now,
-        lastLoginAt: now
+        lastLoginAt: now,
+        welcomeVoucher: {
+          code: 'WELCOME10',
+          discountPercent: 10,
+          claimed: true,
+          claimedAt: now,
+          used: false
+        }
       };
 
       // 4. Save to Firebase Realtime Database
@@ -550,6 +704,7 @@ if (document.readyState === 'loading') {
       // 5. Store session in localStorage
       localStorage.setItem('ecohaven_user', JSON.stringify(newUser));
       localStorage.setItem('ecohaven_uid', newUid);
+      localStorage.setItem('currentUser', JSON.stringify(newUser));
 
       closeAuthModal();
       notify(`Welcome to EcoHaven, ${name}! Your account has been registered.`, 'success');
@@ -559,28 +714,30 @@ if (document.readyState === 'loading') {
         window.simulateEmailNotification({
           to: email,
           subject: 'Welcome to EcoHaven Furniture — Account Verified',
-          body: `Mabuhay ${name}!\n\nYour artisan woodcraft account is active. Explore our sustainable modular collections handcrafted in Candaba, Pampanga.\n\nUse voucher code CANDABA10 for 10% off your initial suite reservation.`,
+          body: `Mabuhay ${name}!\n\nYour artisan woodcraft account is active. Explore our sustainable modular collections handcrafted in Candaba, Pampanga.\n\nUse voucher code WELCOME10 for 10% off your initial suite reservation.`,
           category: 'Welcome'
         });
       }
       if (typeof window.simulateSmsNotification === 'function') {
         window.simulateSmsNotification({
           to: phone,
-          message: `[EcoHaven PH] Salamat ${name}! Your account is active. Welcome voucher: CANDABA10 for 10% off your first modular order. Explore: ecohaven.ph`,
+          message: `[EcoHaven PH] Salamat ${name}! Your account is active. Welcome voucher: WELCOME10 for 10% off your first modular order. Explore: ecohaven.ph`,
           category: 'Welcome'
         });
       }
 
-      // 6. Route to customer dashboard
-      const isPagesDir = window.location.pathname.includes('/pages/');
-      const currentPath = window.location.pathname.toLowerCase();
-      if (!currentPath.includes('dashboard.html')) {
-        setTimeout(() => {
-          window.location.href = isPagesDir ? 'dashboard.html' : 'pages/dashboard.html';
-        }, 600);
-      } else if (typeof populateUserProfile === 'function') {
-        populateUserProfile();
+      // Update header navigation & dispatch login event
+      if (typeof window.syncHeaderUserNavigation === 'function') {
+        window.syncHeaderUserNavigation();
       }
+      window.dispatchEvent(new CustomEvent('ecohaven_user_logged_in', { detail: newUser }));
+
+      // 6. SHOW THE 10% WELCOME VOUCHER MODAL
+      setTimeout(() => {
+        if (typeof window.showWelcomeVoucherModal === 'function') {
+          window.showWelcomeVoucherModal({ name: name, code: 'WELCOME10', discount: 10 });
+        }
+      }, 350);
 
     } catch (err) {
       console.error('Registration error:', err);
@@ -809,6 +966,19 @@ if (document.readyState === 'loading') {
     userProfile.fullName = finalDisplayName;
     userProfile.phone = userProfile.phone || '';
 
+    // Ensure Welcome Voucher exists for new customer
+    let isNewCustomerVoucher = false;
+    if (!userProfile.welcomeVoucher) {
+      userProfile.welcomeVoucher = {
+        code: 'WELCOME10',
+        discountPercent: 10,
+        claimed: true,
+        claimedAt: new Date().toISOString(),
+        used: false
+      };
+      isNewCustomerVoucher = true;
+    }
+
     // 1. Save or update user profile in Firebase Realtime Database
     if (window.ecoHavenDb) {
       try {
@@ -820,6 +990,7 @@ if (document.readyState === 'loading') {
           photoURL: userProfile.photoURL || '',
           authProvider: 'google.com',
           role: 'customer',
+          welcomeVoucher: userProfile.welcomeVoucher,
           lastLoginAt: firebase.database.ServerValue.TIMESTAMP
         });
       } catch (dbErr) {
@@ -837,7 +1008,7 @@ if (document.readyState === 'loading') {
       window.simulateEmailNotification({
         to: userProfile.email,
         subject: "🌿 Welcome to EcoHaven Furniture — Google Verification Successful",
-        body: `Mabuhay ${userProfile.displayName}!\n\nYour Google account (${userProfile.email}) has been successfully authenticated with EcoHaven Furniture (Candaba Workshop). You can now track your orders, manage saved delivery addresses, and reserve furniture pieces with 50% earnest timber allocation.`
+        body: `Mabuhay ${userProfile.displayName}!\n\nYour Google account (${userProfile.email}) has been successfully authenticated with EcoHaven Furniture (Candaba Workshop). You can now track your orders, manage saved delivery addresses, and reserve furniture pieces with 50% earnest timber allocation.\n\nUse your 10% welcome voucher WELCOME10 on your first handcrafted order!`
       });
     }
 
@@ -851,6 +1022,14 @@ if (document.readyState === 'loading') {
 
     if (typeof window.showEcoHavenToast === 'function') {
       window.showEcoHavenToast(`🌿 Welcome, ${userProfile.displayName}! Signed in with Google.`, 'success');
+    }
+
+    if (isNewCustomerVoucher) {
+      setTimeout(() => {
+        if (typeof window.showWelcomeVoucherModal === 'function') {
+          window.showWelcomeVoucherModal({ name: userProfile.displayName, code: 'WELCOME10', discount: 10 });
+        }
+      }, 400);
     }
   }
   window.finalizeGoogleUser = finalizeGoogleUser;
