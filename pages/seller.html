@@ -1557,7 +1557,8 @@ function renderKanban() {
             paid = total;
             bal = 0;
         } else {
-            paid = parseFloat(ord.amountPaid !== undefined ? ord.amountPaid : (ord.downPaymentPaid !== undefined ? ord.downPaymentPaid : (ord.pricing ? ord.pricing.downPaymentPaid : (ord.paymentMode === 'full' ? total : total / 2)))) || 0;
+            const isCodOrder = ord.paymentMode === 'cod' || ord.paymentMethod === 'cod';
+            paid = parseFloat(ord.amountPaid !== undefined ? ord.amountPaid : (ord.downPaymentPaid !== undefined ? ord.downPaymentPaid : (ord.pricing ? ord.pricing.downPaymentPaid : (ord.paymentMode === 'full' ? total : (isCodOrder ? 0 : total / 2))))) || 0;
             bal = parseFloat(ord.balanceDue !== undefined ? ord.balanceDue : Math.max(0, total - paid)) || 0;
         }
 
@@ -1588,6 +1589,7 @@ function renderKanban() {
         if (stage === 1) {
             countPending++;
             const isFull = ord.paymentMode === 'full' || (ord.pricing && !ord.pricing.isDownPayment);
+            const isCod = ord.paymentMode === 'cod' || ord.paymentMethod === 'cod';
             const isFlagged = ord.orderStatus && ord.orderStatus.includes('Flagged');
             card.innerHTML = `
                 <div class="flex justify-between items-center mb-1.5">
@@ -1595,8 +1597,8 @@ function renderKanban() {
                         <span class="text-xs font-mono font-bold text-primary">#${ord.orderId}</span>
                         ${cardActionBtns}
                     </div>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isFlagged ? 'bg-red-100 text-red-800 border border-red-200' : (isFull ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800')}">
-                        ${isFlagged ? '⚠️ Flagged' : (isFull ? '100% Full Paid' : '50% DP')}
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isFlagged ? 'bg-red-100 text-red-800 border border-red-200' : (isFull ? 'bg-emerald-100 text-emerald-800' : (isCod ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'))}">
+                        ${isFlagged ? '⚠️ Flagged' : (isFull ? '100% Full Paid' : (isCod ? 'Cash on Delivery (COD)' : '50% DP'))}
                     </span>
                 </div>
                 <h4 class="font-title-md text-sm text-on-surface font-semibold truncate">${ord.customerName}</h4>
@@ -1625,7 +1627,7 @@ function renderKanban() {
                     </div>
                     ` : `
                     <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline">
-                        Ref: ${ord.gcashRef || (ord.payment && ord.payment.reference) || '9021-8841-2910'}<br/>
+                        ${isCod ? '<span class="text-blue-700 font-bold">Payment Arrangement: Cash on Delivery (COD)</span><br/>' : `Ref: ${ord.gcashRef || (ord.payment && ord.payment.reference) || '9021-8841-2910'}<br/>`}
                         Amount Paid: ₱${paid.toLocaleString('en-PH', {minimumFractionDigits: 2})}<br/>
                         Order Total: ₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})}${ord.discountAmount ? `<br/><span class="text-emerald-700 font-bold">Voucher: ${ord.voucherCode || 'WELCOME10'} (-₱${parseFloat(ord.discountAmount).toLocaleString('en-PH', {minimumFractionDigits: 2})})</span>` : ''}
                     </div>

@@ -704,6 +704,7 @@ function renderOrder(order) {
   document.getElementById('trackGcashRef').innerText = order.gatewayReference || order.gcashRef || 'Direct Escrow Verified';
 
   const isFlagged = order.orderStatus && order.orderStatus.includes('Flagged');
+  const isCod = order.paymentMode === 'cod' || order.paymentMethod === 'cod';
   const isFullPayment = (order.paymentMode === 'full') || (order.balanceDue === 0);
 
   const flagContainer = document.getElementById('flaggedAlertContainer');
@@ -739,6 +740,9 @@ function renderOrder(order) {
   if (isFlagged) {
     document.getElementById('trackPaymentStatusTag').className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-200";
     document.getElementById('trackPaymentStatusTag').innerText = "⚠️ Payment Proof Flagged";
+  } else if (isCod) {
+    document.getElementById('trackPaymentStatusTag').className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200";
+    document.getElementById('trackPaymentStatusTag').innerText = "💵 Cash on Delivery (Pay on Handover)";
   } else if (isFullPayment) {
     document.getElementById('trackPaymentStatusTag').className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800";
     document.getElementById('trackPaymentStatusTag').innerText = "100% Full Payment Settled";
@@ -790,8 +794,19 @@ function renderOrder(order) {
 
   // Financial Summary Breakdown
   const total = parseFloat(order.grossTotal || order.totalAmount || 7184);
-    const isDone = parseInt(order.stage, 10) === 5 || order.orderStatus === 'Delivered & Complete';
-  const paid = isDone ? total : parseFloat(order.amountPaid || order.downPaymentPaid || (isFullPayment ? total : total / 2));
+  const isDone = parseInt(order.stage, 10) === 5 || order.orderStatus === 'Delivered & Complete';
+  let paid = 0;
+  if (isDone) {
+    paid = total;
+  } else if (isCod) {
+    paid = 0;
+  } else if (order.downPaymentPaid !== undefined) {
+    paid = parseFloat(order.downPaymentPaid);
+  } else if (order.amountPaid !== undefined) {
+    paid = parseFloat(order.amountPaid);
+  } else {
+    paid = isFullPayment ? total : total / 2;
+  }
   const bal = isDone ? 0 : (order.balanceDue !== undefined ? parseFloat(order.balanceDue) : Math.max(0, total - paid));
   const freight = parseFloat(order.freightCost || order.deliveryFee || 250);
 
@@ -799,7 +814,10 @@ function renderOrder(order) {
   document.getElementById('trackPaidAmount').innerText = `-₱${paid.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
   document.getElementById('trackBalanceDue').innerText = `₱${bal.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
 
-  if (bal <= 0) {
+  if (isCod) {
+    document.getElementById('trackBalanceTag').innerText = "Cash on Delivery";
+    document.getElementById('trackBalanceTag').className = "px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200";
+  } else if (bal <= 0) {
     document.getElementById('trackBalanceTag').innerText = "Fully Paid";
     document.getElementById('trackBalanceTag').className = "px-2.5 py-1 rounded-full text-xs font-bold bg-tertiary-fixed text-on-tertiary-fixed";
   } else {
