@@ -794,20 +794,38 @@
           ordersBtn.classList.remove('hidden');
           ordersBtn.classList.add('flex');
           if (role === 'seller' || role === 'admin') {
+            const count = window.ecohaven && window.ecohaven.orders ? Object.keys(window.ecohaven.orders).length : 0;
             ordersBtn.href = isPagesDir ? 'seller.html' : 'pages/seller.html';
             ordersBtn.title = 'Artisan Orders & Fabrication Pipeline';
             ordersBtn.setAttribute('aria-label', 'Artisan Orders & Fabrication Pipeline');
             ordersBtn.innerHTML = `
               <span class="material-symbols-outlined text-[20px]">assignment</span>
-              <span id="headerOrdersBadge" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-amber-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-surface shadow-xs leading-none">3</span>
+              ${count > 0 ? `<span id="headerOrdersBadge" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-amber-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-surface shadow-xs leading-none">${count}</span>` : ''}
             `;
           } else {
+            // Count active orders belonging to this customer
+            let custCount = 0;
+            if (window.ecohaven && window.ecohaven.orders) {
+              const uEmail = (user.email || '').toLowerCase().trim();
+              const uPhone = (user.phone || '').replace(/[^0-9]/g, '');
+              const uName = (user.displayName || user.fullName || '').toLowerCase().trim();
+              const uUid = user.uid || '';
+              custCount = Object.values(window.ecohaven.orders).filter(o => {
+                if (!o) return false;
+                if (o.userId && uUid && o.userId === uUid) return true;
+                if (o.email && uEmail && o.email.toLowerCase().trim() === uEmail) return true;
+                if (o.customerEmail && uEmail && o.customerEmail.toLowerCase().trim() === uEmail) return true;
+                if (uPhone && o.phone && o.phone.replace(/[^0-9]/g, '') === uPhone) return true;
+                if (uName && o.customerName && o.customerName.toLowerCase().trim() === uName) return true;
+                return false;
+              }).length;
+            }
             ordersBtn.href = isPagesDir ? 'dashboard.html' : 'pages/dashboard.html';
             ordersBtn.title = 'My Orders Dashboard';
             ordersBtn.setAttribute('aria-label', 'My Orders Dashboard');
             ordersBtn.innerHTML = `
               <span class="material-symbols-outlined text-[20px]">receipt_long</span>
-              <span id="headerOrdersBadge" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-surface shadow-xs leading-none">1</span>
+              ${custCount > 0 ? `<span id="headerOrdersBadge" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-surface shadow-xs leading-none">${custCount}</span>` : ''}
             `;
           }
         }

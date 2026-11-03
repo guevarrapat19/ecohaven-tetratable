@@ -20,7 +20,7 @@
   <!-- 3. Orders Dashboard (In between Notification and User Icon, when user is logged in) -->
   <a href="dashboard.html" id="headerOrdersBtn" class="hidden relative w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-all shadow-xs active:scale-95" aria-label="Orders Dashboard" title="Orders Dashboard">
     <span class="material-symbols-outlined text-[20px]">receipt_long</span>
-    <span id="headerOrdersBadge" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs border border-surface leading-none">1</span>
+    <span id="headerOrdersBadge" class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs border border-surface leading-none">0</span>
   </a>
 
   <!-- 4. User Account Icon -->
@@ -138,10 +138,31 @@
 
     <!-- Right Main Area: Active Orders & Purchases (8 Cols) -->
     <div class="lg:col-span-8 space-y-6">
-        <h2 class="font-headline-sm text-xl text-on-surface">Active Fabrication Orders (1)</h2>
+        <h2 id="dashOrdersHeading" class="font-headline-sm text-xl text-on-surface">Active Fabrication Orders (0)</h2>
+
+        <!-- Empty State (Shown when customer has 0 orders) -->
+        <div id="dashEmptyOrders" class="hidden bg-surface-container-lowest border border-outline-variant/30 rounded-[20px] p-8 md:p-12 text-center shadow-sm">
+            <div class="w-16 h-16 rounded-2xl bg-secondary-container/50 text-secondary flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-[32px]">chair</span>
+            </div>
+            <h3 class="font-headline text-lg font-bold text-on-surface mb-1">No Fabrication Orders Yet</h3>
+            <p class="text-xs text-on-surface-variant max-w-md mx-auto mb-6 leading-relaxed">
+                You haven't commissioned or reserved any bespoke furniture pieces under this account. Explore our handcrafted Candaba workshop collections and reserve your piece with a 50% timber earnest down payment.
+            </p>
+            <div class="flex items-center justify-center gap-3 flex-wrap">
+                <a href="shop.html" class="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-container transition-all flex items-center gap-2 shadow-xs">
+                    <span class="material-symbols-outlined text-[18px]">storefront</span>
+                    Browse Catalog
+                </a>
+                <a href="tetratable.html" class="px-5 py-2.5 rounded-xl border border-outline-variant text-xs font-semibold text-on-surface hover:bg-surface-container transition-all flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[18px]">table_restaurant</span>
+                    Explore TetraTable 4-in-1
+                </a>
+            </div>
+        </div>
 
         <!-- Active Order Card -->
-        <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-[20px] p-6 md:p-8 shadow-sm">
+        <div id="dashActiveOrderCard" class="bg-surface-container-lowest border border-outline-variant/30 rounded-[20px] p-6 md:p-8 shadow-sm">
             <div id="dashFlagNotice" class="hidden"></div>
             <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-outline-variant/30 mb-6">
                 <div>
@@ -314,6 +335,7 @@ function updateCustomerDashboard() {
 
     const allOrders = window.ecohaven.orders || {};
     let ord = null;
+    let userOrders = [];
 
     if (user) {
         const uEmail = (user.email || '').toLowerCase().trim();
@@ -321,8 +343,8 @@ function updateCustomerDashboard() {
         const uName = (user.displayName || user.fullName || '').toLowerCase().trim();
         const uUid = user.uid || '';
 
-        // Check if user has orders matching their account
-        const userOrders = Object.values(allOrders).filter(o => {
+        // Check if user has orders strictly matching their account
+        userOrders = Object.values(allOrders).filter(o => {
             if (!o) return false;
             if (o.userId && uUid && o.userId === uUid) return true;
             if (o.email && uEmail && o.email.toLowerCase().trim() === uEmail) return true;
@@ -336,14 +358,45 @@ function updateCustomerDashboard() {
             userOrders.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
             ord = userOrders[0];
         }
+    } else {
+        // Guest user: check last order id placed in this session
+        const lastId = localStorage.getItem('ecohaven_last_order_id');
+        if (lastId) {
+            const found = window.ecohaven.getOrder(lastId);
+            if (found) {
+                ord = found;
+                userOrders = [found];
+            }
+        }
     }
 
-    if (!ord) {
-        const lastId = localStorage.getItem('ecohaven_last_order_id') || 'EH-2026-88123';
-        ord = window.ecohaven.getOrder(lastId);
+    const headingEl = document.getElementById('dashOrdersHeading');
+    const emptyEl = document.getElementById('dashEmptyOrders');
+    const cardEl = document.getElementById('dashActiveOrderCard');
+    const headerBadge = document.getElementById('headerOrdersBadge');
+
+    // Update header orders badge
+    if (headerBadge) {
+        if (userOrders.length > 0) {
+            headerBadge.innerText = userOrders.length;
+            headerBadge.classList.remove('hidden');
+        } else {
+            headerBadge.classList.add('hidden');
+        }
     }
 
-    if (!ord) return;
+    // If customer has 0 orders placed, show Empty State and hide order card
+    if (userOrders.length === 0 || !ord) {
+        if (headingEl) headingEl.innerText = "Active Fabrication Orders (0)";
+        if (emptyEl) emptyEl.classList.remove('hidden');
+        if (cardEl) cardEl.classList.add('hidden');
+        return;
+    }
+
+    // Customer has active orders!
+    if (headingEl) headingEl.innerText = `Active Fabrication Orders (${userOrders.length})`;
+    if (emptyEl) emptyEl.classList.add('hidden');
+    if (cardEl) cardEl.classList.remove('hidden');
 
     const trackBtn = document.getElementById('dashTrackBtn');
     if (trackBtn) {
