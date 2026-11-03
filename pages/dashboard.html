@@ -49,7 +49,7 @@
                     <span class="material-symbols-outlined text-[16px]">edit</span>
                 </button>
             </div>
-            <p id="dashUserSubtitle" class="text-xs text-on-surface-variant">Member since October 2026 • Verified Customer • Candaba Workshop</p>
+            <p id="dashUserSubtitle" class="text-xs text-on-surface-variant">Member since October 2026 • Verified Customer</p>
         </div>
     </div>
     <div class="flex items-center gap-2.5 flex-wrap">
@@ -114,7 +114,7 @@
                 <div class="flex items-center justify-between group">
                     <div>
                         <span class="text-xs text-outline block">Street &amp; Barangay</span>
-                        <span class="font-medium text-on-surface text-sm" id="profileStreetBarangay">No street address linked</span>
+                        <span class="font-medium text-on-surface text-sm text-outline italic" id="profileStreetBarangay">No street address added yet</span>
                     </div>
                     <button type="button" onclick="openEditProfileModal('street')" class="text-xs text-primary hover:underline flex items-center gap-0.5 opacity-80 hover:opacity-100 transition-opacity">
                         <span class="material-symbols-outlined text-[14px]">edit</span> Change
@@ -125,7 +125,7 @@
                 <div class="flex items-center justify-between group">
                     <div>
                         <span class="text-xs text-outline block">City, Province &amp; ZIP</span>
-                        <span class="font-medium text-on-surface text-sm" id="profileLocation">Candaba, Pampanga</span>
+                        <span class="font-medium text-on-surface text-sm text-outline italic" id="profileLocation">Not set</span>
                     </div>
                     <button type="button" onclick="openEditProfileModal('location')" class="text-xs text-primary hover:underline flex items-center gap-0.5 opacity-80 hover:opacity-100 transition-opacity">
                         <span class="material-symbols-outlined text-[14px]">edit</span> Change
@@ -592,7 +592,7 @@ function switchTab(tab) {
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-on-surface mb-1">Mobile Number (11 Digits)</label>
-                    <input id="addrPhone" type="tel" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="09812558028" required class="w-full bg-surface-container-low px-3 py-2 rounded-lg text-sm text-on-surface border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary"/>
+                    <input id="addrPhone" type="tel" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="09XXXXXXXXX" required class="w-full bg-surface-container-low px-3 py-2 rounded-lg text-sm text-on-surface border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary"/>
                 </div>
             </div>
             <!-- Structured Dropdowns: Province & City -->
@@ -600,13 +600,13 @@ function switchTab(tab) {
                 <div>
                     <label class="block text-xs font-bold text-on-surface mb-1">Province / Region (Dropdown)</label>
                     <select id="dashAddrProvince" onchange="onDashProvinceChange(this.value)" class="w-full bg-surface-container-low px-3 py-2 rounded-lg text-xs font-semibold text-on-surface border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer">
-                        <!-- Populated via initDashRegionDropdowns() -->
+                        <option value="" disabled selected>Select Province / Region</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-on-surface mb-1">City / Municipality (Dropdown)</label>
                     <select id="dashAddrCity" onchange="onDashCityChange(this.value)" class="w-full bg-surface-container-low px-3 py-2 rounded-lg text-xs font-semibold text-on-surface border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer">
-                        <!-- Populated based on province -->
+                        <option value="" disabled selected>Select City / Municipality</option>
                     </select>
                 </div>
             </div>
@@ -616,7 +616,7 @@ function switchTab(tab) {
                 <div>
                     <label class="block text-xs font-bold text-on-surface mb-1">Barangay (Dropdown)</label>
                     <select id="dashAddrBarangay" onchange="syncDashFullAddress()" class="w-full bg-surface-container-low px-3 py-2 rounded-lg text-xs font-semibold text-on-surface border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer">
-                        <!-- Populated based on city -->
+                        <option value="" disabled selected>Select Barangay</option>
                     </select>
                 </div>
                 <div>
@@ -628,7 +628,7 @@ function switchTab(tab) {
             <!-- One-Row Street Input Details -->
             <div>
                 <label class="block text-xs font-bold text-on-surface mb-1">Street Details (House / Lot No., Street, Subdivision)</label>
-                <input id="dashAddrStreet" type="text" oninput="syncDashFullAddress()" placeholder="House No., Street, Subdivision, Barangay" required class="w-full bg-surface-container-low px-3 py-2.5 rounded-lg text-xs font-medium text-on-surface border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary"/>
+                <input id="dashAddrStreet" type="text" oninput="syncDashFullAddress()" placeholder="House / Lot No., Street, Subdivision" required class="w-full bg-surface-container-low px-3 py-2.5 rounded-lg text-xs font-medium text-on-surface border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary"/>
             </div>
 
             <!-- Synthesized Full Address Preview -->
@@ -636,7 +636,7 @@ function switchTab(tab) {
             <div class="p-2.5 rounded-lg bg-surface-container-low border border-outline-variant/20 flex items-center justify-between text-xs text-on-surface-variant">
                 <div class="flex items-center gap-1.5 min-w-0">
                     <span class="material-symbols-outlined text-primary text-[15px] flex-shrink-0">place</span>
-                    <span id="dashFullPreview" class="truncate font-medium text-on-surface">Dalan Batu, Pasig, Candaba, Pampanga, 2013, Philippines</span>
+                    <span id="dashFullPreview" class="truncate font-medium text-outline italic">Enter address details above to preview delivery destination</span>
                 </div>
                 <span class="text-[10px] text-tertiary font-bold px-1.5 py-0.5 rounded bg-tertiary-fixed/40 flex-shrink-0">Auto-Synced</span>
             </div>
@@ -816,8 +816,8 @@ function populateUserProfile() {
         const subEl = document.getElementById('dashUserSubtitle');
         if (subEl) {
             const authType = u.authProvider === 'google.com' ? 'Verified Google Account' : 'Verified Customer';
-            const loc = u.city || u.province || 'Candaba Workshop';
-            subEl.textContent = `Member since October 2026 • ${authType} • ${loc}`;
+            const locParts = [u.city, u.province].filter(Boolean).join(', ');
+            subEl.textContent = locParts ? `Member since October 2026 • ${authType} • ${locParts}` : `Member since October 2026 • ${authType}`;
         }
 
         // 2. Profile Details Card
@@ -830,11 +830,22 @@ function populateUserProfile() {
 
         if (nameEl) nameEl.textContent = displayName;
         if (emailEl && u.email) emailEl.textContent = u.email;
-        // Wipe phantom mock values if previously injected
-        if (u.street === 'Clark Sun Valley' || u.barangay === 'Clark Freeport') {
+        // Wipe phantom prototype mock values if previously injected
+        let wipedMock = false;
+        if (u.street && (u.street.includes('Clark Sun Valley') || u.street.includes('Dalan Batu'))) {
             u.street = '';
+            wipedMock = true;
+        }
+        if (u.barangay && (u.barangay.includes('Clark Freeport') || (u.barangay === 'Pasig' && !u.street))) {
             u.barangay = '';
+            wipedMock = true;
+        }
+        if (wipedMock) {
             localStorage.setItem('ecohaven_user', JSON.stringify(u));
+            if (window.ecoHavenDb && u.uid) {
+                window.ecoHavenDb.ref('users/' + u.uid).update({ street: '', barangay: '' }).catch(() => {});
+                window.ecoHavenDb.ref('ecohaven/users/' + u.uid).update({ street: '', barangay: '' }).catch(() => {});
+            }
         }
 
         // Populate Street & Barangay strictly from user input (zero auto-fill defaults)
@@ -1065,31 +1076,52 @@ function handleWalletAction() {
 
 function initDashRegionDropdowns() {
     const provSelect = document.getElementById('dashAddrProvince');
+    const citySelect = document.getElementById('dashAddrCity');
+    const brgySelect = document.getElementById('dashAddrBarangay');
     if (!provSelect) return;
 
     const regions = window.PHILIPPINE_LOGISTICS_REGIONS || {};
-    let provHtml = '';
+    let provHtml = '<option value="" disabled selected>Select Province / Region</option>';
     Object.keys(regions).forEach(provName => {
         provHtml += `<option value="${provName}">${provName}</option>`;
     });
     provSelect.innerHTML = provHtml;
 
-    onDashProvinceChange(provSelect.value || 'Pampanga', true);
+    if (citySelect) {
+        citySelect.innerHTML = '<option value="" disabled selected>Select City / Municipality</option>';
+    }
+    if (brgySelect) {
+        brgySelect.innerHTML = '<option value="" disabled selected>Select Barangay</option>';
+    }
 }
 
 function onDashProvinceChange(provName, isInitial = false) {
     const regions = window.PHILIPPINE_LOGISTICS_REGIONS || {};
     const provData = regions[provName];
-    if (!provData) return;
-
     const citySelect = document.getElementById('dashAddrCity');
-    if (!citySelect) return;
+    const brgySelect = document.getElementById('dashAddrBarangay');
+    const zipInput = document.getElementById('dashAddrZip');
 
-    let cityHtml = '';
-    provData.cities.forEach(c => {
-        cityHtml += `<option value="${c.name}">${c.name}</option>`;
-    });
-    citySelect.innerHTML = cityHtml;
+    if (!provData) {
+        if (citySelect) citySelect.innerHTML = '<option value="" disabled selected>Select City / Municipality</option>';
+        if (brgySelect) brgySelect.innerHTML = '<option value="" disabled selected>Select Barangay</option>';
+        if (zipInput) zipInput.value = '';
+        syncDashFullAddress();
+        return;
+    }
+
+    if (citySelect) {
+        let cityHtml = '<option value="" disabled selected>Select City / Municipality</option>';
+        provData.cities.forEach(c => {
+            cityHtml += `<option value="${c.name}">${c.name}</option>`;
+        });
+        citySelect.innerHTML = cityHtml;
+    }
+
+    if (brgySelect) {
+        brgySelect.innerHTML = '<option value="" disabled selected>Select Barangay</option>';
+    }
+    if (zipInput) zipInput.value = '';
 
     // Update zone
     const zoneHidden = document.getElementById('addrZone');
@@ -1097,29 +1129,35 @@ function onDashProvinceChange(provName, isInitial = false) {
     if (zoneHidden) zoneHidden.value = provData.zoneCode || '250';
     if (zoneBadge) zoneBadge.innerText = `${provData.zone || 'Zone 1'} (₱${parseFloat(provData.zoneCode || 250).toFixed(2)})`;
 
-    onDashCityChange(citySelect.value, isInitial);
+    syncDashFullAddress();
 }
 
 function onDashCityChange(cityName, isInitial = false) {
     const provSelect = document.getElementById('dashAddrProvince');
-    const provName = provSelect ? provSelect.value : 'Pampanga';
+    const provName = provSelect ? provSelect.value : '';
     const regions = window.PHILIPPINE_LOGISTICS_REGIONS || {};
     const provData = regions[provName];
+    const brgySelect = document.getElementById('dashAddrBarangay');
+    const zipInput = document.getElementById('dashAddrZip');
+
     if (!provData) return;
 
-    const cityObj = provData.cities.find(c => c.name === cityName) || provData.cities[0];
-    if (!cityObj) return;
+    const cityObj = provData.cities.find(c => c.name === cityName);
+    if (!cityObj) {
+        if (brgySelect) brgySelect.innerHTML = '<option value="" disabled selected>Select Barangay</option>';
+        if (zipInput) zipInput.value = '';
+        syncDashFullAddress();
+        return;
+    }
 
-    const brgySelect = document.getElementById('dashAddrBarangay');
     if (brgySelect && cityObj.barangays) {
-        let brgyHtml = '';
+        let brgyHtml = '<option value="" disabled selected>Select Barangay</option>';
         cityObj.barangays.forEach(b => {
             brgyHtml += `<option value="${b}">${b}</option>`;
         });
         brgySelect.innerHTML = brgyHtml;
     }
 
-    const zipInput = document.getElementById('dashAddrZip');
     if (zipInput && cityObj.defaultZip) {
         zipInput.value = cityObj.defaultZip;
     }
@@ -1128,19 +1166,36 @@ function onDashCityChange(cityName, isInitial = false) {
 }
 
 function syncDashFullAddress() {
-    const prov = document.getElementById('dashAddrProvince')?.value || 'Pampanga';
-    const city = document.getElementById('dashAddrCity')?.value || 'Candaba';
-    const brgy = document.getElementById('dashAddrBarangay')?.value || 'Pasig';
-    const zip = document.getElementById('dashAddrZip')?.value || '2013';
+    const prov = document.getElementById('dashAddrProvince')?.value || '';
+    const city = document.getElementById('dashAddrCity')?.value || '';
+    const brgy = document.getElementById('dashAddrBarangay')?.value || '';
+    const zip = document.getElementById('dashAddrZip')?.value || '';
     const street = document.getElementById('dashAddrStreet')?.value || '';
 
-    const fullStr = `${street ? street + ', ' : ''}${brgy}, ${city}, ${prov}, ${zip}, Philippines`;
+    const parts = [
+        street,
+        brgy ? ('Brgy. ' + brgy) : '',
+        city,
+        prov,
+        zip,
+        (prov || city) ? 'Philippines' : ''
+    ].filter(Boolean);
+
+    const fullStr = parts.join(', ');
 
     const hiddenInput = document.getElementById('addrFull');
     if (hiddenInput) hiddenInput.value = fullStr;
 
     const preview = document.getElementById('dashFullPreview');
-    if (preview) preview.innerText = fullStr;
+    if (preview) {
+        if (fullStr) {
+            preview.innerText = fullStr;
+            preview.classList.remove('text-outline', 'italic');
+        } else {
+            preview.innerText = 'Enter address details above to preview delivery destination';
+            preview.classList.add('text-outline', 'italic');
+        }
+    }
 }
 
 function parseDashAddressToFields(addrStr) {
@@ -1270,6 +1325,14 @@ function openAddressModal(id = null) {
         const p2 = document.getElementById('addrPhone');
         if (p2 && window.formatAndValidatePhoneInput) window.formatAndValidatePhoneInput(p2);
 
+        // Reset dropdowns to clean unselected state (no forced default)
+        initDashRegionDropdowns();
+        const streetInput = document.getElementById('dashAddrStreet');
+        if (streetInput) streetInput.value = '';
+        const zipInput = document.getElementById('dashAddrZip');
+        if (zipInput) zipInput.value = '';
+        syncDashFullAddress();
+
         // Let user check "Set as Primary Default" manually - zero forced default
         document.getElementById('addrIsDefault').checked = false;
     }
@@ -1299,6 +1362,29 @@ function handleAddressFormSubmit(e) {
             alert('Recipient phone number must be exactly 11 digits.');
         }
         document.getElementById('addrPhone')?.focus();
+        return;
+    }
+
+    const provVal = document.getElementById('dashAddrProvince')?.value;
+    const cityVal = document.getElementById('dashAddrCity')?.value;
+    const brgyVal = document.getElementById('dashAddrBarangay')?.value;
+    const streetVal = document.getElementById('dashAddrStreet')?.value?.trim();
+
+    if (!provVal || !cityVal || !brgyVal) {
+        if (typeof window.showEcoHavenToast === 'function') {
+            window.showEcoHavenToast('Please select your Province, City, and Barangay.', 'warning');
+        } else {
+            alert('Please select your Province, City, and Barangay.');
+        }
+        return;
+    }
+    if (!streetVal) {
+        if (typeof window.showEcoHavenToast === 'function') {
+            window.showEcoHavenToast('Please enter your House / Lot No. and Street details.', 'warning');
+        } else {
+            alert('Please enter your House / Lot No. and Street details.');
+        }
+        document.getElementById('dashAddrStreet')?.focus();
         return;
     }
     const address = document.getElementById('addrFull').value.trim();

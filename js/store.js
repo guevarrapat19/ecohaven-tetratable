@@ -179,44 +179,7 @@ const INITIAL_FALLBACK_ORDERS = {
 };
 
 
-const DEFAULT_SAVED_ADDRESSES = [
-    {
-        id: "addr-candaba",
-        label: "Home (Candaba Estate)",
-        recipientName: "Paolo Magisa",
-        phone: "09812558028",
-        email: "paomagisa@gmail.com",
-        address: "Dalan Batu, Pasig, Candaba, Pampanga, 2013, Philippines",
-        zone: "Zone 1 - Pampanga Local",
-        zoneCode: "250",
-        deliveryFee: 250.00,
-        isDefault: true
-    },
-    {
-        id: "addr-clark",
-        label: "Office (Clark Freeport)",
-        recipientName: "Paolo Magisa",
-        phone: "09812558028",
-        email: "paomagisa@gmail.com",
-        address: "Bldg 4, Clark Sun Valley Estate, Jose Abad Santos Ave, Clark Freeport Zone, Pampanga, 2023",
-        zone: "Zone 1 - Pampanga Local",
-        zoneCode: "250",
-        deliveryFee: 250.00,
-        isDefault: false
-    },
-    {
-        id: "addr-bgc",
-        label: "Manila Residence",
-        recipientName: "Paolo Magisa",
-        phone: "09812558028",
-        email: "paomagisa@gmail.com",
-        address: "Unit 24B, Pacific Plaza Towers, 4th Ave, Bonifacio Global City, Taguig, 1634 Metro Manila",
-        zone: "Zone 3 - Greater Metro Manila",
-        zoneCode: "650",
-        deliveryFee: 650.00,
-        isDefault: false
-    }
-];
+const DEFAULT_SAVED_ADDRESSES = [];
 
 
 const DEFAULT_INVENTORY = {
@@ -480,12 +443,14 @@ class EcoHavenStore {
                         cloudAddrs = Object.values(cloudVal);
                     }
                 }
+                // Filter out prototype mock seed addresses
+                cloudAddrs = (cloudAddrs || []).filter(a => a && a.id !== 'addr-candaba' && a.id !== 'addr-clark' && a.id !== 'addr-bgc' && a.recipientName !== 'Paolo Magisa');
                 if (cloudAddrs && cloudAddrs.length > 0) {
                     this.addresses = cloudAddrs;
                     this.saveLocalBackup('ecohaven_saved_addresses', cloudAddrs);
                     console.log("📍 EcoHaven: Real-time Saved Addresses Synced:", cloudAddrs.length, "addresses.");
                 } else {
-                    this.addresses = DEFAULT_SAVED_ADDRESSES;
+                    this.addresses = [];
                     this.saveLocalBackup('ecohaven_saved_addresses', this.addresses);
                 }
                 window.dispatchEvent(new CustomEvent('ecohaven_addresses_updated', { detail: this.addresses }));
@@ -1348,9 +1313,10 @@ class EcoHavenStore {
         const userPhone = (user.phone || '').replace(/[^0-9]/g, '');
         const userUid = user.uid || '';
 
-        // Only return addresses that belong to THIS registered user
+        // Only return addresses that belong to THIS registered user (excluding any prototype mock entries)
         return all.filter(a => {
             if (!a) return false;
+            if (a.id === 'addr-candaba' || a.id === 'addr-clark' || a.id === 'addr-bgc' || a.recipientName === 'Paolo Magisa') return false;
             if (a.uid && userUid && a.uid === userUid) return true;
             if (a.email && userEmail && a.email.toLowerCase().trim() === userEmail) return true;
             if (a.phone && userPhone && a.phone.replace(/[^0-9]/g, '') === userPhone) return true;
