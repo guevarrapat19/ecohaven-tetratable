@@ -39,7 +39,7 @@
 <!-- Customer Dashboard Header -->
 <div class="mb-10 pb-6 border-b border-outline-variant/30 flex flex-wrap items-center justify-between gap-4">
     <div class="flex items-center gap-4">
-        <div id="dashAvatar" onclick="openEditProfileModal('photo')" class="w-14 h-14 rounded-full bg-primary/10 border-2 border-primary text-primary flex items-center justify-center font-bold text-xl overflow-hidden shadow-xs cursor-pointer hover:ring-2 hover:ring-primary/40 transition-all" title="Click to change profile photo">
+        <div id="dashAvatar" class="w-14 h-14 rounded-full bg-primary/10 border-2 border-primary text-primary flex items-center justify-center font-bold text-xl overflow-hidden shadow-xs select-none">
             JD
         </div>
         <div>
@@ -696,13 +696,6 @@ function switchTab(tab) {
                 </div>
             </div>
 
-            <!-- Profile Photo / Avatar URL -->
-            <div>
-                <label for="editPhotoURL" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">Profile Photo URL (Optional)</label>
-                <input type="url" id="editPhotoURL" placeholder="https://example.com/avatar.jpg" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
-                <p class="text-[11px] text-on-surface-variant mt-1">Leave blank to use elegant wooden monogram initials.</p>
-            </div>
-
             <!-- Email Address (Account ID) -->
             <div>
                 <label for="editEmail" class="block text-xs font-bold uppercase tracking-wider text-outline mb-1.5">Email Address (Account Identifier)</label>
@@ -771,20 +764,16 @@ function populateUserProfile() {
 
         const avatarEl = document.getElementById('dashAvatar');
         if (avatarEl) {
-            if (u.photoURL) {
-                avatarEl.innerHTML = `<img src="${u.photoURL}" alt="${displayName}" class="w-full h-full object-cover rounded-full"/>`;
+            const words = displayName.trim().split(/\s+/).filter(Boolean);
+            let initials = '';
+            if (words.length >= 2) {
+                initials = (words[0][0] + words[words.length - 1][0]).toUpperCase();
+            } else if (words.length === 1 && words[0].length >= 2) {
+                initials = words[0].substring(0, 2).toUpperCase();
             } else {
-                const words = displayName.trim().split(/\s+/).filter(Boolean);
-                let initials = '';
-                if (words.length >= 2) {
-                    initials = (words[0][0] + words[words.length - 1][0]).toUpperCase();
-                } else if (words.length === 1 && words[0].length >= 2) {
-                    initials = words[0].substring(0, 2).toUpperCase();
-                } else {
-                    initials = 'EH';
-                }
-                avatarEl.textContent = initials;
+                initials = 'EH';
             }
+            avatarEl.textContent = initials;
         }
 
         const subEl = document.getElementById('dashUserSubtitle');
@@ -876,14 +865,12 @@ function openEditProfileModal(targetField) {
     const phoneInput = document.getElementById('editPhone');
     const cityInput = document.getElementById('editCity');
     const provInput = document.getElementById('editProvince');
-    const photoInput = document.getElementById('editPhotoURL');
     const emailInput = document.getElementById('editEmail');
 
     if (nameInput) nameInput.value = u.displayName || u.fullName || '';
     if (phoneInput) phoneInput.value = u.phone || '';
     if (cityInput) cityInput.value = u.city || 'Candaba';
     if (provInput) provInput.value = u.province || 'Pampanga';
-    if (photoInput) photoInput.value = u.photoURL || '';
     if (emailInput) emailInput.value = u.email || '';
 
     modal.classList.remove('hidden');
@@ -893,7 +880,6 @@ function openEditProfileModal(targetField) {
         if (targetField === 'name' && nameInput) nameInput.focus();
         else if (targetField === 'phone' && phoneInput) phoneInput.focus();
         else if (targetField === 'location' && cityInput) cityInput.focus();
-        else if (targetField === 'photo' && photoInput) photoInput.focus();
         else if (nameInput) nameInput.focus();
     }, 100);
 }
@@ -913,7 +899,6 @@ async function handleSaveProfile(e) {
     const phone = document.getElementById('editPhone').value.trim();
     const city = document.getElementById('editCity').value.trim();
     const province = document.getElementById('editProvince').value.trim();
-    const photoURL = document.getElementById('editPhotoURL').value.trim();
 
     if (!name) {
         if (typeof window.showEcoHavenToast === 'function') {
@@ -929,7 +914,6 @@ async function handleSaveProfile(e) {
     u.phone = phone;
     u.city = city || 'Candaba';
     u.province = province || 'Pampanga';
-    u.photoURL = photoURL || '';
 
     // Persist to localStorage
     localStorage.setItem('ecohaven_user', JSON.stringify(u));
@@ -943,8 +927,7 @@ async function handleSaveProfile(e) {
                 fullName: name,
                 phone: phone,
                 city: u.city,
-                province: u.province,
-                photoURL: u.photoURL
+                province: u.province
             });
             console.log('✅ Firebase user profile updated successfully.');
         } catch(err) {

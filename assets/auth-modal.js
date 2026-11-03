@@ -3,7 +3,7 @@
 // Secure Authentication via Firebase Realtime Database 'users' node
 // Role is stored strictly in Firebase under users/{uid}/role (no user role selection)
 
-(function() {
+(function () {
   // Utility: SHA-256 Hash using native Web Crypto API
   async function sha256Hex(str) {
     if (!str) return '';
@@ -209,7 +209,7 @@
     document.body.insertAdjacentHTML('beforeend', modalHTML);
   }
 
-  window.checkPasswordStrength = function(val) {
+  window.checkPasswordStrength = function (val) {
     const bar1 = document.getElementById('pwdBar1');
     const bar2 = document.getElementById('pwdBar2');
     const bar3 = document.getElementById('pwdBar3');
@@ -251,13 +251,13 @@
     }
   };
 
-  window.togglePasswordVisibility = function(inputId) {
+  window.togglePasswordVisibility = function (inputId) {
     const el = document.getElementById(inputId);
     if (!el) return;
     el.type = el.type === 'password' ? 'text' : 'password';
   };
 
-  window.openAuthModal = function(tab) {
+  window.openAuthModal = function (tab) {
     injectAuthModal();
     window.syncHeaderUserNavigation();
     const backdrop = document.getElementById('ecohavenAuthModalBackdrop');
@@ -275,7 +275,7 @@
     });
   };
 
-  window.closeAuthModal = function() {
+  window.closeAuthModal = function () {
     const backdrop = document.getElementById('ecohavenAuthModalBackdrop');
     const modal = document.getElementById('ecohavenAuthModal');
     const card = document.getElementById('ecohavenAuthCard');
@@ -292,7 +292,7 @@
     }, 280);
   };
 
-  window.switchAuthTab = function(tab) {
+  window.switchAuthTab = function (tab) {
     const regBtn = document.getElementById('tabRegisterBtn');
     const loginBtn = document.getElementById('tabLoginBtn');
     const regForm = document.getElementById('authRegisterForm');
@@ -323,7 +323,7 @@
   }
 
   // REGISTER ACCOUNT HANDLER
-  window.handleAuthRegister = async function(e) {
+  window.handleAuthRegister = async function (e) {
     e.preventDefault();
     const nameInput = document.getElementById('regFullName');
     const phoneInput = document.getElementById('regPhone');
@@ -475,7 +475,7 @@
   };
 
   // SIGN IN ACCOUNT HANDLER
-  window.handleAuthLogin = async function(e) {
+  window.handleAuthLogin = async function (e) {
     e.preventDefault();
     const identInput = document.getElementById('loginIdentifier');
     const pwdInput = document.getElementById('loginPassword');
@@ -533,7 +533,7 @@
             if ((luEmail && luEmail === cleanIdent) || (cleanPhone.length >= 10 && luPhone === cleanPhone)) {
               matchedUser = lu;
             }
-          } catch(e) {}
+          } catch (e) { }
         }
       }
 
@@ -570,7 +570,7 @@
       if (window.ecoHavenDb && matchedUser.uid) {
         try {
           window.ecoHavenDb.ref('users/' + matchedUser.uid + '/lastLoginAt').set(new Date().toISOString());
-        } catch(e) {}
+        } catch (e) { }
       }
 
       // Dispatch simulated Security Alert Email
@@ -618,10 +618,10 @@
   // HEADER USER & SELLER NAVIGATION DYNAMIC SYNC
   // - Orders Dashboard button: in between Notification and User icon when ANY user is logged in (seller or customer).
   // - Inventory of products button: immediately before Notification icon if SELLER is logged in.
-    // ==========================================================
+  // ==========================================================
   // GOOGLE SINGLE SIGN-ON CONTROLLER
   // ==========================================================
-  window.handleGoogleSignIn = async function() {
+  window.handleGoogleSignIn = async function () {
     const btn = document.getElementById('googleSignInBtn');
     const btnText = document.getElementById('googleSignInText');
     if (btnText) btnText.textContent = "Connecting to Google...";
@@ -660,13 +660,13 @@
           }
         } catch (authError) {
           console.warn("Firebase Google Popup status:", authError.code, authError.message);
-          
+
           if (authError.code === 'auth/popup-closed-by-user' || authError.code === 'auth/cancelled-popup-request') {
             if (btnText) btnText.textContent = "Continue with Google";
             if (btn) btn.disabled = false;
             return;
           }
-          
+
           // If unauthorized domain (e.g. localhost or vercel domain pending in Firebase Console) or popup blocked
           if (authError.code === 'auth/unauthorized-domain' || authError.code === 'auth/operation-not-allowed' || authError.code === 'auth/configuration-not-found' || authError.code === 'auth/popup-blocked') {
             promptGoogleAccountFallback(authError.code);
@@ -740,7 +740,7 @@
 
   function promptGoogleAccountFallback(reasonCode) {
     const defaultEmail = "mariasantos.pampanga@gmail.com";
-    
+
     const choice = prompt(
       "Google Sign-In Authentication:\n\nEnter your Google account email to sign in as a verified customer:",
       defaultEmail
@@ -763,7 +763,7 @@
     const finalName = (namePrompt && namePrompt.trim()) ? namePrompt.trim() : formattedName;
 
     const fallbackUser = {
-      uid: 'google_' + Math.abs(email.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)).toString(36),
+      uid: 'google_' + Math.abs(email.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0)).toString(36),
       displayName: finalName,
       fullName: finalName,
       email: email,
@@ -776,7 +776,7 @@
     finalizeGoogleUser(fallbackUser);
   }
 
-  window.syncHeaderUserNavigation = function() {
+  window.syncHeaderUserNavigation = function () {
     const userStr = localStorage.getItem('ecohaven_user');
     const isPagesDir = window.location.pathname.includes('/pages/');
 
@@ -806,10 +806,10 @@
             // Count active orders belonging to this customer
             let custCount = 0;
             if (window.ecohaven && window.ecohaven.orders) {
-              const uEmail = (user.email || '').toLowerCase().trim();
-              const uPhone = (user.phone || '').replace(/[^0-9]/g, '');
-              const uName = (user.displayName || user.fullName || '').toLowerCase().trim();
-              const uUid = user.uid || '';
+              const uEmail = (u.email || '').toLowerCase().trim();
+              const uPhone = (u.phone || '').replace(/[^0-9]/g, '');
+              const uName = (u.displayName || u.fullName || '').toLowerCase().trim();
+              const uUid = u.uid || '';
               custCount = Object.values(window.ecohaven.orders).filter(o => {
                 if (!o) return false;
                 if (o.userId && uUid && o.userId === uUid) return true;
@@ -850,7 +850,7 @@
             ? `Artisan Workshop Portal (${u.displayName || 'Seller'})`
             : `Customer Account (${u.displayName || 'Customer'})`;
         }
-      } catch(e) {
+      } catch (e) {
         console.error('Error syncing header navigation:', e);
       }
     } else {
@@ -870,14 +870,14 @@
   };
 
   // Sync immediately and on storage/login events
-  window.addEventListener('storage', function(e) {
+  window.addEventListener('storage', function (e) {
     if (e.key === 'ecohaven_user') {
       window.syncHeaderUserNavigation();
     }
   });
 
   // GLOBAL USER SIGN OUT
-  window.logoutEcoHavenUser = function() {
+  window.logoutEcoHavenUser = function () {
     localStorage.removeItem('ecohaven_user');
     localStorage.removeItem('ecohaven_uid');
     notify('You have signed out of your EcoHaven account.', 'info');
@@ -889,7 +889,7 @@
 
   // GLOBAL HEADER USER ICON CLICK HANDLER
   // Routes directly to seller or customer portal if logged in; opens login modal otherwise.
-  window.handleHeaderUserClick = function() {
+  window.handleHeaderUserClick = function () {
     const userStr = localStorage.getItem('ecohaven_user');
     if (userStr) {
       try {
@@ -903,7 +903,7 @@
           window.location.href = isPagesDir ? 'dashboard.html' : 'pages/dashboard.html';
           return;
         }
-      } catch(e) {}
+      } catch (e) { }
     }
     window.openAuthModal('login');
   };
