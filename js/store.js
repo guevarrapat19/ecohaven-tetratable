@@ -1153,8 +1153,8 @@ class EcoHavenStore {
                     </div>
                     <span class="font-caption text-caption text-on-surface-variant block mt-0.5 truncate">${item.finish || item.wood || '100% Solid Philippine Hardwood'}</span>
                     <div class="flex items-center justify-between mt-1">
-                        ${(itemPrice < 3000)
-    ? `<span class="text-[11px] font-semibold text-tertiary flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Paid in Full (No DP needed)</span>`
+                        ${(itemPrice < 2000)
+    ? `<span class="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span> Paid in Full / COD</span>`
     : `<span class="text-[11px] font-semibold text-tertiary">50% DP: ₱${itemHalf.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>`}
                         <button type="button" class="text-outline hover:text-error transition-colors p-1" onclick="window.ecohaven.removeFromCart(${idx})" title="Remove item">
                             <span class="material-symbols-outlined text-[18px]">delete</span>
