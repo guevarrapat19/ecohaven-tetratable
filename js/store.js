@@ -1394,28 +1394,7 @@ class EcoHavenStore {
 
         this.saveAddresses(all);
 
-        // Also sync customer profile with newly selected default address
-        if (targetAddr && user) {
-            const parts = (targetAddr.address || '').split(',').map(s => s.trim());
-            if (parts.length >= 2) {
-                user.street = parts[0];
-                user.barangay = parts[1].replace(/^Brgy\.?\s*/i, '');
-            }
-            if (targetAddr.city) user.city = targetAddr.city;
-            if (targetAddr.province) user.province = targetAddr.province;
-            if (targetAddr.zipCode) user.zipCode = targetAddr.zipCode;
-
-            localStorage.setItem('ecohaven_user', JSON.stringify(user));
-            if (window.ecoHavenDb && user.uid) {
-                window.ecoHavenDb.ref('users/' + user.uid).update({
-                    street: user.street || '',
-                    barangay: user.barangay || '',
-                    city: user.city || '',
-                    province: user.province || '',
-                    zipCode: user.zipCode || ''
-                }).catch(() => {});
-            }
-        }
+        // Profile address is managed manually by the user
 
         window.showEcoHavenToast("Primary delivery destination set as default.", "success");
         window.dispatchEvent(new CustomEvent('ecohaven_addresses_updated', { detail: this.addresses }));

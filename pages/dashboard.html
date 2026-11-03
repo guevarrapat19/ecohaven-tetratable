@@ -830,37 +830,35 @@ function populateUserProfile() {
 
         if (nameEl) nameEl.textContent = displayName;
         if (emailEl && u.email) emailEl.textContent = u.email;
-        // Populate Street & Barangay
-        const streetBarangayEl = document.getElementById('profileStreetBarangay');
-        
-        // Auto-heal from default address if profile lacks street
-        if (!u.street && window.ecohaven && window.ecohaven.getAddresses) {
-            const addrs = window.ecohaven.getAddresses();
-            const def = addrs.find(a => a.isDefault) || addrs[0];
-            if (def && def.address) {
-                const parts = def.address.split(',').map(s => s.trim());
-                if (parts.length >= 2) {
-                    u.street = parts[0];
-                    u.barangay = parts[1].replace(/^Brgy\.?\s*/i, '');
-                    localStorage.setItem('ecohaven_user', JSON.stringify(u));
-                }
-            }
+        // Wipe phantom mock values if previously injected
+        if (u.street === 'Clark Sun Valley' || u.barangay === 'Clark Freeport') {
+            u.street = '';
+            u.barangay = '';
+            localStorage.setItem('ecohaven_user', JSON.stringify(u));
         }
 
+        // Populate Street & Barangay strictly from user input (zero auto-fill defaults)
+        const streetBarangayEl = document.getElementById('profileStreetBarangay');
         const streetParts = [u.street, u.barangay ? ('Brgy. ' + u.barangay) : ''].filter(Boolean).join(', ');
         if (streetBarangayEl) {
             if (streetParts) {
                 streetBarangayEl.textContent = streetParts;
                 streetBarangayEl.classList.remove('text-outline', 'italic');
             } else {
-                streetBarangayEl.textContent = 'No street / barangay linked';
+                streetBarangayEl.textContent = 'No street address added yet';
                 streetBarangayEl.classList.add('text-outline', 'italic');
             }
         }
 
         if (locationEl) {
             const locParts = [u.city, u.province, u.zipCode].filter(Boolean).join(', ');
-            locationEl.textContent = locParts || 'Candaba, Pampanga';
+            if (locParts) {
+                locationEl.textContent = locParts;
+                locationEl.classList.remove('text-outline', 'italic');
+            } else {
+                locationEl.textContent = 'Not set';
+                locationEl.classList.add('text-outline', 'italic');
+            }
         }
         if (roleEl) {
             roleEl.textContent = u.authProvider === 'google.com' ? 'GOOGLE VERIFIED' : ((u.role || 'customer').toUpperCase() + ' ACCOUNT');
@@ -942,8 +940,8 @@ function openEditProfileModal(targetField) {
     }
     if (streetInput) streetInput.value = u.street || '';
     if (brgyInput) brgyInput.value = u.barangay || '';
-    if (cityInput) cityInput.value = u.city || 'Candaba';
-    if (provInput) provInput.value = u.province || 'Pampanga';
+    if (cityInput) cityInput.value = u.city || '';
+    if (provInput) provInput.value = u.province || '';
     if (zipInput) zipInput.value = u.zipCode || '';
     if (emailInput) emailInput.value = u.email || '';
 
@@ -1003,8 +1001,8 @@ async function handleSaveProfile(e) {
     u.phone = phone;
     u.street = street;
     u.barangay = barangay;
-    u.city = city || 'Candaba';
-    u.province = province || 'Pampanga';
+    u.city = city || '';
+    u.province = province || '';
     u.zipCode = zipCode;
 
     // Persist to localStorage
@@ -1272,9 +1270,8 @@ function openAddressModal(id = null) {
         const p2 = document.getElementById('addrPhone');
         if (p2 && window.formatAndValidatePhoneInput) window.formatAndValidatePhoneInput(p2);
 
-        // Pre-check Set as Primary Default if user has 0 saved addresses
-        const userAddrs = (window.ecohaven && window.ecohaven.getAddresses) ? window.ecohaven.getAddresses() : [];
-        document.getElementById('addrIsDefault').checked = userAddrs.length === 0;
+        // Let user check "Set as Primary Default" manually - zero forced default
+        document.getElementById('addrIsDefault').checked = false;
     }
 
     modal.classList.remove('hidden');
@@ -1332,32 +1329,7 @@ function handleAddressFormSubmit(e) {
         isDefault: isDefault
     };
 
-    // If marked as default or if profile lacks address, sync to customer profile details
-    if (isDefault && curU) {
-        const streetVal = document.getElementById('dashAddrStreet') ? document.getElementById('dashAddrStreet').value.trim() : '';
-        const brgyVal = document.getElementById('dashAddrBarangay') ? document.getElementById('dashAddrBarangay').value.trim() : '';
-        const cityVal = document.getElementById('dashAddrCity') ? document.getElementById('dashAddrCity').value.trim() : '';
-        const provVal = document.getElementById('dashAddrProvince') ? document.getElementById('dashAddrProvince').value.trim() : '';
-        const zipVal = document.getElementById('dashAddrZip') ? document.getElementById('dashAddrZip').value.trim() : '';
-
-        if (streetVal) curU.street = streetVal;
-        if (brgyVal) curU.barangay = brgyVal;
-        if (cityVal) curU.city = cityVal;
-        if (provVal) curU.province = provVal;
-        if (zipVal) curU.zipCode = zipVal;
-
-        localStorage.setItem('ecohaven_user', JSON.stringify(curU));
-        if (window.ecoHavenDb && curU.uid) {
-            window.ecoHavenDb.ref('users/' + curU.uid).update({
-                street: curU.street || '',
-                barangay: curU.barangay || '',
-                city: curU.city || '',
-                province: curU.province || '',
-                zipCode: curU.zipCode || ''
-            }).catch(() => {});
-        }
-        populateUserProfile();
-    }
+    // User profile address is controlled manually by the user, not auto-overwritten
     if (id) addrData.id = id;
 
     window.ecohaven.saveOrUpdateAddress(addrData);
