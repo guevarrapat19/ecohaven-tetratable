@@ -212,9 +212,16 @@
 </label>
 <div class="relative flex items-center">
 <span class="material-symbols-outlined text-outline absolute left-3 text-[18px]">smartphone</span>
-<input id="customerPhoneInput" class="w-full bg-surface-container-low pl-9 pr-3 py-2.5 rounded-lg font-body-md text-body-md text-on-surface outline-none focus:bg-surface focus:shadow-[0_0_0_2px_#86450d]" type="tel" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(typeof syncCustomerPhoneDisplay === 'function') syncCustomerPhoneDisplay();" placeholder="09XXXXXXXXX" value=""/>
+<input id="customerPhoneInput" class="w-full bg-surface-container-low pl-9 pr-3 py-2.5 rounded-lg font-body-md text-body-md text-on-surface outline-none focus:bg-surface focus:shadow-[0_0_0_2px_#86450d]" type="tel" inputmode="numeric" maxlength="11" oninput="if(window.formatAndValidatePhoneInput) window.formatAndValidatePhoneInput(this); if(typeof syncCustomerPhoneDisplay === 'function') syncCustomerPhoneDisplay();" placeholder="09171234567" value=""/>
 </div>
-<span class="font-caption text-caption text-on-surface-variant">GCash deep-link auth &amp; SMS dispatch updates</span>
+<div id="customerPhoneInput_indicator" class="phone-digit-indicator text-[11px] font-mono mt-1 flex items-center justify-between transition-all">
+  <span class="text-on-surface-variant flex items-center gap-1">
+    <span class="material-symbols-outlined text-[13px]">info</span>
+    Must be 11 digits (e.g. 09171234567)
+  </span>
+  <span class="text-outline font-semibold">0/11</span>
+</div>
+<span class="font-caption text-caption text-on-surface-variant mt-0.5">GCash deep-link auth &amp; SMS dispatch updates</span>
 </div>
 </div>
 <div class="flex flex-col gap-1.5">
@@ -1790,9 +1797,10 @@
         window.showEcoHavenToast ? window.showEcoHavenToast("⚠️ Please enter your Full Legal Name for delivery.", "warning") : alert("Please enter your Full Legal Name.");
         return false;
       }
-      if (!phone || phone.length < 10) {
+      const cleanCustomerPhone = phone.replace(/[^0-9]/g, '');
+      if (!cleanCustomerPhone || cleanCustomerPhone.length !== 11) {
         document.getElementById('customerPhoneInput')?.focus();
-        window.showEcoHavenToast ? window.showEcoHavenToast("⚠️ Please enter a valid 11-digit Philippine Mobile Number.", "warning") : alert("Please enter a valid Philippine Mobile Number.");
+        window.showEcoHavenToast ? window.showEcoHavenToast("⚠️ Phone number must be exactly 11 digits (e.g. 09171234567).", "warning") : alert("Phone number must be exactly 11 digits.");
         return false;
       }
       if (!email || !email.includes('@')) {

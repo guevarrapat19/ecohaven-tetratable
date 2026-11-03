@@ -679,8 +679,18 @@ function switchTab(tab) {
 
             <!-- Mobile Phone -->
             <div>
-                <label for="editPhone" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">Mobile Phone (Philippine Mobile) *</label>
-                <input type="tel" id="editPhone" placeholder="09171234567" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface font-mono focus:outline-none focus:ring-2 focus:ring-primary/20"/>
+                <label for="editPhone" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5 flex items-center justify-between">
+                    <span>Mobile Phone (Philippine Mobile) *</span>
+                    <span class="text-[10px] text-primary lowercase font-mono">11 digits (09XXXXXXXXX)</span>
+                </label>
+                <input type="tel" id="editPhone" placeholder="09171234567" inputmode="numeric" maxlength="11" oninput="if(window.formatAndValidatePhoneInput) window.formatAndValidatePhoneInput(this);" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface font-mono focus:outline-none focus:ring-2 focus:ring-primary/20"/>
+                <div id="editPhone_indicator" class="phone-digit-indicator text-[11px] font-mono mt-1 flex items-center justify-between transition-all">
+                    <span class="text-on-surface-variant flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[13px]">info</span>
+                        Must be 11 digits (e.g. 09171234567)
+                    </span>
+                    <span class="text-outline font-semibold">0/11</span>
+                </div>
                 <p class="text-[11px] text-on-surface-variant mt-1">Used for order tracking SMS, white-glove driver coordination, and GCash wallet binding.</p>
             </div>
 
@@ -868,7 +878,10 @@ function openEditProfileModal(targetField) {
     const emailInput = document.getElementById('editEmail');
 
     if (nameInput) nameInput.value = u.displayName || u.fullName || '';
-    if (phoneInput) phoneInput.value = u.phone || '';
+    if (phoneInput) {
+        phoneInput.value = u.phone || '';
+        if (window.formatAndValidatePhoneInput) window.formatAndValidatePhoneInput(phoneInput);
+    }
     if (cityInput) cityInput.value = u.city || 'Candaba';
     if (provInput) provInput.value = u.province || 'Pampanga';
     if (emailInput) emailInput.value = u.email || '';
@@ -906,6 +919,17 @@ async function handleSaveProfile(e) {
         } else {
             alert('Please provide your full name.');
         }
+        return;
+    }
+
+    const cleanProfilePhone = phone.replace(/[^0-9]/g, '');
+    if (phone && cleanProfilePhone.length !== 11) {
+        if (typeof window.showEcoHavenToast === 'function') {
+            window.showEcoHavenToast('Phone number must be exactly 11 digits (e.g. 09171234567).', 'warning');
+        } else {
+            alert('Phone number must be exactly 11 digits (e.g. 09171234567).');
+        }
+        document.getElementById('editPhone')?.focus();
         return;
     }
 
@@ -1161,6 +1185,8 @@ function openAddressModal(id = null) {
             document.getElementById('addrLabel').value = found.label || '';
             document.getElementById('addrRecipient').value = found.recipientName || '';
             document.getElementById('addrPhone').value = found.phone || '';
+            const p1 = document.getElementById('addrPhone');
+            if (p1 && window.formatAndValidatePhoneInput) window.formatAndValidatePhoneInput(p1);
             parseDashAddressToFields(found.address || '');
             document.getElementById('addrZone').value = found.zoneCode || (found.deliveryFee ? found.deliveryFee.toString() : '250');
             document.getElementById('addrIsDefault').checked = !!found.isDefault;
@@ -1172,6 +1198,8 @@ function openAddressModal(id = null) {
         try { if (uStr) curU = JSON.parse(uStr); } catch(e){}
         document.getElementById('addrRecipient').value = (curU && (curU.displayName || curU.fullName)) || '';
         document.getElementById('addrPhone').value = (curU && curU.phone) || '';
+        const p2 = document.getElementById('addrPhone');
+        if (p2 && window.formatAndValidatePhoneInput) window.formatAndValidatePhoneInput(p2);
     }
 
     modal.classList.remove('hidden');
@@ -1190,6 +1218,17 @@ function handleAddressFormSubmit(e) {
     const label = document.getElementById('addrLabel').value.trim();
     const recipientName = document.getElementById('addrRecipient').value.trim();
     const phone = document.getElementById('addrPhone').value.trim();
+
+    const cleanAddrPhone = phone.replace(/[^0-9]/g, '');
+    if (cleanAddrPhone.length !== 11) {
+        if (typeof window.showEcoHavenToast === 'function') {
+            window.showEcoHavenToast('Recipient phone number must be exactly 11 digits.', 'warning');
+        } else {
+            alert('Recipient phone number must be exactly 11 digits.');
+        }
+        document.getElementById('addrPhone')?.focus();
+        return;
+    }
     const address = document.getElementById('addrFull').value.trim();
     const zoneCode = document.getElementById('addrZone').value;
     const isDefault = document.getElementById('addrIsDefault').checked;

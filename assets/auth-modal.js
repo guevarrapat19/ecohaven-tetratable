@@ -1,3 +1,105 @@
+
+// =========================================================================
+// 11-DIGIT PHILIPPINE PHONE NUMBER CONTROLLER & LIVE INDICATOR
+// =========================================================================
+window.formatAndValidatePhoneInput = function(inputEl, indicatorEl) {
+  if (!inputEl) return;
+  
+  // Enforce numeric only and max 11 digits
+  let val = inputEl.value.replace(/[^0-9]/g, '');
+  if (val.length > 11) val = val.slice(0, 11);
+  if (inputEl.value !== val) {
+    inputEl.value = val;
+  }
+  inputEl.maxLength = 11;
+  inputEl.setAttribute('inputmode', 'numeric');
+
+  // Find or create indicator element if not provided
+  if (!indicatorEl) {
+    let indId = inputEl.id ? inputEl.id + '_indicator' : null;
+    if (indId) indicatorEl = document.getElementById(indId);
+    if (!indicatorEl) {
+      indicatorEl = document.createElement('div');
+      if (indId) indicatorEl.id = indId;
+      indicatorEl.className = 'phone-digit-indicator text-[11px] font-mono mt-1 flex items-center justify-between transition-all';
+      if (inputEl.parentNode) {
+        inputEl.parentNode.appendChild(indicatorEl);
+      }
+    }
+  }
+
+  const count = val.length;
+  if (!indicatorEl) return;
+
+  if (count === 0) {
+    indicatorEl.innerHTML = '<span class="text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">info</span>Must be 11 digits (e.g. 09171234567)</span><span class="text-outline font-semibold">0/11</span>';
+    inputEl.classList.remove('border-emerald-500', 'border-amber-500');
+  } else if (count < 11) {
+    const remaining = 11 - count;
+    indicatorEl.innerHTML = '<span class="text-amber-700 flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-[13px]">hourglass_top</span>Needs ' + remaining + ' more digit' + (remaining > 1 ? 's' : '') + ' (starts with 09)</span><span class="text-amber-700 font-bold">' + count + '/11</span>';
+    inputEl.classList.remove('border-emerald-500');
+  } else if (count === 11) {
+    if (val.startsWith('09')) {
+      indicatorEl.innerHTML = '<span class="text-emerald-700 flex items-center gap-1 font-semibold"><span class="material-symbols-outlined text-[14px]">check_circle</span>Valid 11-digit PH mobile</span><span class="text-emerald-700 font-bold">11/11 ✓</span>';
+      inputEl.classList.add('border-emerald-500');
+    } else {
+      indicatorEl.innerHTML = '<span class="text-amber-700 flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-[13px]">warning</span>PH mobile should start with 09</span><span class="text-amber-700 font-bold">11/11</span>';
+    }
+  }
+};
+
+window.initEcoHavenPhoneFields = function() {
+  const phoneSelectors = [
+    '#regPhone',
+    '#signupPhone',
+    '#customerPhoneInput',
+    '#userContact',
+    '#editPhone',
+    '#addrPhone',
+    '#editCustomerPhone',
+    '#driverPhoneInput',
+    'input[type="tel"]'
+  ];
+
+  phoneSelectors.forEach(selector => {
+    document.querySelectorAll(selector).forEach(input => {
+      if (input.dataset.phoneBound === 'true') {
+        window.formatAndValidatePhoneInput(input);
+        return;
+      }
+      input.dataset.phoneBound = 'true';
+      input.maxLength = 11;
+      input.setAttribute('inputmode', 'numeric');
+      if (!input.placeholder || input.placeholder.includes('+63')) {
+        input.placeholder = '09171234567';
+      }
+
+      window.formatAndValidatePhoneInput(input);
+
+      input.addEventListener('input', function() {
+        window.formatAndValidatePhoneInput(input);
+      });
+
+      input.addEventListener('blur', function() {
+        const clean = this.value.replace(/[^0-9]/g, '');
+        if (clean.length > 0 && clean.length < 11) {
+          let indId = this.id ? this.id + '_indicator' : null;
+          let indicatorEl = indId ? document.getElementById(indId) : null;
+          if (indicatorEl) {
+            indicatorEl.innerHTML = '<span class="text-red-700 flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-[13px]">error</span>Incomplete: Phone number must be 11 digits (' + clean.length + '/11)</span><span class="text-red-700 font-bold">' + clean.length + '/11</span>';
+          }
+        }
+      });
+    });
+  });
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', window.initEcoHavenPhoneFields);
+} else {
+  window.initEcoHavenPhoneFields();
+}
+
 // EcoHaven Furniture - Account Sign In & Register Modal
 // Official Cloud Backend: https://ecohavenfurniture-d0114-default-rtdb.asia-southeast1.firebasedatabase.app/
 // Secure Authentication via Firebase Realtime Database 'users' node
@@ -82,13 +184,21 @@
             </div>
 
             <div>
-              <label for="regPhone" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">
-                Mobile Number * (Philippine Mobile)
+              <label for="regPhone" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5 flex items-center justify-between">
+                <span>Mobile Number *</span>
+                <span class="text-[10px] text-primary lowercase font-mono">11 digits (09XXXXXXXXX)</span>
               </label>
-              <input type="tel" id="regPhone" required inputmode="numeric" 
-                     oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
+              <input type="tel" id="regPhone" required inputmode="numeric" maxlength="11" 
+                     oninput="if(window.formatAndValidatePhoneInput) window.formatAndValidatePhoneInput(this);" 
                      placeholder="09171234567" 
                      class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm text-on-surface font-mono"/>
+              <div id="regPhone_indicator" class="phone-digit-indicator text-[11px] font-mono mt-1 flex items-center justify-between transition-all">
+                <span class="text-on-surface-variant flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[13px]">info</span>
+                  Must be 11 digits (e.g. 09171234567)
+                </span>
+                <span class="text-outline font-semibold">0/11</span>
+              </div>
             </div>
 
             <div>
@@ -339,6 +449,13 @@
 
     if (!name || !phone || !email || !password) {
       notify('Please fill out all required fields.', 'warning');
+      return;
+    }
+
+    const cleanRegPhone = phone.replace(/[^0-9]/g, '');
+    if (cleanRegPhone.length !== 11) {
+      notify('Phone number must be exactly 11 digits (e.g. 09171234567).', 'warning');
+      phoneInput.focus();
       return;
     }
 
