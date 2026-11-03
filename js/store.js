@@ -1294,7 +1294,7 @@ class EcoHavenStore {
     }
 
 // ==========================================================
-    // 8. SHOPEE-STYLE SAVED DELIVERY ADDRESS BOOK
+    // 8. SAVED DELIVERY ADDRESS BOOK
     // ==========================================================
     loadAddresses() {
         try {
