@@ -464,7 +464,7 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
         <form onsubmit="handleSaveProduct(event)" class="space-y-4">
             <div>
                 <label class="text-xs font-bold text-on-surface block mb-1">Product Title</label>
-                <input type="text" id="newProdName" required placeholder="e.g. Santos Butterfly Dining Table" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-sm font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+                <input type="text" id="newProdName" required placeholder="Product Title / Name" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-sm font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
@@ -528,7 +528,7 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
         <form onsubmit="handleSaveMaterial(event)" class="space-y-4">
             <div>
                 <label class="text-xs font-bold text-on-surface block mb-1">Material Name</label>
-                <input type="text" id="newMatName" required placeholder="e.g. Kiln-Dried Narra Planks" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-sm font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+                <input type="text" id="newMatName" required placeholder="Raw Material Name" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-sm font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
@@ -622,7 +622,7 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
                     </div>
                     <div>
                         <label class="text-[11px] font-bold text-on-surface block mb-1">Order Status Title</label>
-                        <input type="text" id="editOrderStatusName" class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. In Production" />
+                        <input type="text" id="editOrderStatusName" class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Order Status Title" />
                     </div>
                 </div>
 
@@ -718,7 +718,7 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
                     </div>
                     <div>
                         <label class="text-[11px] font-bold text-on-surface block mb-1">GCash / InstaPay Reference</label>
-                        <input type="text" id="editGcashRef" class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" placeholder="9021-XXXX-XXXX" />
+                        <input type="text" id="editGcashRef" class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Payment Reference Number" />
                     </div>
                 </div>
             </div>
@@ -729,7 +729,7 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
                     <span class="material-symbols-outlined text-primary text-[17px]">handyman</span>
                     Workshop Artisan Notes &amp; Moisture Specs
                 </span>
-                <textarea id="editArtisanNotes" rows="2" class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Lead: Mang Ronaldo • Batch #491 • 11.4% MC • Special edge chamfer"></textarea>
+                <textarea id="editArtisanNotes" rows="2" class="w-full px-3 py-2 rounded-lg border border-outline-variant/40 bg-surface text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Workshop artisan notes and moisture specifications"></textarea>
             </div>
 
             <!-- Section 5: Space Clearing & Delete Actions -->

@@ -1346,9 +1346,9 @@ class EcoHavenStore {
 
         all = all.map(a => {
             if (!a) return a;
-            const isThisUser = (a.uid && userUid && a.uid === userUid) ||
+            const isThisUser = user ? ((a.uid && userUid && a.uid === userUid) ||
                                (a.email && userEmail && a.email.toLowerCase().trim() === userEmail) ||
-                               (a.phone && userPhone && a.phone.replace(/[^0-9]/g, '') === userPhone);
+                               (a.phone && userPhone && a.phone.replace(/[^0-9]/g, '') === userPhone)) : true;
             if (a.id === id) {
                 targetAddr = { ...a, isDefault: true };
                 return targetAddr;
@@ -1360,7 +1360,32 @@ class EcoHavenStore {
 
         this.saveAddresses(all);
 
-        // Profile address is managed manually by the user
+        // Sync primary default delivery destination to user profile
+        if (targetAddr) {
+            let u = null;
+            try {
+                const uStr = localStorage.getItem('ecohaven_user');
+                if (uStr) u = JSON.parse(uStr);
+            } catch(e){}
+            if (u) {
+                if (targetAddr.street) u.street = targetAddr.street;
+                if (targetAddr.barangay) u.barangay = targetAddr.barangay;
+                if (targetAddr.city) u.city = targetAddr.city;
+                if (targetAddr.province) u.province = targetAddr.province;
+                if (targetAddr.zipCode) u.zipCode = targetAddr.zipCode;
+                localStorage.setItem('ecohaven_user', JSON.stringify(u));
+                localStorage.setItem('currentUser', JSON.stringify(u));
+                if (window.ecoHavenDb && u.uid) {
+                    window.ecoHavenDb.ref('users/' + u.uid).update({
+                        street: u.street || '',
+                        barangay: u.barangay || '',
+                        city: u.city || '',
+                        province: u.province || '',
+                        zipCode: u.zipCode || ''
+                    }).catch(() => {});
+                }
+            }
+        }
 
         window.showEcoHavenToast("Primary delivery destination set as default.", "success");
         window.dispatchEvent(new CustomEvent('ecohaven_addresses_updated', { detail: this.addresses }));
@@ -1408,12 +1433,12 @@ class EcoHavenStore {
         }
 
         // If this address is set as default, mark other addresses for this user as NOT default
-        if (addrData.isDefault && user) {
+        if (addrData.isDefault) {
             all = all.map(a => {
                 if (!a) return a;
-                const isThisUser = (a.uid && userUid && a.uid === userUid) ||
+                const isThisUser = user ? ((a.uid && userUid && a.uid === userUid) ||
                                    (a.email && userEmail && a.email.toLowerCase().trim() === userEmail) ||
-                                   (a.phone && userPhone && a.phone.replace(/[^0-9]/g, '') === userPhone);
+                                   (a.phone && userPhone && a.phone.replace(/[^0-9]/g, '') === userPhone)) : true;
                 if (isThisUser && a.id !== id) {
                     return { ...a, isDefault: false };
                 }
