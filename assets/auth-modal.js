@@ -32,7 +32,7 @@ window.formatAndValidatePhoneInput = function(inputEl, indicatorEl) {
   if (!indicatorEl) return;
 
   if (count === 0) {
-    indicatorEl.innerHTML = '<span class="text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">info</span>Must be 11 digits (e.g. 09171234567)</span><span class="text-outline font-semibold">0/11</span>';
+    indicatorEl.innerHTML = '<span class="text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">info</span>Must be 11 digits</span><span class="text-outline font-semibold">0/11</span>';
     inputEl.classList.remove('border-emerald-500', 'border-amber-500');
   } else if (count < 11) {
     const remaining = 11 - count;
@@ -71,7 +71,7 @@ window.initEcoHavenPhoneFields = function() {
       input.maxLength = 11;
       input.setAttribute('inputmode', 'numeric');
       if (!input.placeholder || input.placeholder.includes('+63')) {
-        input.placeholder = '09171234567';
+        input.placeholder = 'Mobile Number';
       }
 
       window.formatAndValidatePhoneInput(input);
@@ -179,23 +179,23 @@ if (document.readyState === 'loading') {
               <label for="regFullName" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">
                 Full Name *
               </label>
-              <input type="text" id="regFullName" required placeholder="Paolo Magisa" 
+              <input type="text" id="regFullName" required placeholder="Full Name" 
                      class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm text-on-surface"/>
             </div>
 
             <div>
               <label for="regPhone" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5 flex items-center justify-between">
                 <span>Mobile Number *</span>
-                <span class="text-[10px] text-primary lowercase font-mono">11 digits (09XXXXXXXXX)</span>
+                <span class="text-[10px] text-primary font-mono">11 digits</span>
               </label>
               <input type="tel" id="regPhone" required inputmode="numeric" maxlength="11" 
                      oninput="if(window.formatAndValidatePhoneInput) window.formatAndValidatePhoneInput(this);" 
-                     placeholder="09171234567" 
+                     placeholder="Mobile Number" 
                      class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm text-on-surface font-mono"/>
               <div id="regPhone_indicator" class="phone-digit-indicator text-[11px] font-mono mt-1 flex items-center justify-between transition-all">
                 <span class="text-on-surface-variant flex items-center gap-1">
                   <span class="material-symbols-outlined text-[13px]">info</span>
-                  Must be 11 digits (e.g. 09171234567)
+                  Must be 11 digits
                 </span>
                 <span class="text-outline font-semibold">0/11</span>
               </div>
@@ -205,7 +205,7 @@ if (document.readyState === 'loading') {
               <label for="regEmail" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">
                 Email Address *
               </label>
-              <input type="email" id="regEmail" required placeholder="name@example.ph" 
+              <input type="email" id="regEmail" required placeholder="Email Address" 
                      class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm text-on-surface"/>
             </div>
 
@@ -214,7 +214,7 @@ if (document.readyState === 'loading') {
                 Create Password * (At least 6 characters)
               </label>
               <div class="relative">
-                <input type="password" id="regPassword" required minlength="6" placeholder="••••••••" oninput="checkPasswordStrength(this.value)" 
+                <input type="password" id="regPassword" required minlength="6" placeholder="Password" oninput="checkPasswordStrength(this.value)" 
                        class="w-full px-4 py-2.5 pr-10 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm text-on-surface"/>
               </div>
               <!-- Real-time Password Security Meter -->
@@ -254,7 +254,7 @@ if (document.readyState === 'loading') {
               <label for="loginIdentifier" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">
                 Email or Mobile Number *
               </label>
-              <input type="text" id="loginIdentifier" required placeholder="paomagisa@gmail.com or 09812558028" 
+              <input type="text" id="loginIdentifier" required placeholder="Email or Mobile Number" 
                      class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm text-on-surface"/>
             </div>
 
@@ -265,7 +265,7 @@ if (document.readyState === 'loading') {
                 </label>
               </div>
               <div class="relative">
-                <input type="password" id="loginPassword" required placeholder="••••••••" 
+                <input type="password" id="loginPassword" required placeholder="Password" 
                        class="w-full px-4 py-2.5 pr-10 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm text-on-surface"/>
                 <button type="button" onclick="togglePasswordVisibility('loginPassword')" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface text-sm">
                   <span class="material-symbols-outlined text-[18px]">visibility</span>
