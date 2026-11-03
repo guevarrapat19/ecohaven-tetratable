@@ -973,19 +973,19 @@ class EcoHavenStore {
                     </div>
 
                     <!-- Payment Modality Toggle -->
-                    <div class="p-space-md rounded-xl bg-surface-container">
-                        <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider block mb-2 font-semibold">Payment Settlement Modality</span>
-                        <label class="flex items-center justify-between p-3 rounded-lg bg-surface-container-lowest cursor-pointer mb-2 border border-primary/20">
+                    <div class="p-space-md rounded-xl bg-surface-container" id="drawerPaymentModalitySection">
+                        <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider block mb-2 font-semibold" id="drawerModalityTitle">Payment Settlement Modality</span>
+                        <label id="drawerOptionFifty" class="flex items-center justify-between p-3 rounded-lg bg-surface-container-lowest cursor-pointer mb-2 border border-primary/20">
                             <div class="flex items-center gap-space-xs">
                                 <input checked class="accent-primary w-4 h-4 cursor-pointer" name="globalDrawerPaymentOption" onchange="window.ecohaven.setDrawerPaymentMode('fifty')" type="radio" value="fifty"/>
                                 <div>
-                                    <span class="font-label-md text-label-md text-on-surface font-bold block">50% Earnest Down Payment</span>
-                                    <span class="font-caption text-caption text-on-surface-variant">Remaining 50% due upon white-glove inspection</span>
+                                    <span class="font-label-md text-label-md text-on-surface font-bold block" id="drawerFiftyTitle">50% Earnest Down Payment</span>
+                                    <span class="font-caption text-caption text-on-surface-variant" id="drawerFiftySubtext">Remaining 50% due upon white-glove inspection</span>
                                 </div>
                             </div>
                             <span class="font-label-md text-label-md text-primary font-bold" id="drawerHalfAmountDisplay">₱3,467.00</span>
                         </label>
-                        <label class="flex items-center justify-between p-3 rounded-lg bg-surface-container-lowest cursor-pointer border border-outline-variant/30">
+                        <label id="drawerOptionFull" class="flex items-center justify-between p-3 rounded-lg bg-surface-container-lowest cursor-pointer mb-2 border border-outline-variant/30">
                             <div class="flex items-center gap-space-xs">
                                 <input class="accent-primary w-4 h-4 cursor-pointer" name="globalDrawerPaymentOption" onchange="window.ecohaven.setDrawerPaymentMode('full')" type="radio" value="full"/>
                                 <div>
@@ -994,6 +994,16 @@ class EcoHavenStore {
                                 </div>
                             </div>
                             <span class="font-label-md text-label-md text-on-surface font-bold" id="drawerFullAmountDisplay">₱6,934.00</span>
+                        </label>
+                        <label id="drawerOptionCod" class="hidden flex items-center justify-between p-3 rounded-lg bg-surface-container-lowest cursor-pointer border border-outline-variant/30">
+                            <div class="flex items-center gap-space-xs">
+                                <input class="accent-primary w-4 h-4 cursor-pointer" name="globalDrawerPaymentOption" onchange="window.ecohaven.setDrawerPaymentMode('cod')" type="radio" value="cod"/>
+                                <div>
+                                    <span class="font-label-md text-label-md text-on-surface font-bold block">Cash on Delivery</span>
+                                    <span class="font-caption text-caption text-on-surface-variant">Zero down payment • Settle upon handover</span>
+                                </div>
+                            </div>
+                            <span class="font-label-md text-label-md text-tertiary font-bold" id="drawerCodAmountDisplay">₱0.00 today</span>
                         </label>
                     </div>
 
@@ -1085,24 +1095,79 @@ class EcoHavenStore {
         const isPages = window.location.pathname.includes('/pages/') || window.location.pathname.includes('\\pages\\');
         const defaultImg = isPages ? '../assets/images/product pic.png' : 'assets/images/product pic.png';
 
-        const hasFurniture = this.cart.some(item => (parseFloat(item.price) || 0) >= 3000);
-        if (!hasFurniture && this.cart.length > 0) {
-            this.drawerPaymentMode = 'full';
-        }
-
         const subtotal = this.getCartSubtotal();
         const half = subtotal / 2;
-        const dueAmount = (this.drawerPaymentMode === 'fifty' && hasFurniture) ? half : subtotal;
+
+        const isTier1 = subtotal < 2000;
+        const isTier2 = subtotal >= 2000 && subtotal <= 5000;
+        const isTier3 = subtotal > 5000;
+
+        const optFifty = document.getElementById('drawerOptionFifty');
+        const optFull = document.getElementById('drawerOptionFull');
+        const optCod = document.getElementById('drawerOptionCod');
+        const fiftyTitle = document.getElementById('drawerFiftyTitle');
+        const fiftySub = document.getElementById('drawerFiftySubtext');
+
+        if (isTier1) {
+            if (optFifty) optFifty.classList.add('hidden');
+            if (optFull) optFull.classList.remove('hidden');
+            if (optCod) optCod.classList.remove('hidden');
+            if (this.drawerPaymentMode === 'fifty') {
+                this.drawerPaymentMode = 'full';
+            }
+        } else if (isTier2) {
+            if (optFifty) {
+                optFifty.classList.remove('hidden');
+                if (fiftyTitle) fiftyTitle.innerText = "50% Earnest Down Payment";
+                if (fiftySub) fiftySub.innerText = "Optional milestone escrow for orders ₱2k–₱5k";
+            }
+            if (optFull) optFull.classList.remove('hidden');
+            if (optCod) optCod.classList.remove('hidden');
+        } else {
+            // isTier3 (> 5000): Downpayment is MANDATORY! COD is HIDDEN
+            if (optFifty) {
+                optFifty.classList.remove('hidden');
+                if (fiftyTitle) fiftyTitle.innerText = "50% Down Payment (Mandatory)";
+                if (fiftySub) fiftySub.innerText = "Required earnest deposit to begin bespoke woodworking";
+            }
+            if (optFull) optFull.classList.remove('hidden');
+            if (optCod) optCod.classList.add('hidden');
+            if (this.drawerPaymentMode === 'cod') {
+                this.drawerPaymentMode = 'fifty';
+            }
+        }
+
+        // Sync radio check state
+        const drawerRadio = document.querySelector(`input[name="globalDrawerPaymentOption"][value="${this.drawerPaymentMode}"]`);
+        if (drawerRadio) drawerRadio.checked = true;
+
+        let dueAmount = subtotal;
+        if (this.drawerPaymentMode === 'fifty' && subtotal >= 2000) {
+            dueAmount = half;
+        } else if (this.drawerPaymentMode === 'cod') {
+            dueAmount = 0;
+        }
 
         // Update displays
         const dueDisplay = document.getElementById('drawerDueAmount');
-        if (dueDisplay) dueDisplay.innerText = this.cart.length === 0 ? '₱0.00' : `₱${dueAmount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        if (dueDisplay) {
+            if (this.cart.length === 0) {
+                dueDisplay.innerText = '₱0.00';
+            } else if (this.drawerPaymentMode === 'cod') {
+                dueDisplay.innerText = '₱0.00 (Pay on Handover)';
+            } else {
+                dueDisplay.innerText = `₱${dueAmount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            }
+        }
 
         const halfDisplay = document.getElementById('drawerHalfAmountDisplay');
         if (halfDisplay) halfDisplay.innerText = this.cart.length === 0 ? '₱0.00' : `₱${half.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
         const fullDisplay = document.getElementById('drawerFullAmountDisplay');
         if (fullDisplay) fullDisplay.innerText = this.cart.length === 0 ? '₱0.00' : `₱${subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+        const codDisplay = document.getElementById('drawerCodAmountDisplay');
+        if (codDisplay) codDisplay.innerText = '₱0.00 today';
 
         const cartSubtotalEl = document.getElementById('cart-subtotal');
         if (cartSubtotalEl) cartSubtotalEl.innerText = `₱${subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
@@ -1155,7 +1220,9 @@ class EcoHavenStore {
                     <div class="flex items-center justify-between mt-1">
                         ${(itemPrice < 2000)
     ? `<span class="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span> Paid in Full / COD</span>`
-    : `<span class="text-[11px] font-semibold text-tertiary">50% DP: ₱${itemHalf.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>`}
+    : (itemPrice <= 5000)
+        ? `<span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1">50% DP / Full / COD</span>`
+        : `<span class="text-[11px] font-semibold text-tertiary">50% DP: ₱${itemHalf.toLocaleString('en-PH', {minimumFractionDigits: 2})} (Downpayment Required)</span>`}
                         <button type="button" class="text-outline hover:text-error transition-colors p-1" onclick="window.ecohaven.removeFromCart(${idx})" title="Remove item">
                             <span class="material-symbols-outlined text-[18px]">delete</span>
                         </button>

@@ -432,10 +432,10 @@
       <span class="font-label-md text-label-md font-semibold text-on-surface" id="arrangementTitle">Payment Arrangement</span>
       <span class="font-caption text-caption text-primary font-bold" id="arrangementBadge">Candaba Workshop Benefit</span>
     </div>
-    <div class="grid grid-cols-2 p-1 bg-surface-container rounded-xl gap-1.5 border border-outline-variant/20" id="arrangementToggleGrid">
+    <div class="grid grid-cols-2 p-1 bg-surface-container rounded-xl gap-1.5 border border-outline-variant/20 transition-all" id="arrangementToggleGrid">
       <button type="button" class="py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-primary-container text-on-primary-container shadow-sm flex flex-col items-center justify-center" id="toggleFifty" onclick="setPaymentMode('fifty')">
         <span class="font-bold text-xs sm:text-sm">50% Down Payment</span>
-        <span class="text-[10px] opacity-90 font-medium">Earnest Escrow (Recommended)</span>
+        <span class="text-[10px] opacity-90 font-medium" id="toggleFiftySubtext">Earnest Escrow (Recommended)</span>
       </button>
       <button type="button" class="py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center" id="toggleFull" onclick="setPaymentMode('full')">
         <span class="font-bold text-xs sm:text-sm">Paid in Full</span>
@@ -443,7 +443,7 @@
       </button>
       <button type="button" class="hidden py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center" id="toggleCod" onclick="setPaymentMode('cod')">
         <span class="font-bold text-xs sm:text-sm">Cash on Delivery</span>
-        <span class="text-[10px] opacity-90 font-medium text-tertiary">Pay upon Handover (COD)</span>
+        <span class="text-[10px] opacity-90 font-medium text-tertiary" id="toggleCodSubtext">Pay upon Handover (COD)</span>
       </button>
     </div>
   </div>
@@ -1759,34 +1759,46 @@
         onPaymentMethodChange(selectedGateway);
       }
 
-      const hasFurniture = cart.length === 0
-        ? (basePrice >= 2000)
-        : cart.some(item => (parseFloat(item.price) || 0) >= 2000);
-      const isBelow2000 = !hasFurniture;
-
       const toggleFifty = document.getElementById('toggleFifty');
       const toggleFull = document.getElementById('toggleFull');
       const toggleCod = document.getElementById('toggleCod');
+      const toggleFiftySubtext = document.getElementById('toggleFiftySubtext');
       const toggleFullSubtext = document.getElementById('toggleFullSubtext');
+      const toggleCodSubtext = document.getElementById('toggleCodSubtext');
       const arrangementBadge = document.getElementById('arrangementBadge');
       const escrowInfoBanner = document.getElementById('escrowInfoBanner');
       const agreementTermsText = document.getElementById('agreementTermsText');
+      const arrangementToggleGrid = document.getElementById('arrangementToggleGrid');
+      const gatewayLabelCod = document.getElementById('gatewayLabelCod');
 
-      if (isBelow2000) {
-        // Products below 2000: TWO OPTIONS ONLY -> Paid in Full or Cash on Delivery (COD).
-        // 50% Downpayment is completely HIDDEN.
+      // =========================================================================
+      // THREE PAYMENT MODALITY TIERS BASED ON TOTAL PRODUCT PURCHASE (basePrice)
+      // 1. Below ₱2,000: Paid in Full OR Cash on Delivery (COD). 50% DP is HIDDEN.
+      // 2. ₱2,000 – ₱5,000: 50% Down Payment, Paid in Full, OR COD available.
+      // 3. More than ₱5,000: Downpayment is MANDATORY! COD is STRICTLY PROHIBITED.
+      // =========================================================================
+      if (basePrice < 2000) {
+        // TIER 1: Below ₱2,000
         if (toggleFifty) {
           toggleFifty.classList.add('hidden');
           toggleFifty.style.display = 'none';
-        }
-        if (toggleCod) {
-          toggleCod.classList.remove('hidden');
-          toggleCod.style.display = 'flex';
         }
         if (toggleFull) {
           toggleFull.classList.remove('hidden');
           toggleFull.style.display = 'flex';
           if (toggleFullSubtext) toggleFullSubtext.innerText = "100% Upfront (Instant Dispatch)";
+        }
+        if (toggleCod) {
+          toggleCod.classList.remove('hidden');
+          toggleCod.style.display = 'flex';
+          if (toggleCodSubtext) toggleCodSubtext.innerText = "Pay upon Handover (COD)";
+        }
+        if (gatewayLabelCod) {
+          gatewayLabelCod.classList.remove('hidden');
+          gatewayLabelCod.style.display = 'flex';
+        }
+        if (arrangementToggleGrid) {
+          arrangementToggleGrid.className = "grid grid-cols-2 p-1 bg-surface-container rounded-xl gap-1.5 border border-outline-variant/20 transition-all";
         }
 
         if (paymentMode === 'fifty') {
@@ -1804,23 +1816,78 @@
         }
 
         if (paymentMode === 'cod') {
-          if (toggleCod) {
-            toggleCod.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-tertiary text-white shadow-sm flex flex-col items-center justify-center";
-          }
-          if (toggleFull) {
-            toggleFull.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center";
-          }
+          if (toggleCod) toggleCod.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-tertiary text-white shadow-sm flex flex-col items-center justify-center";
+          if (toggleFull) toggleFull.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center";
           selectedGateway = 'cod';
           const codRadio = document.querySelector('input[name="payment_method"][value="cod"]');
           if (codRadio) codRadio.checked = true;
         } else {
           // paymentMode === 'full'
-          if (toggleFull) {
-            toggleFull.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-primary-container text-on-primary-container shadow-sm flex flex-col items-center justify-center";
+          if (toggleFull) toggleFull.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-primary-container text-on-primary-container shadow-sm flex flex-col items-center justify-center";
+          if (toggleCod) toggleCod.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center";
+          if (selectedGateway === 'cod') {
+            selectedGateway = 'gcash';
+            const gcashRadio = document.querySelector('input[name="payment_method"][value="gcash"]');
+            if (gcashRadio) gcashRadio.checked = true;
           }
-          if (toggleCod) {
-            toggleCod.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center";
+        }
+      } else if (basePrice <= 5000) {
+        // TIER 2: ₱2,000 – ₱5,000 (Option of 50% Downpayment, Paid in Full, or COD)
+        if (toggleFifty) {
+          toggleFifty.classList.remove('hidden');
+          toggleFifty.style.display = 'flex';
+          toggleFifty.disabled = false;
+          if (toggleFiftySubtext) toggleFiftySubtext.innerText = "50% Earnest Escrow (Optional)";
+        }
+        if (toggleFull) {
+          toggleFull.classList.remove('hidden');
+          toggleFull.style.display = 'flex';
+          toggleFull.disabled = false;
+          if (toggleFullSubtext) toggleFullSubtext.innerText = "100% Upfront (Instant Dispatch)";
+        }
+        if (toggleCod) {
+          toggleCod.classList.remove('hidden');
+          toggleCod.style.display = 'flex';
+          if (toggleCodSubtext) toggleCodSubtext.innerText = "Pay upon Handover (COD)";
+        }
+        if (gatewayLabelCod) {
+          gatewayLabelCod.classList.remove('hidden');
+          gatewayLabelCod.style.display = 'flex';
+        }
+        if (arrangementToggleGrid) {
+          arrangementToggleGrid.className = "grid grid-cols-1 sm:grid-cols-3 p-1 bg-surface-container rounded-xl gap-1.5 border border-outline-variant/20 transition-all";
+        }
+
+        if (arrangementBadge) {
+          arrangementBadge.innerText = "Order ₱2k–₱5k: 50% DP, Full, or COD";
+        }
+        if (escrowInfoBanner) {
+          escrowInfoBanner.innerHTML = `<span class="material-symbols-outlined text-[16px] text-tertiary">check_circle</span> Orders from ₱2,000 to ₱5,000: Choose between <strong>50% Down Payment</strong>, <strong>Paid in Full</strong>, or <strong>Cash on Delivery (COD)</strong>.`;
+        }
+        if (agreementTermsText) {
+          agreementTermsText.innerHTML = `I confirm that I have reviewed and agree to the <a href="legal.html#terms" target="_blank" class="underline text-primary font-bold hover:text-primary-container">Terms and Conditions</a> for prompt Candaba workshop dispatch and delivery under RA 8792.`;
+        }
+
+        // Reset default classes
+        if (toggleFifty) toggleFifty.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center";
+        if (toggleFull) toggleFull.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center";
+        if (toggleCod) toggleCod.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center";
+
+        if (paymentMode === 'fifty') {
+          if (toggleFifty) toggleFifty.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-primary-container text-on-primary-container shadow-sm flex flex-col items-center justify-center";
+          if (selectedGateway === 'cod') {
+            selectedGateway = 'gcash';
+            const gcashRadio = document.querySelector('input[name="payment_method"][value="gcash"]');
+            if (gcashRadio) gcashRadio.checked = true;
           }
+        } else if (paymentMode === 'cod') {
+          if (toggleCod) toggleCod.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-tertiary text-white shadow-sm flex flex-col items-center justify-center";
+          selectedGateway = 'cod';
+          const codRadio = document.querySelector('input[name="payment_method"][value="cod"]');
+          if (codRadio) codRadio.checked = true;
+        } else {
+          // paymentMode === 'full'
+          if (toggleFull) toggleFull.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-primary-container text-on-primary-container shadow-sm flex flex-col items-center justify-center";
           if (selectedGateway === 'cod') {
             selectedGateway = 'gcash';
             const gcashRadio = document.querySelector('input[name="payment_method"][value="gcash"]');
@@ -1828,35 +1895,49 @@
           }
         }
       } else {
-        // Normal furniture orders (>= 2000): 50% Earnest Downpayment available
+        // TIER 3: More than ₱5,000 -> DOWNPAYMENT IS MANDATORY! COD is NOT PERMITTED.
         if (toggleFifty) {
           toggleFifty.classList.remove('hidden');
           toggleFifty.style.display = 'flex';
           toggleFifty.disabled = false;
-        }
-        if (toggleCod) {
-          toggleCod.classList.add('hidden');
-          toggleCod.style.display = 'none';
+          if (toggleFiftySubtext) toggleFiftySubtext.innerText = "Mandatory Escrow (> ₱5,000)";
         }
         if (toggleFull) {
           toggleFull.classList.remove('hidden');
           toggleFull.style.display = 'flex';
           toggleFull.disabled = false;
-          if (toggleFullSubtext) toggleFullSubtext.innerText = "Instant Priority Dispatch";
+          if (toggleFullSubtext) toggleFullSubtext.innerText = "100% Upfront (Instant Dispatch)";
+        }
+        if (toggleCod) {
+          toggleCod.classList.add('hidden');
+          toggleCod.style.display = 'none';
+        }
+        if (gatewayLabelCod) {
+          gatewayLabelCod.classList.add('hidden');
+          gatewayLabelCod.style.display = 'none';
+        }
+        if (arrangementToggleGrid) {
+          arrangementToggleGrid.className = "grid grid-cols-2 p-1 bg-surface-container rounded-xl gap-1.5 border border-outline-variant/20 transition-all";
         }
 
+        // Strictly disallow COD for > 5k
         if (paymentMode === 'cod') {
           paymentMode = 'fifty';
         }
+        if (selectedGateway === 'cod') {
+          selectedGateway = 'gcash';
+          const gcashRadio = document.querySelector('input[name="payment_method"][value="gcash"]');
+          if (gcashRadio) gcashRadio.checked = true;
+        }
 
         if (arrangementBadge) {
-          arrangementBadge.innerText = "Candaba Workshop Benefit";
+          arrangementBadge.innerText = "Order > ₱5,000: Downpayment Required";
         }
         if (escrowInfoBanner) {
-          escrowInfoBanner.innerHTML = `<span class="material-symbols-outlined text-[16px]">verified_user</span> 50% earnest down payment reserves sustainable Candaba lumber &amp; initiates master joinery.`;
+          escrowInfoBanner.innerHTML = `<span class="material-symbols-outlined text-[16px] text-primary">verified_user</span> Orders above ₱5,000 require <strong>50% earnest down payment</strong> to reserve sustainable Candaba lumber &amp; initiate master joinery. Cash on Delivery (COD) is not available.`;
         }
         if (agreementTermsText) {
-          agreementTermsText.innerHTML = `I confirm that I have reviewed and agree to the <a href="legal.html#terms" target="_blank" class="underline text-primary font-bold hover:text-primary-container">Terms and Conditions</a>, acknowledging that custom furniture orders require a 50% non-refundable earnest deposit to secure timber allocation in Pampanga under RA 8792.`;
+          agreementTermsText.innerHTML = `I confirm that I have reviewed and agree to the <a href="legal.html#terms" target="_blank" class="underline text-primary font-bold hover:text-primary-container">Terms and Conditions</a>, acknowledging that custom furniture orders above ₱5,000 require a 50% non-refundable earnest deposit to secure timber allocation in Pampanga under RA 8792.`;
         }
 
         if (paymentMode === 'fifty') {
@@ -1895,7 +1976,7 @@
       document.getElementById('grossTotal').innerText = `₱${gross.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
       document.getElementById('freightVal').innerText = `₱${freightCost.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
-      if (paymentMode === 'fifty' && hasFurniture) {
+      if (paymentMode === 'fifty' && basePrice >= 2000) {
         const halfBase = discountedBase / 2;
         const due = halfBase + freightCost;
         const balance = halfBase;
@@ -1934,16 +2015,18 @@
     }
 
     function setPaymentMode(mode) {
-      const cart = (window.ecohaven && window.ecohaven.cart && window.ecohaven.cart.length > 0) ? window.ecohaven.cart : [];
-      const hasFurniture = cart.length === 0
-        ? (basePrice >= 2000)
-        : cart.some(item => (parseFloat(item.price) || 0) >= 2000);
-
-      if (mode === 'fifty' && !hasFurniture) {
+      if (mode === 'fifty' && basePrice < 2000) {
         if (typeof window.showEcoHavenToast === 'function') {
-          window.showEcoHavenToast("ℹ️ Items below ₱2,000 are ready-stock: choose Paid in Full or Cash on Delivery (COD).", "info");
+          window.showEcoHavenToast("ℹ️ Orders below ₱2,000 qualify for Paid in Full or Cash on Delivery (COD). Zero downpayment required.", "info");
         }
         mode = 'full';
+      }
+
+      if (mode === 'cod' && basePrice > 5000) {
+        if (typeof window.showEcoHavenToast === 'function') {
+          window.showEcoHavenToast("⚠️ Bespoke orders above ₱5,000 require down payment before workshop allocation. Cash on Delivery is not available.", "warning");
+        }
+        mode = 'fifty';
       }
 
       paymentMode = mode;
@@ -1952,7 +2035,7 @@
         selectedGateway = 'cod';
         const codRadio = document.querySelector('input[name="payment_method"][value="cod"]');
         if (codRadio) codRadio.checked = true;
-      } else if (mode === 'full') {
+      } else {
         if (selectedGateway === 'cod') {
           selectedGateway = 'gcash';
           const gcashRadio = document.querySelector('input[name="payment_method"][value="gcash"]');
@@ -2121,18 +2204,24 @@
         }
       });
 
-      const cart = (window.ecohaven && window.ecohaven.cart && window.ecohaven.cart.length > 0) ? window.ecohaven.cart : [];
-      const hasFurniture = cart.length === 0
-        ? (basePrice >= 2000)
-        : cart.some(item => (parseFloat(item.price) || 0) >= 2000);
-
-      if (!hasFurniture) {
-        if (val === 'cod' && paymentMode !== 'cod') {
+      if (val === 'cod') {
+        if (basePrice > 5000) {
+          if (typeof window.showEcoHavenToast === 'function') {
+            window.showEcoHavenToast("⚠️ Orders above ₱5,000 require down payment. Cash on Delivery is not available.", "warning");
+          }
+          selectedGateway = 'gcash';
+          const gcashRadio = document.querySelector('input[name="payment_method"][value="gcash"]');
+          if (gcashRadio) gcashRadio.checked = true;
+          return;
+        }
+        if (paymentMode !== 'cod') {
           paymentMode = 'cod';
           recalculate();
           return;
-        } else if (val !== 'cod' && paymentMode === 'cod') {
-          paymentMode = 'full';
+        }
+      } else {
+        if (paymentMode === 'cod') {
+          paymentMode = (basePrice < 2000) ? 'full' : 'fifty';
           recalculate();
           return;
         }
@@ -2214,11 +2303,22 @@
           }, 3500);
         }
         if (typeof window.showEcoHavenToast === 'function') {
-          window.showEcoHavenToast("⚠️ Please agree to the Terms and Conditions (50% earnest timber allocation under RA 8792) to proceed.", "error");
+          window.showEcoHavenToast("⚠️ Please agree to the Terms and Conditions to proceed with your order.", "error");
         } else {
-          alert("⚠️ Please check and agree to the 50% Earnest Escrow Terms before proceeding.");
+          alert("⚠️ Please check and agree to the Terms and Conditions before proceeding.");
         }
         return;
+      }
+
+      // 1.5. Validate Mandatory Downpayment for Orders > ₱5,000
+      if (basePrice > 5000 && (paymentMode === 'cod' || selectedGateway === 'cod')) {
+        if (typeof window.showEcoHavenToast === 'function') {
+          window.showEcoHavenToast("⚠️ Orders above ₱5,000 require down payment. Cash on Delivery is unavailable.", "error");
+        } else {
+          alert("⚠️ Orders above ₱5,000 require down payment. Cash on Delivery is unavailable.");
+        }
+        setPaymentMode('fifty');
+        return false;
       }
 
       // 2. Sync phone number into all simulator stages before launch
@@ -2592,13 +2692,22 @@
       const discountedBase = Math.max(0, basePrice - discountVal);
       const gross = discountedBase + freightCost;
       const isCodOrder = (selectedGateway === 'cod' || paymentMode === 'cod');
-      const hasFurniture = activeCart.length === 0
-        ? (basePrice >= 2000)
-        : activeCart.some(item => (parseFloat(item.price) || 0) >= 2000);
 
+      // Enforce: Orders > ₱5,000 cannot be COD
+      if (basePrice > 5000 && isCodOrder) {
+        if (typeof window.showEcoHavenToast === 'function') {
+          window.showEcoHavenToast("⚠️ Orders above ₱5,000 require down payment. Cash on Delivery is unavailable.", "error");
+        } else {
+          alert("⚠️ Orders above ₱5,000 require down payment. Cash on Delivery is unavailable.");
+        }
+        setPaymentMode('fifty');
+        return;
+      }
+
+      const isFiftyDpOrder = (paymentMode === 'fifty' && basePrice >= 2000);
       let orderStageName = "50% Down Payment Submitted (Pending Verification)";
-      let orderDownPayment = (paymentMode === 'fifty' && hasFurniture) ? (discountedBase / 2 + freightCost) : gross;
-      let orderBalance = (paymentMode === 'fifty' && hasFurniture) ? (discountedBase / 2) : 0;
+      let orderDownPayment = isFiftyDpOrder ? (discountedBase / 2 + freightCost) : gross;
+      let orderBalance = isFiftyDpOrder ? (discountedBase / 2) : 0;
       let orderPaymentMode = paymentMode;
 
       if (isCodOrder) {
