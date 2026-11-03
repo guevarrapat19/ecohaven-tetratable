@@ -1287,6 +1287,11 @@ function onEditStageChange(newStage) {
     }
     const badge = document.getElementById('editModalCurrentStageBadge');
     if (badge) badge.innerText = 'Stage ' + newStage;
+    if (newStage === '5' || newStage === 5) {
+        const total = parseFloat(document.getElementById('editTotalAmount').value) || 0;
+        document.getElementById('editPaidAmount').value = total;
+        document.getElementById('editBalanceAmount').value = 0;
+    }
 }
 
 function recalcEditBalance() {
@@ -1309,6 +1314,10 @@ async function handleSaveOrderEdit(event) {
 
     const updates = {
         customerName: document.getElementById('editCustomerName').value.trim(),
+        amountPaid: stageNum === 5 ? total : paid,
+        downPaymentPaid: stageNum === 5 ? total : paid,
+        balanceDue: stageNum === 5 ? 0 : bal,
+        paymentStatus: stageNum === 5 ? 'paid_in_full' : (bal === 0 ? 'paid_in_full' : 'downpayment_paid'),
         phone: document.getElementById('editCustomerPhone').value.trim(),
         email: document.getElementById('editCustomerEmail').value.trim(),
         destinationZone: document.getElementById('editDestinationZone').value,
@@ -1514,9 +1523,21 @@ function renderKanban() {
 
         activeOrdersCount++;
         const stage = parseInt(ord.stage, 10) || 1;
+        const isDone = stage === 5 || ord.orderStatus === 'Delivered & Complete';
         const total = parseFloat(ord.totalAmount || (ord.pricing ? ord.pricing.totalAmount : 7184.00)) || 0;
-        const paid = parseFloat(ord.downPaymentPaid !== undefined ? ord.downPaymentPaid : (ord.pricing ? ord.pricing.downPaymentPaid : 3467.00)) || 0;
-        const bal = parseFloat(ord.balanceDue !== undefined ? ord.balanceDue : (total - paid)) || 0;
+
+        let paid = 0;
+        let bal = 0;
+
+        if (isDone) {
+            // Order is completed & delivered: final balance is collected!
+            // Revenue collected gets full 100% of order value, balance due is 0.
+            paid = total;
+            bal = 0;
+        } else {
+            paid = parseFloat(ord.amountPaid !== undefined ? ord.amountPaid : (ord.downPaymentPaid !== undefined ? ord.downPaymentPaid : (ord.pricing ? ord.pricing.downPaymentPaid : (ord.paymentMode === 'full' ? total : total / 2)))) || 0;
+            bal = parseFloat(ord.balanceDue !== undefined ? ord.balanceDue : Math.max(0, total - paid)) || 0;
+        }
 
         totalRevenue += paid;
         totalBalanceDue += bal;
@@ -1753,7 +1774,14 @@ function renderKanban() {
                 </div>
                 <h4 class="font-title-md text-sm text-on-surface font-semibold truncate">${ord.customerName}</h4>
                 <div class="flex items-center justify-between text-xs text-on-surface-variant mt-0.5 mb-1.5">
-                    <span class="font-mono font-semibold text-primary">Bal: ₱${bal.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>
+                    ${isDone ? `
+                        <span class="font-mono font-bold text-tertiary flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                            <span>Fully Paid (₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})})</span>
+                        </span>
+                    ` : `
+                        <span class="font-mono font-semibold text-primary">Bal: ₱${bal.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>
+                    `}
                     <span class="text-[11px] text-outline truncate max-w-[120px]">${ord.address ? ord.address.split(',')[1] || ord.address : 'Pampanga'}</span>
                 </div>
 
@@ -1769,7 +1797,15 @@ function renderKanban() {
                         ${itemsSummary}
                     </div>
                     <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline">
-                        Balance Due: ₱${bal.toLocaleString('en-PH', {minimumFractionDigits: 2})}<br/>
+                        ${isDone ? `
+                            <span class="text-tertiary font-bold flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[13px]">paid</span>
+                                Settlement: Final Balance Collected (₱0.00 Due)
+                            </span>
+                            Total Paid: ₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})}<br/>
+                        ` : `
+                            Balance Due: ₱${bal.toLocaleString('en-PH', {minimumFractionDigits: 2})}<br/>
+                        `}
                         Courier: Workshop Fleet (CBD 4821)<br/>
                         Driver: Mang Ronaldo Santos
                     </div>

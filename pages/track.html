@@ -755,8 +755,9 @@ function renderOrder(order) {
 
   // Financial Summary Breakdown
   const total = parseFloat(order.grossTotal || order.totalAmount || 7184);
-  const paid = parseFloat(order.amountPaid || order.downPaymentPaid || (isFullPayment ? total : total / 2));
-  const bal = order.balanceDue !== undefined ? parseFloat(order.balanceDue) : Math.max(0, total - paid);
+    const isDone = parseInt(order.stage, 10) === 5 || order.orderStatus === 'Delivered & Complete';
+  const paid = isDone ? total : parseFloat(order.amountPaid || order.downPaymentPaid || (isFullPayment ? total : total / 2));
+  const bal = isDone ? 0 : (order.balanceDue !== undefined ? parseFloat(order.balanceDue) : Math.max(0, total - paid));
   const freight = parseFloat(order.freightCost || order.deliveryFee || 250);
 
   document.getElementById('trackFreightCost').innerText = `₱${freight.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;

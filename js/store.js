@@ -432,6 +432,16 @@ class EcoHavenStore {
             ordersRef.on('value', (snapshot) => {
                 const cloudOrders = snapshot.val();
                 if (cloudOrders && Object.keys(cloudOrders).length > 0) {
+                    // Auto-settle completed orders (Stage 5) so collected balance adds to total revenue and deducts from balance due
+                    Object.values(cloudOrders).forEach(ord => {
+                        if (ord && (parseInt(ord.stage, 10) === 5 || ord.orderStatus === 'Delivered & Complete')) {
+                            const tot = parseFloat(ord.totalAmount || (ord.pricing && ord.pricing.totalAmount) || 7184.00) || 0;
+                            ord.balanceDue = 0;
+                            ord.amountPaid = tot;
+                            ord.downPaymentPaid = tot;
+                            ord.paymentStatus = 'paid_in_full';
+                        }
+                    });
                     this.orders = cloudOrders;
                     console.log("☁️ EcoHaven: Real-time Cloud Orders Synced:", Object.keys(cloudOrders).length, "orders active.");
                     this.saveLocalBackup('ecohaven_cloud_orders_cache', cloudOrders);
@@ -654,6 +664,11 @@ class EcoHavenStore {
         }
         if (nextStage === 5) {
             updates.orderStatus = 'Delivered & Complete';
+            updates.balanceDue = 0;
+            updates.amountPaid = total;
+            updates.downPaymentPaid = total;
+            updates.paymentStatus = 'paid_in_full';
+            updates.deliveredAt = new Date().toISOString();
         }
 
         if (window.ecoHavenDb) {
