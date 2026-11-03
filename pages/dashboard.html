@@ -1271,6 +1271,10 @@ function openAddressModal(id = null) {
         document.getElementById('addrPhone').value = (curU && curU.phone) || '';
         const p2 = document.getElementById('addrPhone');
         if (p2 && window.formatAndValidatePhoneInput) window.formatAndValidatePhoneInput(p2);
+
+        // Pre-check Set as Primary Default if user has 0 saved addresses
+        const userAddrs = (window.ecohaven && window.ecohaven.getAddresses) ? window.ecohaven.getAddresses() : [];
+        document.getElementById('addrIsDefault').checked = userAddrs.length === 0;
     }
 
     modal.classList.remove('hidden');

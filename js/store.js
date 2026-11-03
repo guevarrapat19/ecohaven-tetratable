@@ -471,13 +471,22 @@ class EcoHavenStore {
             // Sync Saved Delivery Addresses
             const addressesRef = window.ecoHavenDb.ref('ecohaven/addresses');
             addressesRef.on('value', (snap) => {
-                const cloudAddrs = snap.val();
-                if (cloudAddrs && Array.isArray(cloudAddrs) && cloudAddrs.length > 0) {
+                const cloudVal = snap.val();
+                let cloudAddrs = [];
+                if (cloudVal) {
+                    if (Array.isArray(cloudVal)) {
+                        cloudAddrs = cloudVal;
+                    } else if (typeof cloudVal === 'object') {
+                        cloudAddrs = Object.values(cloudVal);
+                    }
+                }
+                if (cloudAddrs && cloudAddrs.length > 0) {
                     this.addresses = cloudAddrs;
                     this.saveLocalBackup('ecohaven_saved_addresses', cloudAddrs);
                     console.log("📍 EcoHaven: Real-time Saved Addresses Synced:", cloudAddrs.length, "addresses.");
                 } else {
-                    addressesRef.set(DEFAULT_SAVED_ADDRESSES);
+                    this.addresses = DEFAULT_SAVED_ADDRESSES;
+                    this.saveLocalBackup('ecohaven_saved_addresses', this.addresses);
                 }
                 window.dispatchEvent(new CustomEvent('ecohaven_addresses_updated', { detail: this.addresses }));
             });
@@ -1356,12 +1365,66 @@ class EcoHavenStore {
     }
 
     setDefaultAddress(id) {
-        const list = this.getAddresses().map(a => ({
-            ...a,
-            isDefault: a.id === id
-        }));
-        this.saveAddresses(list);
+        let user = null;
+        try {
+            const uStr = localStorage.getItem('ecohaven_user');
+            if (uStr) user = JSON.parse(uStr);
+        } catch(e) {}
+
+        let all = (this.addresses && this.addresses.length > 0) ? [...this.addresses] : this.loadAddresses();
+        const userEmail = (user && user.email) ? user.email.toLowerCase().trim() : '';
+        const userUid = user ? user.uid : '';
+        const userPhone = (user && user.phone) ? user.phone.replace(/[^0-9]/g, '') : '';
+
+        let targetAddr = null;
+
+        all = all.map(a => {
+            if (!a) return a;
+            const isThisUser = (a.uid && userUid && a.uid === userUid) ||
+                               (a.email && userEmail && a.email.toLowerCase().trim() === userEmail) ||
+                               (a.phone && userPhone && a.phone.replace(/[^0-9]/g, '') === userPhone);
+            if (a.id === id) {
+                targetAddr = { ...a, isDefault: true };
+                return targetAddr;
+            } else if (isThisUser) {
+                return { ...a, isDefault: false };
+            }
+            return a;
+        });
+
+        this.saveAddresses(all);
+
+        // Also sync customer profile with newly selected default address
+        if (targetAddr && user) {
+            const parts = (targetAddr.address || '').split(',').map(s => s.trim());
+            if (parts.length >= 2) {
+                user.street = parts[0];
+                user.barangay = parts[1].replace(/^Brgy\.?\s*/i, '');
+            }
+            if (targetAddr.city) user.city = targetAddr.city;
+            if (targetAddr.province) user.province = targetAddr.province;
+            if (targetAddr.zipCode) user.zipCode = targetAddr.zipCode;
+
+            localStorage.setItem('ecohaven_user', JSON.stringify(user));
+            if (window.ecoHavenDb && user.uid) {
+                window.ecoHavenDb.ref('users/' + user.uid).update({
+                    street: user.street || '',
+                    barangay: user.barangay || '',
+                    city: user.city || '',
+                    province: user.province || '',
+                    zipCode: user.zipCode || ''
+                }).catch(() => {});
+            }
+        }
+
         window.showEcoHavenToast("Primary delivery destination set as default.", "success");
+        window.dispatchEvent(new CustomEvent('ecohaven_addresses_updated', { detail: this.addresses }));
+        if (typeof renderDashboardAddresses === 'function') {
+            renderDashboardAddresses();
+        }
+        if (typeof populateUserProfile === 'function') {
+            populateUserProfile();
+        }
     }
 
     saveOrUpdateAddress(addrData) {
@@ -1376,12 +1439,41 @@ class EcoHavenStore {
             if (!addrData.email) addrData.email = user.email;
         }
 
-        let all = (this.addresses && this.addresses.length > 0) ? this.addresses : this.loadAddresses();
+        let all = (this.addresses && this.addresses.length > 0) ? [...this.addresses] : this.loadAddresses();
         const id = addrData.id || ('addr-' + Date.now());
         addrData.id = id;
+        addrData.isDefault = !!addrData.isDefault;
 
+        const userEmail = (user && user.email) ? user.email.toLowerCase().trim() : '';
+        const userUid = user ? user.uid : '';
+        const userPhone = (user && user.phone) ? user.phone.replace(/[^0-9]/g, '') : '';
+
+        // Check user's current addresses
+        const userExistingAddrs = all.filter(a => {
+            if (!a) return false;
+            if (a.uid && userUid && a.uid === userUid) return true;
+            if (a.email && userEmail && a.email.toLowerCase().trim() === userEmail) return true;
+            if (a.phone && userPhone && a.phone.replace(/[^0-9]/g, '') === userPhone) return true;
+            return false;
+        });
+
+        // If user has no other addresses, enforce isDefault: true
+        if (userExistingAddrs.length === 0 || (userExistingAddrs.length === 1 && userExistingAddrs[0].id === id)) {
+            addrData.isDefault = true;
+        }
+
+        // If this address is set as default, mark other addresses for this user as NOT default
         if (addrData.isDefault && user) {
-            all = all.map(a => (a.uid === user.uid || a.email === user.email) ? ({ ...a, isDefault: false }) : a);
+            all = all.map(a => {
+                if (!a) return a;
+                const isThisUser = (a.uid && userUid && a.uid === userUid) ||
+                                   (a.email && userEmail && a.email.toLowerCase().trim() === userEmail) ||
+                                   (a.phone && userPhone && a.phone.replace(/[^0-9]/g, '') === userPhone);
+                if (isThisUser && a.id !== id) {
+                    return { ...a, isDefault: false };
+                }
+                return a;
+            });
         }
 
         const existingIdx = all.findIndex(a => a.id === id);
