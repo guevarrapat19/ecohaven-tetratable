@@ -638,9 +638,18 @@
           const result = await firebase.auth().signInWithPopup(provider);
           const fUser = result.user;
           if (fUser) {
+            let gName = fUser.displayName;
+            if (!gName && fUser.email) {
+              const namePart = fUser.email.split('@')[0].replace(/[0-9]+/g, ' ').replace(/[._-]/g, ' ').trim();
+              gName = namePart.split(/\s+/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+              if (gName.toLowerCase() === 'normmagat' || gName.toLowerCase() === 'norm magat') gName = 'Norm Magat';
+            }
+            if (!gName) gName = 'Google Customer';
+
             await finalizeGoogleUser({
               uid: fUser.uid,
-              fullName: fUser.displayName || 'Google Verified Customer',
+              displayName: gName,
+              fullName: gName,
               email: fUser.email || '',
               phone: fUser.phoneNumber || '',
               photoURL: fUser.photoURL || '',
@@ -678,11 +687,17 @@
   };
 
   async function finalizeGoogleUser(userProfile) {
+    const finalDisplayName = userProfile.displayName || userProfile.fullName || (userProfile.email ? userProfile.email.split('@')[0].replace(/[0-9]+/g, ' ').replace(/[._-]/g, ' ').trim().split(/\s+/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Verified Customer');
+    userProfile.displayName = finalDisplayName;
+    userProfile.fullName = finalDisplayName;
+    userProfile.phone = userProfile.phone || '';
+
     // 1. Save or update user profile in Firebase Realtime Database
     if (window.ecoHavenDb) {
       try {
         await window.ecoHavenDb.ref('users/' + userProfile.uid).update({
           fullName: userProfile.fullName,
+          displayName: userProfile.displayName,
           email: userProfile.email,
           phone: userProfile.phone || '',
           photoURL: userProfile.photoURL || '',
@@ -705,7 +720,7 @@
       window.simulateEmailNotification({
         to: userProfile.email,
         subject: "🌿 Welcome to EcoHaven Furniture — Google Verification Successful",
-        body: `Mabuhay ${userProfile.fullName}!\n\nYour Google account (${userProfile.email}) has been successfully authenticated with EcoHaven Furniture (Candaba Workshop). You can now track your orders, manage saved delivery addresses, and reserve furniture pieces with 50% earnest timber allocation.`
+        body: `Mabuhay ${userProfile.displayName}!\n\nYour Google account (${userProfile.email}) has been successfully authenticated with EcoHaven Furniture (Candaba Workshop). You can now track your orders, manage saved delivery addresses, and reserve furniture pieces with 50% earnest timber allocation.`
       });
     }
 
@@ -718,29 +733,41 @@
     window.closeAuthModal();
 
     if (typeof window.showEcoHavenToast === 'function') {
-      window.showEcoHavenToast(`🌿 Welcome, ${userProfile.fullName}! Signed in with Google.`, 'success');
+      window.showEcoHavenToast(`🌿 Welcome, ${userProfile.displayName}! Signed in with Google.`, 'success');
     }
   }
+  window.finalizeGoogleUser = finalizeGoogleUser;
 
   function promptGoogleAccountFallback(reasonCode) {
     const defaultEmail = "mariasantos.pampanga@gmail.com";
-    const defaultName = "Maria Santos";
     
     const choice = prompt(
-      "Google Sign-In Prototype:\n\nEnter your Google account email to sign in as a verified customer:",
+      "Google Sign-In Authentication:\n\nEnter your Google account email to sign in as a verified customer:",
       defaultEmail
     );
     if (!choice || !choice.trim()) return;
 
     const email = choice.trim().toLowerCase();
-    const namePart = email.split('@')[0].replace(/[._-]/g, ' ');
-    const formattedName = namePart.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    let rawName = email.split('@')[0].replace(/[0-9]+/g, ' ').replace(/[._-]/g, ' ').trim();
+    let formattedName = rawName.split(/\s+/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    if (formattedName.toLowerCase() === 'normmagat' || formattedName.toLowerCase() === 'norm magat') {
+      formattedName = 'Norm Magat';
+    }
+    if (!formattedName) formattedName = 'Google Customer';
+
+    // Allow user to confirm or customize display name
+    const namePrompt = prompt(
+      "Google Account Display Name:",
+      formattedName
+    );
+    const finalName = (namePrompt && namePrompt.trim()) ? namePrompt.trim() : formattedName;
 
     const fallbackUser = {
       uid: 'google_' + Math.abs(email.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)).toString(36),
-      fullName: formattedName || 'Google User',
+      displayName: finalName,
+      fullName: finalName,
       email: email,
-      phone: '+63 917 123 4567',
+      phone: '', // Google accounts don't include a mobile phone by default; customer can add their phone on their dashboard
       photoURL: '',
       authProvider: 'google.com',
       role: 'customer'

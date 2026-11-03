@@ -39,12 +39,12 @@
 <!-- Customer Dashboard Header -->
 <div class="mb-10 pb-6 border-b border-outline-variant/30 flex flex-wrap items-center justify-between gap-4">
     <div class="flex items-center gap-4">
-        <div class="w-14 h-14 rounded-full bg-primary/10 border-2 border-primary text-primary flex items-center justify-center font-bold text-xl">
+        <div id="dashAvatar" class="w-14 h-14 rounded-full bg-primary/10 border-2 border-primary text-primary flex items-center justify-center font-bold text-xl overflow-hidden shadow-xs">
             JD
         </div>
         <div>
-            <h1 class="font-headline-lg text-2xl md:text-3xl text-on-surface">Welcome back, Juan Dela Cruz</h1>
-            <p class="text-xs text-on-surface-variant">Member since October 2026 • Verified Customer • Angeles City, Pampanga</p>
+            <h1 id="dashWelcomeTitle" class="font-headline-lg text-2xl md:text-3xl text-on-surface">Welcome back, <span id="dashWelcomeName">Customer</span></h1>
+            <p id="dashUserSubtitle" class="text-xs text-on-surface-variant">Member since October 2026 • Verified Customer • Candaba Workshop</p>
         </div>
     </div>
     <div class="flex gap-2">
@@ -61,22 +61,32 @@
         <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-[20px] p-6 shadow-sm">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="font-title-md text-on-surface font-semibold">Customer Details</h3>
-                <button type="button" onclick="logoutEcoHavenUser()" class="text-xs text-red-600 hover:text-red-700 font-semibold flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-red-50 transition-colors" title="Sign Out">
-                    <span class="material-symbols-outlined text-[15px]">logout</span> Sign Out
-                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="openEditProfileModal()" class="text-xs text-primary hover:text-primary-container font-semibold flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-primary/5 transition-colors" title="Edit Profile Details">
+                        <span class="material-symbols-outlined text-[15px]">edit</span> Edit
+                    </button>
+                    <button type="button" onclick="logoutEcoHavenUser()" class="text-xs text-red-600 hover:text-red-700 font-semibold flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-red-50 transition-colors" title="Sign Out">
+                        <span class="material-symbols-outlined text-[15px]">logout</span> Sign Out
+                    </button>
+                </div>
             </div>
             <div class="space-y-3 text-sm">
                 <div>
                     <span class="text-xs text-outline block">Full Name</span>
-                    <span class="font-medium text-on-surface" id="profileFullName">Juan Dela Cruz</span>
+                    <span class="font-medium text-on-surface" id="profileFullName">Customer</span>
                 </div>
                 <div>
                     <span class="text-xs text-outline block">Mobile Phone</span>
-                    <span class="font-medium text-on-surface font-mono" id="profilePhone">+63 917 123 4567</span>
+                    <div id="profilePhoneContainer" class="flex items-center gap-2 flex-wrap">
+                        <span class="font-medium text-on-surface font-mono" id="profilePhone">No mobile phone linked</span>
+                        <button type="button" id="profilePhoneAddBtn" onclick="openEditProfileModal()" class="text-[11px] font-bold text-primary hover:underline flex items-center gap-0.5">
+                            <span class="material-symbols-outlined text-[14px]">add_circle</span> Add Phone
+                        </button>
+                    </div>
                 </div>
                 <div>
                     <span class="text-xs text-outline block">Email Address</span>
-                    <span class="font-medium text-on-surface" id="profileEmail">juan.delacruz@example.ph</span>
+                    <span class="font-medium text-on-surface" id="profileEmail">customer@example.ph</span>
                 </div>
                 <div>
                     <span class="text-xs text-outline block">Account Role</span>
@@ -110,19 +120,19 @@
         <!-- Connected Payment Wallets -->
         <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-[20px] p-6 shadow-sm">
             <h3 class="font-title-md text-on-surface font-semibold mb-3">Connected Mobile Wallets</h3>
-            <div class="p-3 rounded-xl bg-[#005CE6]/10 border border-[#005CE6]/30 flex items-center justify-between mb-3">
+            <div id="walletBindingCard" class="p-3 rounded-xl bg-[#005CE6]/10 border border-[#005CE6]/30 flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2.5">
                     <span class="w-8 h-8 rounded-lg bg-[#005CE6] text-white flex items-center justify-center font-bold text-xs">G</span>
                     <div>
                         <span class="text-xs font-bold text-on-surface block">GCash Account Binding</span>
-                        <span class="text-[11px] text-outline font-mono">0917 •••• 4567</span>
+                        <span id="walletBoundPhone" class="text-[11px] text-outline font-mono">No mobile wallet linked</span>
                     </div>
                 </div>
-                <button onclick="alert('GCash Account unlinked successfully.')" class="text-xs font-bold text-red-600 hover:underline">
-                    Disconnect
+                <button id="walletActionBtn" onclick="handleWalletAction()" class="text-xs font-bold text-primary hover:underline">
+                    Connect
                 </button>
             </div>
-            <p class="text-[11px] text-outline">Connected via 1-Tap Merchant Deep-Linking for instant order checkout.</p>
+            <p id="walletSubtext" class="text-[11px] text-outline">Connected via 1-Tap Merchant Deep-Linking for instant order checkout.</p>
         </div>
     </div>
 
@@ -140,7 +150,7 @@
                     <span class="text-xs text-on-surface-variant">Natural Polished Mahogany • Handcrafted in Candaba</span>
                 </div>
                 <div class="text-right">
-                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-primary text-on-primary">
+                    <span id="dashStatusBadge" class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-primary text-on-primary">
                         Stage 3: Joinery &amp; Sanding
                     </span>
                     <span class="text-xs text-outline block mt-1">Est. Delivery: Nov 05, 2026</span>
@@ -150,15 +160,15 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-xl bg-surface mb-6 text-sm">
                 <div>
                     <span class="text-xs text-outline block">Total Agreed Price</span>
-                    <span class="font-bold text-on-surface">₱6,934.00</span>
+                    <span id="dashTotalAmount" class="font-bold text-on-surface">₱6,934.00</span>
                 </div>
                 <div>
                     <span class="text-xs text-outline block">50% Earnest Down Payment</span>
-                    <span class="font-bold text-tertiary">₱3,467.00 (Paid via GCash)</span>
+                    <span id="dashDepositPaid" class="font-bold text-tertiary">₱3,467.00 (Paid via GCash)</span>
                 </div>
                 <div>
                     <span class="text-xs text-outline block">Balance Due on Delivery</span>
-                    <span class="font-bold text-primary">₱3,467.00</span>
+                    <span id="dashBalanceDue" class="font-bold text-primary">₱3,467.00</span>
                 </div>
             </div>
 
@@ -298,8 +308,41 @@
 <script>
 function updateCustomerDashboard() {
     if (!window.ecohaven) return;
-    const lastId = localStorage.getItem('ecohaven_last_order_id') || 'EH-2026-88123';
-    const ord = window.ecohaven.getOrder(lastId);
+    const userStr = localStorage.getItem('ecohaven_user');
+    let user = null;
+    try { if (userStr) user = JSON.parse(userStr); } catch(e){}
+
+    const allOrders = window.ecohaven.orders || {};
+    let ord = null;
+
+    if (user) {
+        const uEmail = (user.email || '').toLowerCase().trim();
+        const uPhone = (user.phone || '').replace(/[^0-9]/g, '');
+        const uName = (user.displayName || user.fullName || '').toLowerCase().trim();
+        const uUid = user.uid || '';
+
+        // Check if user has orders matching their account
+        const userOrders = Object.values(allOrders).filter(o => {
+            if (!o) return false;
+            if (o.userId && uUid && o.userId === uUid) return true;
+            if (o.email && uEmail && o.email.toLowerCase().trim() === uEmail) return true;
+            if (o.customerEmail && uEmail && o.customerEmail.toLowerCase().trim() === uEmail) return true;
+            if (uPhone && o.phone && o.phone.replace(/[^0-9]/g, '') === uPhone) return true;
+            if (uName && o.customerName && o.customerName.toLowerCase().trim() === uName) return true;
+            return false;
+        });
+
+        if (userOrders.length > 0) {
+            userOrders.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+            ord = userOrders[0];
+        }
+    }
+
+    if (!ord) {
+        const lastId = localStorage.getItem('ecohaven_last_order_id') || 'EH-2026-88123';
+        ord = window.ecohaven.getOrder(lastId);
+    }
+
     if (!ord) return;
 
     const trackBtn = document.getElementById('dashTrackBtn');
@@ -323,6 +366,18 @@ function updateCustomerDashboard() {
             statusBadge.innerText = `Stage ${ord.stage || 1}: ${ord.stageName || 'In Production'}`;
         }
     }
+
+    // Dynamic financials
+    const totalEl = document.getElementById('dashTotalAmount');
+    const depositEl = document.getElementById('dashDepositPaid');
+    const balEl = document.getElementById('dashBalanceDue');
+    const totalVal = ord.totalAmount || (ord.pricing && ord.pricing.totalAmount) || 7184;
+    const paidVal = ord.downPaymentPaid !== undefined ? ord.downPaymentPaid : 3467;
+    const balVal = ord.balanceDue !== undefined ? ord.balanceDue : (totalVal - paidVal);
+
+    if (totalEl) totalEl.textContent = '₱' + parseFloat(totalVal).toLocaleString('en-PH', {minimumFractionDigits: 2});
+    if (depositEl) depositEl.textContent = '₱' + parseFloat(paidVal).toLocaleString('en-PH', {minimumFractionDigits: 2}) + ' (Paid via GCash)';
+    if (balEl) balEl.textContent = '₱' + parseFloat(balVal).toLocaleString('en-PH', {minimumFractionDigits: 2});
 
     if (flagNotice) {
         if (isFlagged) {
@@ -490,6 +545,43 @@ function switchTab(tab) {
     </div>
 </div>
 
+
+<!-- Edit Customer Profile Modal -->
+<div id="editProfileModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25 backdrop-blur-[3px] hidden">
+    <div class="w-full max-w-md bg-surface rounded-3xl shadow-2xl border border-outline-variant/40 p-6 sm:p-8">
+        <div class="flex items-center justify-between mb-5">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+                </div>
+                <h3 class="font-headline text-lg font-bold text-on-surface">Edit Profile Details</h3>
+            </div>
+            <button type="button" onclick="closeEditProfileModal()" class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors">
+                <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
+        </div>
+        <form onsubmit="handleSaveProfile(event)" class="space-y-4">
+            <div>
+                <label for="editFullName" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1">Full Name *</label>
+                <input type="text" id="editFullName" required class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
+            </div>
+            <div>
+                <label for="editPhone" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1">Mobile Phone (Philippine Mobile)</label>
+                <input type="tel" id="editPhone" placeholder="09171234567" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface font-mono focus:outline-none focus:ring-2 focus:ring-primary/20"/>
+                <p class="text-[11px] text-on-surface-variant mt-1">Used for order tracking SMS and Candaba White-Glove delivery dispatch.</p>
+            </div>
+            <div>
+                <label for="editEmail" class="block text-xs font-bold uppercase tracking-wider text-outline mb-1">Email Address (Account ID)</label>
+                <input type="email" id="editEmail" disabled class="w-full px-4 py-2.5 rounded-xl bg-surface-container border border-outline-variant/30 text-sm text-on-surface-variant cursor-not-allowed"/>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-outline-variant/30">
+                <button type="button" onclick="closeEditProfileModal()" class="px-4 py-2 rounded-xl border border-outline-variant text-xs font-bold text-on-surface hover:bg-surface-container">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-on-primary-fixed shadow-md transition-all">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 </main>
 <footer class="w-full bg-inverse-surface text-inverse-on-surface pt-space-xl pb-space-lg"><div class="max-w-7xl mx-auto px-gutter"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg pb-space-lg"><div class="flex flex-col gap-space-sm"><div class="flex items-center gap-space-xs"><img alt="EcoHaven Furniture Emblem" class="h-8 w-auto object-contain brightness-200" src="https://lh3.googleusercontent.com/aida/AEtjO1WoMmLqUdcp17_0K7-4RU3j_laJKFuB71tIYvo-2PL2jhAcZH749676gu7fQWloblAKrXLnjtrDm7cmDLa4_OGy5SO-WatR_aBQpdDN0K2Bp6LZLKKxNxFLcFB1WDJaz2oG_ycj2LROrpKw9eiaDGzfF-wXFdhm7wzyX7JBN_KzsFFfDSN_mIJx2ADuxlhZHSpu8qhuPImA1uzZy04pyRsDNRGhCYwcwDRbrWqtTrzRhg"/><span class="font-headline-sm text-headline-sm text-surface tracking-tight font-semibold">EcoHaven</span></div><p class="font-body-sm text-body-sm text-inverse-on-surface/80 leading-relaxed">Architectural Japandi woodworking synthesis with traditional Filipino joinery. Crafted with intention in our dedicated Candaba workshop.</p><div class="flex items-center gap-space-xs pt-1"><span class="font-caption text-caption text-primary-fixed bg-surface-container-highest/20 px-2 py-1 rounded">FSC Certified Narra &amp; Teak</span><span class="font-caption text-caption text-tertiary-fixed bg-surface-container-highest/20 px-2 py-1 rounded">Zero-VOC Oils</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Workshop &amp; Coordinates</span><div class="flex items-start gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed mt-0.5">location_on</span><span>Dalan Batu, Pasig, Candaba, Pampanga 2013, Philippines</span></div><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed">call</span><span>Direct Hotline: +63 981 255 8028</span></div><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed">schedule</span><span>Monday to Sunday: 8:00 AM – 5:00 PM PHT</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Workshop Collections</span><div class="flex flex-col gap-2 font-body-sm text-body-sm text-inverse-on-surface/80"><a class="hover:text-primary-fixed transition-colors" data-path="tetratable-4-in-1" href="tetratable.html">TetraTable 4-in-1 Modular</a><a class="hover:text-primary-fixed transition-colors" data-path="furniture-catalog" href="#">Tansu Credenzas &amp; Consoles</a><a class="hover:text-primary-fixed transition-colors" data-path="furniture-catalog" href="#">Live Edge Dining Tables</a><a class="hover:text-primary-fixed transition-colors" data-path="production-tracker" href="#">Kiln Drying &amp; Batch Status</a><a class="hover:text-primary-fixed transition-colors" data-path="seller-portal" href="#">Workshop Artisan Portal</a></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Follow Our Craft</span><p class="font-body-sm text-body-sm text-inverse-on-surface/80">Connect with us on official social media channels for live workshop demonstrations and customer photos.</p><div class="flex items-center gap-3 pt-1"><a href="https://www.facebook.com/profile.php?id=61588914923992&rdid=JkQTafkpCiS2BW1d&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1CBMxNxPbk%2F#" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#1877F2] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Facebook"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a><a href="https://www.tiktok.com/@ecohavenfurnitureph" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-black hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="TikTok (@ecohavenfurnitureph)"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.97v7.54c.03 2.5-1.28 4.9-3.4 6.13-2.15 1.25-4.94 1.19-7.03-.15-2.07-1.32-3.13-3.76-2.69-6.17.43-2.39 2.37-4.27 4.79-4.67.65-.11 1.31-.1 1.96.01v4.06c-.46-.17-.97-.2-1.45-.1-.99.2-1.77.96-1.99 1.94-.22.98.15 2.02.94 2.63.78.61 1.86.68 2.7.18.84-.49 1.34-1.41 1.32-2.38V.02h-.01z"/></svg></a><a href="https://www.instagram.com/ecohavenfuniture?psln=bHN3dzI4dW1oMnY3" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#E4405F] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Instagram (@ecohavenfuniture)"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a></div></div></div></div><div class="pt-space-md flex flex-col sm:flex-row items-center justify-between gap-space-sm"><p class="font-caption text-caption text-inverse-on-surface/60">© 2024 EcoHaven Furniture. All rights reserved. Dalan Batu, Pasig, Candaba, Pampanga.</p><div class="flex items-center gap-space-md font-caption text-caption text-inverse-on-surface/70"><a class="hover:text-primary-fixed transition-colors" href="#">Privacy Framework</a><a class="hover:text-primary-fixed transition-colors" href="#">Warranty Terms</a><a class="hover:text-primary-fixed transition-colors" href="#">Bespoke Commission Agreement</a></div></div></div></footer>
 <!-- Firebase Realtime Database SDK (Official CDN - Zero Build Step) -->
@@ -507,19 +599,115 @@ function populateUserProfile() {
     const userStr = localStorage.getItem('ecohaven_user');
     if (!userStr) return;
     try {
-        const u = JSON.parse(userStr);
+        let u = JSON.parse(userStr);
+        
+        // Healing / auto-derivation for legacy or incomplete user records
+        if (u.email) {
+            const cleanPrefix = u.email.split('@')[0].replace(/[0-9]+/g, ' ').replace(/[._-]/g, ' ').trim();
+            let derivedName = cleanPrefix.split(/\s+/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            if (derivedName.toLowerCase() === 'normmagat' || derivedName.toLowerCase() === 'norm magat') {
+                derivedName = 'Norm Magat';
+            }
+
+            // If displayName is missing, or is placeholder 'Juan Dela Cruz' / 'Google User', update to real name
+            if (!u.displayName || u.displayName === 'Juan Dela Cruz' || u.displayName === 'Google User' || u.displayName === 'Google Verified Customer') {
+                u.displayName = u.fullName && u.fullName !== 'Juan Dela Cruz' ? u.fullName : (derivedName || 'Customer');
+                u.fullName = u.displayName;
+                localStorage.setItem('ecohaven_user', JSON.stringify(u));
+            }
+
+            // Remove legacy hardcoded fake phone from prototype
+            if (u.phone === '+63 917 123 4567' || u.phone === '09171234567') {
+                u.phone = '';
+                localStorage.setItem('ecohaven_user', JSON.stringify(u));
+            }
+        }
+
+        const displayName = u.displayName || u.fullName || 'Customer';
+
+        // 1. Header Banner Greeting & Avatar
+        const welcomeName = document.getElementById('dashWelcomeName');
+        if (welcomeName) welcomeName.textContent = displayName;
+
+        const avatarEl = document.getElementById('dashAvatar');
+        if (avatarEl) {
+            if (u.photoURL) {
+                avatarEl.innerHTML = `<img src="${u.photoURL}" alt="${displayName}" class="w-full h-full object-cover rounded-full"/>`;
+            } else {
+                const words = displayName.trim().split(/\s+/).filter(Boolean);
+                let initials = '';
+                if (words.length >= 2) {
+                    initials = (words[0][0] + words[words.length - 1][0]).toUpperCase();
+                } else if (words.length === 1 && words[0].length >= 2) {
+                    initials = words[0].substring(0, 2).toUpperCase();
+                } else {
+                    initials = 'EH';
+                }
+                avatarEl.textContent = initials;
+            }
+        }
+
+        const subEl = document.getElementById('dashUserSubtitle');
+        if (subEl) {
+            const authType = u.authProvider === 'google.com' ? 'Verified Google Account' : 'Verified Customer';
+            const loc = u.city || u.province || 'Candaba Workshop';
+            subEl.textContent = `Member since October 2026 • ${authType} • ${loc}`;
+        }
+
+        // 2. Profile Details Card
         const nameEl = document.getElementById('profileFullName');
         const phoneEl = document.getElementById('profilePhone');
         const emailEl = document.getElementById('profileEmail');
         const roleEl = document.getElementById('profileRole');
-        if (nameEl && u.displayName) nameEl.textContent = u.displayName;
-        if (phoneEl && u.phone) phoneEl.textContent = u.phone;
+        const phoneAddBtn = document.getElementById('profilePhoneAddBtn');
+
+        if (nameEl) nameEl.textContent = displayName;
         if (emailEl && u.email) emailEl.textContent = u.email;
-        if (roleEl) roleEl.textContent = (u.role || 'customer').toUpperCase() + ' ACCOUNT';
+        if (roleEl) {
+            roleEl.textContent = u.authProvider === 'google.com' ? 'GOOGLE VERIFIED' : ((u.role || 'customer').toUpperCase() + ' ACCOUNT');
+        }
+
+        if (u.phone && u.phone.trim()) {
+            if (phoneEl) {
+                phoneEl.textContent = u.phone;
+                phoneEl.classList.remove('text-outline', 'italic');
+            }
+            if (phoneAddBtn) phoneAddBtn.classList.add('hidden');
+        } else {
+            if (phoneEl) {
+                phoneEl.textContent = 'No mobile phone linked';
+                phoneEl.classList.add('text-outline', 'italic');
+            }
+            if (phoneAddBtn) phoneAddBtn.classList.remove('hidden');
+        }
+
+        // 3. Connected Mobile Wallets Card
+        const boundPhoneEl = document.getElementById('walletBoundPhone');
+        const walletActionBtn = document.getElementById('walletActionBtn');
+        if (boundPhoneEl && walletActionBtn) {
+            if (u.phone && u.phone.trim()) {
+                const clean = u.phone.replace(/[^0-9]/g, '');
+                let masked = u.phone;
+                if (clean.length === 11 && clean.startsWith('09')) {
+                    masked = `${clean.slice(0, 4)} •••• ${clean.slice(7)}`;
+                } else if (clean.length === 12 && clean.startsWith('639')) {
+                    masked = `+63 ${clean.slice(2, 5)} •••• ${clean.slice(8)}`;
+                }
+                boundPhoneEl.textContent = masked;
+                boundPhoneEl.classList.remove('italic');
+                walletActionBtn.textContent = 'Disconnect';
+                walletActionBtn.className = 'text-xs font-bold text-red-600 hover:underline';
+            } else {
+                boundPhoneEl.textContent = 'No mobile wallet linked';
+                boundPhoneEl.classList.add('italic');
+                walletActionBtn.textContent = 'Connect GCash';
+                walletActionBtn.className = 'text-xs font-bold text-primary hover:underline';
+            }
+        }
 
         // Auto pre-fill address recipient inputs if empty
         const recEl = document.getElementById('addrRecipient');
-        if (recEl && !recEl.value && u.displayName) recEl.value = u.displayName;
+        if (recEl && !recEl.value) recEl.value = displayName;
         const phEl = document.getElementById('addrPhone');
         if (phEl && !phEl.value && u.phone) phEl.value = u.phone;
     } catch(e) {
@@ -527,6 +715,103 @@ function populateUserProfile() {
     }
 }
 document.addEventListener('DOMContentLoaded', populateUserProfile);
+window.addEventListener('ecohaven_user_logged_in', populateUserProfile);
+
+// ==========================================================
+// EDIT PROFILE MODAL CONTROLLERS
+// ==========================================================
+function openEditProfileModal() {
+    const modal = document.getElementById('editProfileModal');
+    if (!modal) return;
+    const userStr = localStorage.getItem('ecohaven_user');
+    let u = {};
+    try { if (userStr) u = JSON.parse(userStr); } catch(e){}
+
+    const nameInput = document.getElementById('editFullName');
+    const phoneInput = document.getElementById('editPhone');
+    const emailInput = document.getElementById('editEmail');
+
+    if (nameInput) nameInput.value = u.displayName || u.fullName || '';
+    if (phoneInput) phoneInput.value = u.phone || '';
+    if (emailInput) emailInput.value = u.email || '';
+
+    modal.classList.remove('hidden');
+}
+
+function closeEditProfileModal() {
+    const modal = document.getElementById('editProfileModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+async function handleSaveProfile(e) {
+    e.preventDefault();
+    const userStr = localStorage.getItem('ecohaven_user');
+    if (!userStr) return;
+    let u = JSON.parse(userStr);
+
+    const name = document.getElementById('editFullName').value.trim();
+    const phone = document.getElementById('editPhone').value.trim();
+
+    if (!name) {
+        if (typeof window.showEcoHavenToast === 'function') {
+            window.showEcoHavenToast('Please provide your full name.', 'warning');
+        } else {
+            alert('Please provide your full name.');
+        }
+        return;
+    }
+
+    u.displayName = name;
+    u.fullName = name;
+    u.phone = phone;
+
+    // Persist to localStorage
+    localStorage.setItem('ecohaven_user', JSON.stringify(u));
+    localStorage.setItem('currentUser', JSON.stringify(u));
+
+    // Persist to Firebase Realtime Database
+    if (window.ecoHavenDb && u.uid) {
+        try {
+            await window.ecoHavenDb.ref('users/' + u.uid).update({
+                displayName: name,
+                fullName: name,
+                phone: phone
+            });
+            console.log('✅ Firebase user profile updated successfully.');
+        } catch(err) {
+            console.warn('Firebase user update warning:', err);
+        }
+    }
+
+    populateUserProfile();
+    closeEditProfileModal();
+
+    if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast('Profile details updated successfully!', 'success');
+    }
+}
+
+function handleWalletAction() {
+    const userStr = localStorage.getItem('ecohaven_user');
+    if (!userStr) return;
+    let u = JSON.parse(userStr);
+
+    if (u.phone && u.phone.trim()) {
+        if (confirm('Do you want to unlink your GCash mobile wallet (' + u.phone + ')?')) {
+            u.phone = '';
+            localStorage.setItem('ecohaven_user', JSON.stringify(u));
+            if (window.ecoHavenDb && u.uid) {
+                window.ecoHavenDb.ref('users/' + u.uid).update({ phone: '' });
+            }
+            populateUserProfile();
+            if (typeof window.showEcoHavenToast === 'function') {
+                window.showEcoHavenToast('GCash Account unlinked.', 'info');
+            }
+        }
+    } else {
+        openEditProfileModal();
+    }
+}
 
 // ==========================================================
 // SHOPEE-STYLE SAVED ADDRESS BOOK CONTROLLER (PROFILE PAGE)
@@ -694,7 +979,7 @@ function renderDashboardAddresses() {
                 </div>
             </div>
             <div>
-                <p class="text-xs text-on-surface font-semibold">${addr.recipientName || 'Juan Dela Cruz'} • <span class="font-normal text-on-surface-variant">${addr.phone || '09812558028'}</span></p>
+                <p class="text-xs text-on-surface font-semibold">${addr.recipientName || 'Customer'} • <span class="font-normal text-on-surface-variant">${addr.phone || 'No phone'}</span></p>
                 <p class="text-xs text-on-surface-variant mt-0.5 leading-relaxed">${addr.address || ''}</p>
             </div>
             <div class="flex items-center justify-between text-[11px] text-outline pt-1 border-t border-outline-variant/20">
@@ -730,8 +1015,11 @@ function openAddressModal(id = null) {
         }
     } else {
         title.innerText = "Add New Delivery Address";
-        document.getElementById('addrRecipient').value = "Paolo Magisa";
-        document.getElementById('addrPhone').value = "09812558028";
+        const uStr = localStorage.getItem('ecohaven_user');
+        let curU = null;
+        try { if (uStr) curU = JSON.parse(uStr); } catch(e){}
+        document.getElementById('addrRecipient').value = (curU && (curU.displayName || curU.fullName)) || '';
+        document.getElementById('addrPhone').value = (curU && curU.phone) || '';
     }
 
     modal.classList.remove('hidden');
