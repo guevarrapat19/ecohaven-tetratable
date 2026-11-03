@@ -1564,14 +1564,53 @@ class EcoHavenStore {
     }
 
     deleteAddress(id) {
-        let list = this.getAddresses();
-        const target = list.find(a => a.id === id);
-        list = list.filter(a => a.id !== id);
-        if (target && target.isDefault && list.length > 0) {
-            list[0].isDefault = true;
+        let all = (this.addresses && this.addresses.length > 0) ? [...this.addresses] : this.loadAddresses();
+        const target = all.find(a => a.id === id);
+        all = all.filter(a => a.id !== id);
+
+        // If the deleted address was default, make the next address for that user default
+        if (target && target.isDefault) {
+            let user = null;
+            try {
+                const uStr = localStorage.getItem('ecohaven_user');
+                if (uStr) user = JSON.parse(uStr);
+            } catch(e) {}
+            const userEmail = (user && user.email) ? user.email.toLowerCase().trim() : '';
+            const userUid = user ? user.uid : '';
+            const userPhone = (user && user.phone) ? user.phone.replace(/[^0-9]/g, '') : '';
+
+            const nextAddr = all.find(a => {
+                if (!a) return false;
+                if (a.uid && userUid && a.uid === userUid) return true;
+                if (a.email && userEmail && a.email.toLowerCase().trim() === userEmail) return true;
+                if (a.phone && userPhone && a.phone.replace(/[^0-9]/g, '') === userPhone) return true;
+                return false;
+            });
+            if (nextAddr) {
+                nextAddr.isDefault = true;
+                if (user) {
+                    if (nextAddr.street) user.street = nextAddr.street;
+                    if (nextAddr.barangay) user.barangay = nextAddr.barangay;
+                    if (nextAddr.city) user.city = nextAddr.city;
+                    if (nextAddr.province) user.province = nextAddr.province;
+                    if (nextAddr.zipCode) user.zipCode = nextAddr.zipCode;
+                    localStorage.setItem('ecohaven_user', JSON.stringify(user));
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    if (window.ecoHavenDb && user.uid) {
+                        window.ecoHavenDb.ref('users/' + user.uid).update({
+                            street: user.street || '',
+                            barangay: user.barangay || '',
+                            city: user.city || '',
+                            province: user.province || '',
+                            zipCode: user.zipCode || ''
+                        }).catch(() => {});
+                    }
+                }
+            }
         }
-        this.saveAddresses(list);
+        this.saveAddresses(all);
         window.showEcoHavenToast("Delivery address removed.", "info");
+        window.dispatchEvent(new CustomEvent('ecohaven_addresses_updated', { detail: this.addresses }));
     }
 
     // ==========================================================
