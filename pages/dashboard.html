@@ -110,10 +110,21 @@
                     </button>
                 </div>
 
+                <!-- Street & Barangay Details -->
+                <div class="flex items-center justify-between group">
+                    <div>
+                        <span class="text-xs text-outline block">Street &amp; Barangay</span>
+                        <span class="font-medium text-on-surface text-sm" id="profileStreetBarangay">No street address linked</span>
+                    </div>
+                    <button type="button" onclick="openEditProfileModal('street')" class="text-xs text-primary hover:underline flex items-center gap-0.5 opacity-80 hover:opacity-100 transition-opacity">
+                        <span class="material-symbols-outlined text-[14px]">edit</span> Change
+                    </button>
+                </div>
+
                 <!-- Primary Region / Town -->
                 <div class="flex items-center justify-between group">
                     <div>
-                        <span class="text-xs text-outline block">Primary City / Province</span>
+                        <span class="text-xs text-outline block">City, Province &amp; ZIP</span>
                         <span class="font-medium text-on-surface text-sm" id="profileLocation">Candaba, Pampanga</span>
                     </div>
                     <button type="button" onclick="openEditProfileModal('location')" class="text-xs text-primary hover:underline flex items-center gap-0.5 opacity-80 hover:opacity-100 transition-opacity">
@@ -694,15 +705,31 @@ function switchTab(tab) {
                 <p class="text-[11px] text-on-surface-variant mt-1">Used for order tracking SMS, white-glove driver coordination, and GCash wallet binding.</p>
             </div>
 
-            <!-- Location: City & Province Grid -->
+            <!-- Street Details & Barangay -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                    <label for="editCity" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">City / Municipality</label>
+                    <label for="editStreet" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">House / Lot No. &amp; Street</label>
+                    <input type="text" id="editStreet" placeholder="e.g. Purok 1, Block 4 Lot 12" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
+                </div>
+                <div>
+                    <label for="editBarangay" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">Barangay</label>
+                    <input type="text" id="editBarangay" placeholder="e.g. Pasig, Bahay Pare" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
+                </div>
+            </div>
+
+            <!-- Location: City, Province & ZIP Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                    <label for="editCity" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">City / Town</label>
                     <input type="text" id="editCity" placeholder="City / Municipality" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
                 </div>
                 <div>
                     <label for="editProvince" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">Province</label>
                     <input type="text" id="editProvince" placeholder="Province" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
+                </div>
+                <div>
+                    <label for="editZip" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">ZIP Code</label>
+                    <input type="text" id="editZip" placeholder="ZIP Code" maxlength="6" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
                 </div>
             </div>
 
@@ -803,9 +830,37 @@ function populateUserProfile() {
 
         if (nameEl) nameEl.textContent = displayName;
         if (emailEl && u.email) emailEl.textContent = u.email;
+        // Populate Street & Barangay
+        const streetBarangayEl = document.getElementById('profileStreetBarangay');
+        
+        // Auto-heal from default address if profile lacks street
+        if (!u.street && window.ecohaven && window.ecohaven.getAddresses) {
+            const addrs = window.ecohaven.getAddresses();
+            const def = addrs.find(a => a.isDefault) || addrs[0];
+            if (def && def.address) {
+                const parts = def.address.split(',').map(s => s.trim());
+                if (parts.length >= 2) {
+                    u.street = parts[0];
+                    u.barangay = parts[1].replace(/^Brgy\.?\s*/i, '');
+                    localStorage.setItem('ecohaven_user', JSON.stringify(u));
+                }
+            }
+        }
+
+        const streetParts = [u.street, u.barangay ? ('Brgy. ' + u.barangay) : ''].filter(Boolean).join(', ');
+        if (streetBarangayEl) {
+            if (streetParts) {
+                streetBarangayEl.textContent = streetParts;
+                streetBarangayEl.classList.remove('text-outline', 'italic');
+            } else {
+                streetBarangayEl.textContent = 'No street / barangay linked';
+                streetBarangayEl.classList.add('text-outline', 'italic');
+            }
+        }
+
         if (locationEl) {
-            const locText = [u.city, u.province].filter(Boolean).join(', ') || 'Candaba, Pampanga';
-            locationEl.textContent = locText;
+            const locParts = [u.city, u.province, u.zipCode].filter(Boolean).join(', ');
+            locationEl.textContent = locParts || 'Candaba, Pampanga';
         }
         if (roleEl) {
             roleEl.textContent = u.authProvider === 'google.com' ? 'GOOGLE VERIFIED' : ((u.role || 'customer').toUpperCase() + ' ACCOUNT');
@@ -873,8 +928,11 @@ function openEditProfileModal(targetField) {
 
     const nameInput = document.getElementById('editFullName');
     const phoneInput = document.getElementById('editPhone');
+    const streetInput = document.getElementById('editStreet');
+    const brgyInput = document.getElementById('editBarangay');
     const cityInput = document.getElementById('editCity');
     const provInput = document.getElementById('editProvince');
+    const zipInput = document.getElementById('editZip');
     const emailInput = document.getElementById('editEmail');
 
     if (nameInput) nameInput.value = u.displayName || u.fullName || '';
@@ -882,8 +940,11 @@ function openEditProfileModal(targetField) {
         phoneInput.value = u.phone || '';
         if (window.formatAndValidatePhoneInput) window.formatAndValidatePhoneInput(phoneInput);
     }
+    if (streetInput) streetInput.value = u.street || '';
+    if (brgyInput) brgyInput.value = u.barangay || '';
     if (cityInput) cityInput.value = u.city || 'Candaba';
     if (provInput) provInput.value = u.province || 'Pampanga';
+    if (zipInput) zipInput.value = u.zipCode || '';
     if (emailInput) emailInput.value = u.email || '';
 
     modal.classList.remove('hidden');
@@ -892,6 +953,7 @@ function openEditProfileModal(targetField) {
     setTimeout(() => {
         if (targetField === 'name' && nameInput) nameInput.focus();
         else if (targetField === 'phone' && phoneInput) phoneInput.focus();
+        else if (targetField === 'street' && streetInput) streetInput.focus();
         else if (targetField === 'location' && cityInput) cityInput.focus();
         else if (nameInput) nameInput.focus();
     }, 100);
@@ -910,8 +972,11 @@ async function handleSaveProfile(e) {
 
     const name = document.getElementById('editFullName').value.trim();
     const phone = document.getElementById('editPhone').value.trim();
+    const street = document.getElementById('editStreet') ? document.getElementById('editStreet').value.trim() : '';
+    const barangay = document.getElementById('editBarangay') ? document.getElementById('editBarangay').value.trim() : '';
     const city = document.getElementById('editCity').value.trim();
     const province = document.getElementById('editProvince').value.trim();
+    const zipCode = document.getElementById('editZip') ? document.getElementById('editZip').value.trim() : '';
 
     if (!name) {
         if (typeof window.showEcoHavenToast === 'function') {
@@ -936,8 +1001,11 @@ async function handleSaveProfile(e) {
     u.displayName = name;
     u.fullName = name;
     u.phone = phone;
+    u.street = street;
+    u.barangay = barangay;
     u.city = city || 'Candaba';
     u.province = province || 'Pampanga';
+    u.zipCode = zipCode;
 
     // Persist to localStorage
     localStorage.setItem('ecohaven_user', JSON.stringify(u));
@@ -950,8 +1018,11 @@ async function handleSaveProfile(e) {
                 displayName: name,
                 fullName: name,
                 phone: phone,
+                street: u.street || '',
+                barangay: u.barangay || '',
                 city: u.city,
-                province: u.province
+                province: u.province,
+                zipCode: u.zipCode || ''
             });
             console.log('✅ Firebase user profile updated successfully.');
         } catch(err) {
@@ -1239,6 +1310,12 @@ function handleAddressFormSubmit(e) {
         '650': 'Zone 3: Greater Central Luzon & Metro Manila'
     };
 
+    let curU = null;
+    try {
+        const userStr = localStorage.getItem('ecohaven_user');
+        if (userStr) curU = JSON.parse(userStr);
+    } catch(e) {}
+
     const addrData = {
         label: label || 'Home',
         recipientName: recipientName,
@@ -1250,11 +1327,39 @@ function handleAddressFormSubmit(e) {
         deliveryFee: parseFloat(zoneCode),
         isDefault: isDefault
     };
+
+    // If marked as default or if profile lacks address, sync to customer profile details
+    if (isDefault && curU) {
+        const streetVal = document.getElementById('dashAddrStreet') ? document.getElementById('dashAddrStreet').value.trim() : '';
+        const brgyVal = document.getElementById('dashAddrBarangay') ? document.getElementById('dashAddrBarangay').value.trim() : '';
+        const cityVal = document.getElementById('dashAddrCity') ? document.getElementById('dashAddrCity').value.trim() : '';
+        const provVal = document.getElementById('dashAddrProvince') ? document.getElementById('dashAddrProvince').value.trim() : '';
+        const zipVal = document.getElementById('dashAddrZip') ? document.getElementById('dashAddrZip').value.trim() : '';
+
+        if (streetVal) curU.street = streetVal;
+        if (brgyVal) curU.barangay = brgyVal;
+        if (cityVal) curU.city = cityVal;
+        if (provVal) curU.province = provVal;
+        if (zipVal) curU.zipCode = zipVal;
+
+        localStorage.setItem('ecohaven_user', JSON.stringify(curU));
+        if (window.ecoHavenDb && curU.uid) {
+            window.ecoHavenDb.ref('users/' + curU.uid).update({
+                street: curU.street || '',
+                barangay: curU.barangay || '',
+                city: curU.city || '',
+                province: curU.province || '',
+                zipCode: curU.zipCode || ''
+            }).catch(() => {});
+        }
+        populateUserProfile();
+    }
     if (id) addrData.id = id;
 
     window.ecohaven.saveOrUpdateAddress(addrData);
     closeAddressModal();
     renderDashboardAddresses();
+    populateUserProfile();
 }
 
 function confirmDeleteAddress(id) {
