@@ -228,11 +228,11 @@
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label class="text-[11px] font-bold text-on-surface block mb-1">Your Name / Title</label>
-                  <input type="text" id="reviewAuthorInput" required value="Rose Timbol" class="w-full px-3 py-2 rounded-xl border border-outline-variant/40 bg-surface text-xs font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+                  <input type="text" id="reviewAuthorInput" required value="" placeholder="Enter your full name or title" class="w-full px-3 py-2 rounded-xl border border-outline-variant/40 bg-surface text-xs font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
                 </div>
                 <div>
                   <label class="text-[11px] font-bold text-on-surface block mb-1">Town / Province</label>
-                  <input type="text" id="reviewLocationInput" required value="San Fernando, Pampanga" class="w-full px-3 py-2 rounded-xl border border-outline-variant/40 bg-surface text-xs font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+                  <input type="text" id="reviewLocationInput" required value="" placeholder="e.g., Angeles City, Pampanga" class="w-full px-3 py-2 rounded-xl border border-outline-variant/40 bg-surface text-xs font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
                 </div>
               </div>
 
@@ -479,14 +479,40 @@
     if (nameEl) nameEl.innerText = productName || 'TetraTable 4-in-1 Suite';
     if (finishEl) finishEl.innerText = (finish || 'Natural Warm Teak') + ' • 320-Grit Finish';
 
-    if (orderId && window.ecohaven && typeof window.ecohaven.getOrder === 'function') {
-      const ord = window.ecohaven.getOrder(orderId);
-      if (ord) {
-        if (authorEl && ord.customerName) authorEl.value = ord.customerName;
-        if (locEl && ord.address) {
-          locEl.value = ord.address.split(',')[1] ? ord.address.split(',')[1].trim() : ord.address;
+    // Reset fields to blank by default (Guest Customer enters manually)
+    if (authorEl) authorEl.value = '';
+    if (locEl) locEl.value = '';
+
+    // Only autofill Name and Town/Province if a registered user is currently logged in
+    let loggedInUser = null;
+    try {
+      const userRaw = localStorage.getItem('ecohaven_user') || localStorage.getItem('currentUser');
+      if (userRaw) loggedInUser = JSON.parse(userRaw);
+    } catch (e) {}
+
+    if (loggedInUser) {
+      if (authorEl) {
+        authorEl.value = loggedInUser.displayName || loggedInUser.fullName || loggedInUser.name || '';
+      }
+      // Resolve town/province from user's default saved address, profile address, or attached order
+      let resolvedLocation = '';
+      if (window.ecohaven && typeof window.ecohaven.getDefaultAddress === 'function') {
+        const defAddr = window.ecohaven.getDefaultAddress();
+        if (defAddr && (defAddr.city || defAddr.province)) {
+          resolvedLocation = [defAddr.city, defAddr.province].filter(Boolean).join(', ');
         }
       }
+      if (!resolvedLocation && loggedInUser.city && loggedInUser.province) {
+        resolvedLocation = `${loggedInUser.city}, ${loggedInUser.province}`;
+      }
+      if (!resolvedLocation && orderId && window.ecohaven && typeof window.ecohaven.getOrder === 'function') {
+        const ord = window.ecohaven.getOrder(orderId);
+        if (ord && ord.address) {
+          const parts = ord.address.split(',').map(s => s.trim()).filter(Boolean);
+          resolvedLocation = parts.length >= 3 ? `${parts[parts.length - 4] || parts[1]}, ${parts[parts.length - 3] || parts[2]}` : (parts[1] || ord.address);
+        }
+      }
+      if (locEl) locEl.value = resolvedLocation;
     }
 
     const backdrop = document.getElementById('reviewModalBackdrop');
