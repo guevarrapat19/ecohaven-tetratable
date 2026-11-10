@@ -350,6 +350,9 @@
     if (item && !item.read) {
       item.read = true;
       saveAllNotifications(all);
+      if (window.ecoHavenDb && id) {
+        try { window.ecoHavenDb.ref('ecohaven/notifications/' + id + '/read').set(true); } catch (e) {}
+      }
       renderNotificationItems();
     }
   };
@@ -360,7 +363,12 @@
     const scoped = getNotifications();
     const scopedIds = scoped.map(s => s.id);
     all.forEach(n => {
-      if (scopedIds.includes(n.id)) n.read = true;
+      if (scopedIds.includes(n.id)) {
+        n.read = true;
+        if (window.ecoHavenDb && n.id) {
+          try { window.ecoHavenDb.ref('ecohaven/notifications/' + n.id + '/read').set(true); } catch (e) {}
+        }
+      }
     });
     saveAllNotifications(all);
     renderNotificationItems();
@@ -390,7 +398,7 @@
     }
 
     const newEntry = {
-      id: 'notif_' + Date.now(),
+      id: 'notif_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
       type: notif.type || 'order',
       title: notif.title || 'Order Update',
       body: notif.body || '',
@@ -408,8 +416,8 @@
     allList.unshift(newEntry);
     saveAllNotifications(allList);
 
-    // Sync with Firebase Realtime Database
-    if (window.ecoHavenDb && notif.orderId) {
+    // Sync with Firebase Realtime Database (Firebase Priority)
+    if (window.ecoHavenDb) {
       try {
         window.ecoHavenDb.ref('ecohaven/notifications/' + newEntry.id).set(newEntry);
       } catch(e) {}
@@ -438,10 +446,30 @@
     window.toggleEcoHavenNotifications();
   };
 
+  // Live Firebase RTDB Listener (Firebase Priority -> LocalStorage Mirror)
+  function initCloudNotificationsListener() {
+    if (!window.ecoHavenDb) return;
+    try {
+      window.ecoHavenDb.ref('ecohaven/notifications').on('value', (snap) => {
+        const cloudNotifs = snap.val();
+        if (!cloudNotifs) {
+          saveAllNotifications([]);
+        } else {
+          const list = Object.values(cloudNotifs).filter(Boolean).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+          saveAllNotifications(list);
+        }
+        if (document.getElementById('ecohavenNotifDrawer') && !document.getElementById('ecohavenNotifDrawer').classList.contains('hidden')) {
+          renderNotificationItems();
+        }
+      });
+    } catch (e) {}
+  }
+
   // Initialize on page load
   function initNotifications() {
     injectNotificationDrawer();
     updateBadge();
+    setTimeout(initCloudNotificationsListener, 350);
     window.addEventListener('ecohaven_notifications_updated', updateBadge);
     window.addEventListener('ecohaven_user_logged_in', () => { updateBadge(); renderNotificationItems(); });
     window.addEventListener('ecohaven_user_logged_out', () => { updateBadge(); renderNotificationItems(); });

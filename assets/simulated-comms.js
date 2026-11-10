@@ -83,7 +83,7 @@
           ${metaRoute}
         </span>
         <button type="button" onclick="window.openSimulatedCommsModal('${entry.id}')" class="font-bold text-primary hover:underline flex items-center gap-0.5">
-          <span>View Outbox</span>
+          <span>Open Email Inbox</span>
           <span class="material-symbols-outlined text-[12px]">open_in_new</span>
         </button>
       </div>
@@ -126,6 +126,28 @@
     log.unshift(entry);
     saveCommsLog(log);
     showCommsToast(entry);
+
+    // REALTIME CLOUD SYNC TO FIREBASE (ecohaven/emails)
+    if (window.ecoHavenDb) {
+      try {
+        window.ecoHavenDb.ref('ecohaven/emails/' + entry.id).set({
+          id: entry.id,
+          subject: entry.subject,
+          fromName: opts.fromName || 'EcoHaven Workshop Dispatch',
+          fromEmail: opts.fromEmail || 'notifications@ecohaven.ph',
+          toEmail: entry.to,
+          orderId: entry.orderId || 'WF-2026-ONLINE',
+          dateStr: new Date(entry.timestamp).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          timestamp: entry.timestamp,
+          unread: true,
+          body: entry.body || ''
+        });
+        console.log("☁️ Simulated Email Synced to Firebase Cloud (ecohaven/emails):", entry.id);
+      } catch(err) {
+        console.warn("Firebase email sync notice:", err);
+      }
+    }
+
     return entry;
   };
 
@@ -148,6 +170,27 @@
     log.unshift(entry);
     saveCommsLog(log);
     showCommsToast(entry);
+
+    // REALTIME CLOUD SYNC TO FIREBASE (ecohaven/sms)
+    if (window.ecoHavenDb) {
+      try {
+        window.ecoHavenDb.ref('ecohaven/sms/' + entry.id).set({
+          id: entry.id,
+          type: 'sms',
+          to: entry.to,
+          message: entry.message || '',
+          orderId: entry.orderId || 'WF-2026-ONLINE',
+          category: entry.category || 'Order Status',
+          timestamp: entry.timestamp,
+          status: entry.status,
+          gateway: entry.gateway
+        });
+        console.log("☁️ Simulated SMS Synced to Firebase Cloud (ecohaven/sms):", entry.id);
+      } catch(err) {
+        console.warn("Firebase SMS sync notice:", err);
+      }
+    }
+
     return entry;
   };
 
@@ -158,6 +201,12 @@
   window.clearSimulatedCommsLog = function() {
     localStorage.removeItem(COMMS_STORAGE_KEY);
     saveCommsLog([]);
+    if (window.ecoHavenDb) {
+      try {
+        window.ecoHavenDb.ref('ecohaven/emails').remove();
+        window.ecoHavenDb.ref('ecohaven/sms').remove();
+      } catch (e) {}
+    }
     renderCommsModalContent();
     if (typeof window.showEcoHavenToast === 'function') {
       window.showEcoHavenToast('Simulated notification outbox cleared.', 'info');
@@ -182,20 +231,20 @@
           <div class="p-5 border-b border-outline-variant/30 bg-surface-container-lowest flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-2xl bg-secondary-container text-primary flex items-center justify-center font-bold shadow-sm">
-                <span class="material-symbols-outlined text-[22px]">cell_tower</span>
+                <span class="material-symbols-outlined text-[22px]">mail</span>
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h3 class="font-headline text-lg sm:text-xl font-bold text-on-surface leading-tight">Simulated Outbox &amp; Gateway Logs</h3>
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">DEMO PROTOTYPE</span>
+                  <h3 class="font-headline text-lg sm:text-xl font-bold text-on-surface leading-tight">My Incoming Emails &amp; Workshop Alerts</h3>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">LIVE INBOX</span>
                 </div>
-                <p class="text-xs text-on-surface-variant">Live mock dispatches showing exact email and SMS payloads triggered by actions</p>
+                <p class="text-xs text-on-surface-variant">Official incoming emails, warranty certificates, and SMS updates from EcoHaven Candaba Atelier</p>
               </div>
             </div>
             <div class="flex items-center gap-2">
               <button type="button" onclick="window.clearSimulatedCommsLog()" class="px-3 py-1.5 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-1" title="Clear all logs">
                 <span class="material-symbols-outlined text-sm">delete</span>
-                <span class="hidden sm:inline">Clear Logs</span>
+                <span class="hidden sm:inline">Clear Inbox</span>
               </button>
               <button type="button" onclick="window.closeSimulatedCommsModal()" class="w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-all" aria-label="Close">
                 <span class="material-symbols-outlined text-[20px]">close</span>
@@ -206,9 +255,9 @@
           <!-- Controls Bar -->
           <div class="p-3 bg-surface-container-low border-b border-outline-variant/20 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div class="flex items-center gap-1.5">
-              <button type="button" id="commsFilterAll" onclick="window.filterSimulatedComms('all')" class="px-3 py-1.5 rounded-lg font-bold bg-primary text-white shadow-xs">All Outbound</button>
-              <button type="button" id="commsFilterEmail" onclick="window.filterSimulatedComms('email')" class="px-3 py-1.5 rounded-lg font-medium text-on-surface-variant hover:text-on-surface">Emails Only</button>
-              <button type="button" id="commsFilterSms" onclick="window.filterSimulatedComms('sms')" class="px-3 py-1.5 rounded-lg font-medium text-on-surface-variant hover:text-on-surface">SMS Only</button>
+              <button type="button" id="commsFilterAll" onclick="window.filterSimulatedComms('all')" class="px-3 py-1.5 rounded-lg font-bold bg-primary text-white shadow-xs">All Incoming</button>
+              <button type="button" id="commsFilterEmail" onclick="window.filterSimulatedComms('email')" class="px-3 py-1.5 rounded-lg font-medium text-on-surface-variant hover:text-on-surface">Incoming Emails</button>
+              <button type="button" id="commsFilterSms" onclick="window.filterSimulatedComms('sms')" class="px-3 py-1.5 rounded-lg font-medium text-on-surface-variant hover:text-on-surface">SMS Alerts</button>
             </div>
             <div class="text-[11px] text-on-surface-variant font-mono" id="commsStatsBadge">
               Loading dispatches...
@@ -449,39 +498,75 @@
     }, 280);
   };
 
-  // Seed sample initial mock dispatches if empty
-  if (!localStorage.getItem(COMMS_STORAGE_KEY)) {
-    const sampleDispatches = [
-      {
-        id: 'sample_email_1',
-        type: 'email',
-        to: 'paolo.magisa@gmail.com',
-        subject: '🚚 Order #EH-2026-88123 Dispatched via Workshop Fleet',
-        body: 'Mabuhay Paolo!\n\nYour TetraTable 4-in-1 Suite has passed white-glove quality control in Candaba, Pampanga. Driver Mang Juan S. (Plate: CBD 4821) is en route to your Pampanga delivery address.\n\nRemaining Balance: ₱3,467.00 payable upon handover.',
-        orderId: 'EH-2026-88123',
-        timestamp: Date.now() - 35 * 60 * 1000,
-        status: 'DELIVERED_SIMULATED',
-        gateway: 'Mock SMTP / SendGrid Simulator'
-      },
-      {
-        id: 'sample_sms_1',
-        type: 'sms',
-        to: '09812558028',
-        message: '[EcoHaven PH] Order #EH-2026-88123 is OUT FOR DELIVERY! Driver Mang Juan S. (CBD 4821) is arriving today. Please prepare ₱3,467.00 balance.',
-        orderId: 'EH-2026-88123',
-        timestamp: Date.now() - 34 * 60 * 1000,
-        status: 'DELIVERED_SIMULATED',
-        gateway: 'Semaphore PH Gateway'
-      }
-    ];
-    saveCommsLog(sampleDispatches);
+  // Sync live with Firebase RTDB (ecohaven/emails & ecohaven/sms) — FIREBASE IS #1 PRIORITY, LOCALSTORAGE MIRRORS CLOUD
+  let _cloudEmailsSnapshot = [];
+  let _cloudSmsSnapshot = [];
+
+  function syncCloudCommsToLocal() {
+    const merged = [..._cloudEmailsSnapshot, ..._cloudSmsSnapshot].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    saveCommsLog(merged);
+    if (document.getElementById('ecohavenCommsModal') && !document.getElementById('ecohavenCommsModal').classList.contains('hidden')) {
+      renderCommsModalContent();
+    }
+  }
+
+  function initCloudEmailInboxListener() {
+    if (!window.ecoHavenDb) return;
+    try {
+      window.ecoHavenDb.ref('ecohaven/emails').on('value', (snap) => {
+        const cloudEmails = snap.val();
+        if (!cloudEmails) {
+          _cloudEmailsSnapshot = [];
+        } else {
+          _cloudEmailsSnapshot = Object.values(cloudEmails).filter(Boolean).map(ce => ({
+            id: ce.id || ('email_' + (ce.timestamp || Date.now())),
+            type: 'email',
+            to: ce.toEmail || ce.to || 'customer@ecohaven.ph',
+            fromName: ce.fromName || 'EcoHaven Candaba Workshop',
+            fromEmail: ce.fromEmail || 'notifications@ecohaven.ph',
+            subject: ce.subject || 'EcoHaven Workshop Update',
+            body: ce.body || ce.message || '',
+            orderId: ce.orderId || null,
+            timestamp: ce.timestamp || Date.now(),
+            unread: ce.unread !== false,
+            status: 'DELIVERED_SIMULATED',
+            gateway: 'Firebase Cloud SMTP Sync'
+          }));
+        }
+        syncCloudCommsToLocal();
+      });
+
+      window.ecoHavenDb.ref('ecohaven/sms').on('value', (snap) => {
+        const cloudSms = snap.val();
+        if (!cloudSms) {
+          _cloudSmsSnapshot = [];
+        } else {
+          _cloudSmsSnapshot = Object.values(cloudSms).filter(Boolean).map(cs => ({
+            id: cs.id || ('sms_' + (cs.timestamp || Date.now())),
+            type: 'sms',
+            to: cs.to || '09170000000',
+            message: cs.message || '',
+            orderId: cs.orderId || null,
+            category: cs.category || 'Order Status',
+            timestamp: cs.timestamp || Date.now(),
+            status: cs.status || 'DELIVERED_SIMULATED',
+            gateway: cs.gateway || 'Firebase Cloud SMS Sync'
+          }));
+        }
+        syncCloudCommsToLocal();
+      });
+    } catch (e) {}
   }
 
   // Auto initialize on DOM ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', injectCommsModal);
+    document.addEventListener('DOMContentLoaded', () => {
+      injectCommsModal();
+      setTimeout(initCloudEmailInboxListener, 400);
+    });
   } else {
     injectCommsModal();
+    setTimeout(initCloudEmailInboxListener, 400);
   }
 })();
 

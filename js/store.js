@@ -94,92 +94,49 @@ const ECOHAVEN_DEFAULT_PRODUCT = {
     image: 'tetratable_luxury_living_room_1793454407629.jpg'
 };
 
-const INITIAL_FALLBACK_ORDERS = {
-    "EH-2026-88123": {
-        orderId: "EH-2026-88123",
-        customerName: "Juan Dela Cruz",
-        phone: "+63 917 555 1234",
-        email: "juan.delacruz@email.ph",
-        address: "Lot 14 Blk 5, Mahogany Hills, Angeles City, Pampanga, 2009",
-        destinationZone: "Zone 1: Candaba Local & Pampanga",
-        deliveryFee: 250.00,
-        stage: 3,
-        stageName: "Precision Joinery Assembly & Hand Sanding",
-        orderStatus: "In Production",
-        paymentMode: "fifty",
-        downPaymentPaid: 3717.00,
-        balanceDue: 3467.00,
-        totalAmount: 7184.00,
-        gcashRef: "9021-8841-2910",
-        items: [
-            {
-                productId: "tetratable-mahogany",
-                name: "TetraTable 4-in-1 Suite",
-                finish: "Natural Polished Mahogany",
-                quantity: 1,
-                unitPrice: 6934.00
-            }
-        ],
-        createdAt: "2026-10-31T14:40:00Z"
-    },
-    "EH-2026-88130": {
-        orderId: "EH-2026-88130",
-        customerName: "Teresa Mendoza",
-        phone: "+63 918 987 6543",
-        email: "teresa.mendoza@email.ph",
-        address: "Block 4, Lot 12, Villa Gloria, San Fernando, Pampanga",
-        destinationZone: "Zone 1: Candaba Local & Pampanga",
-        deliveryFee: 250.00,
-        stage: 1,
-        stageName: "50% Down Payment Submitted (Pending Verification)",
-        orderStatus: "Pending Review",
-        paymentMode: "fifty",
-        downPaymentPaid: 3717.00,
-        balanceDue: 3467.00,
-        totalAmount: 7184.00,
-        gcashRef: "7721-3904-8112",
-        items: [
-            {
-                productId: "tetratable-mahogany",
-                name: "TetraTable 4-in-1 Suite",
-                finish: "Natural Polished Mahogany",
-                quantity: 1,
-                unitPrice: 6934.00
-            }
-        ],
-        createdAt: "2026-11-01T08:10:00Z"
-    },
-    "EH-2026-88145": {
-        orderId: "EH-2026-88145",
-        customerName: "Atty. Rafael Henson",
-        phone: "+63 920 441 9922",
-        email: "rafael.henson@clarklaw.ph",
-        address: "Clark Sun Valley Estate, Clark Freeport Zone, Pampanga",
-        destinationZone: "Zone 1: Candaba Local & Pampanga",
-        deliveryFee: 250.00,
-        stage: 1,
-        stageName: "50% Down Payment Submitted (Pending Verification)",
-        orderStatus: "Pending Review",
-        paymentMode: "fifty",
-        downPaymentPaid: 3717.00,
-        balanceDue: 3467.00,
-        totalAmount: 7184.00,
-        gcashRef: "8104-5519-6320",
-        items: [
-            {
-                productId: "tetratable-mahogany",
-                name: "TetraTable 4-in-1 Suite",
-                finish: "Dark Smoked Walnut",
-                quantity: 1,
-                unitPrice: 6934.00
-            }
-        ],
-        createdAt: "2026-11-01T09:30:00Z"
-    }
-};
+const INITIAL_FALLBACK_ORDERS = {};
 
 
 const DEFAULT_SAVED_ADDRESSES = [];
+
+const DEFAULT_REVIEWS = {
+    "rev-1": {
+        id: "rev-1",
+        author: "Patricia M.",
+        location: "Angeles City, Pampanga",
+        rating: 5,
+        productName: "TetraTable 4-in-1 Suite",
+        finish: "Natural Warm Teak",
+        comment: "We live in a 36-sqm modern condo in Angeles City. The TetraTable looks like an expensive designer side table during weekdays, and when our barkada comes over on weekends, we instantly have 4 sturdy seats.",
+        tags: ["Smooth 320-Grit Sanding", "Perfect Condo Space Saver"],
+        verifiedBuyer: true,
+        createdAt: "2026-10-24T10:30:00.000Z"
+    },
+    "rev-2": {
+        id: "rev-2",
+        author: "Rafael D.",
+        location: "San Fernando, Pampanga",
+        rating: 5,
+        productName: "TetraTable 4-in-1 Suite",
+        finish: "Dark Smoked Walnut",
+        comment: "You can really feel that it's genuine Philippine Mahogany. The wood grain is gorgeous, edges are smooth, and the 50% reservation downpayment made it super accessible.",
+        tags: ["Sturdy Kiln-Dried Mahogany", "Silky Finish"],
+        verifiedBuyer: true,
+        createdAt: "2026-10-26T14:15:00.000Z"
+    },
+    "rev-3": {
+        id: "rev-3",
+        author: "Camille T.",
+        location: "Guagua, Pampanga",
+        rating: 5,
+        productName: "TetraTable 4-in-1 Suite",
+        finish: "Natural Warm Teak",
+        comment: "Customer service was so responsive via mobile. The Candaba logistics team delivered it directly to our doorstep in Guagua, Pampanga with white-glove unboxing.",
+        tags: ["Punctual Courier Delivery", "White-Glove Unboxing"],
+        verifiedBuyer: true,
+        createdAt: "2026-10-28T09:45:00.000Z"
+    }
+};
 
 
 const DEFAULT_INVENTORY = {
@@ -363,6 +320,7 @@ class EcoHavenStore {
         this.users = {};
         this.addresses = this.loadAddresses();
         this.inventory = this.loadInitialInventory();
+        this.reviews = this.loadInitialReviews();
         this.drawerPaymentMode = 'fifty'; // 'fifty' or 'full'
         this.init();
     }
@@ -388,16 +346,17 @@ class EcoHavenStore {
         return { ...INITIAL_FALLBACK_ORDERS };
     }
 
-    // 1. REALTIME FIREBASE DATABASE SYNC (CLOUD FIRST)
+    // 1. REALTIME FIREBASE DATABASE SYNC (FIREBASE RTDB #1 PRIORITY — LOCALSTORAGE STRICTLY MIRRORS CLOUD)
     setupRealtimeSync() {
         if (window.ecoHavenDb) {
             const ordersRef = window.ecoHavenDb.ref('ecohaven/orders');
             ordersRef.on('value', (snapshot) => {
+                this.cloudSynced = true;
                 const cloudOrders = snapshot.val();
                 if (cloudOrders && Object.keys(cloudOrders).length > 0) {
                     // Auto-settle completed orders (Stage 5) so collected balance adds to total revenue and deducts from balance due
                     Object.values(cloudOrders).forEach(ord => {
-                        if (ord && (parseInt(ord.stage, 10) === 5 || ord.orderStatus === 'Delivered & Complete')) {
+                        if (ord && (parseInt(ord.stage, 10) === 5 || ord.orderStatus === 'Delivered & Complete' || ord.orderStatus === 'Customer Confirmed Receipt')) {
                             const tot = parseFloat(ord.totalAmount || (ord.pricing && ord.pricing.totalAmount) || 7184.00) || 0;
                             ord.balanceDue = 0;
                             ord.amountPaid = tot;
@@ -406,11 +365,15 @@ class EcoHavenStore {
                         }
                     });
                     this.orders = cloudOrders;
-                    console.log("☁️ EcoHaven: Real-time Cloud Orders Synced:", Object.keys(cloudOrders).length, "orders active.");
+                    console.log("☁️ EcoHaven: Real-time Cloud Orders Synced (Firebase Priority):", Object.keys(cloudOrders).length, "orders active.");
                     this.saveLocalBackup('ecohaven_cloud_orders_cache', cloudOrders);
+                    try { localStorage.removeItem('ecohaven_orders'); } catch (e) {}
                 } else {
-                    console.log("☁️ Firebase orders node empty, seeding default workshop state...");
-                    ordersRef.set(this.orders);
+                    // Respect Firebase Realtime Database as Single Source of Truth (even when empty)
+                    this.orders = {};
+                    this.saveLocalBackup('ecohaven_cloud_orders_cache', {});
+                    try { localStorage.removeItem('ecohaven_orders'); } catch (e) {}
+                    console.log("☁️ EcoHaven: Firebase orders node is empty — local cache mirrored to empty state.");
                 }
                 window.dispatchEvent(new CustomEvent('ecohaven_orders_updated', { detail: this.orders }));
             }, (error) => {
@@ -430,8 +393,7 @@ class EcoHavenStore {
                 }
             });
 
-            
-            // Sync Saved Delivery Addresses
+            // Sync Saved Delivery Addresses (Firebase Priority -> LocalStorage Mirror)
             const addressesRef = window.ecoHavenDb.ref('ecohaven/addresses');
             addressesRef.on('value', (snap) => {
                 const cloudVal = snap.val();
@@ -445,18 +407,13 @@ class EcoHavenStore {
                 }
                 // Filter out prototype mock seed addresses
                 cloudAddrs = (cloudAddrs || []).filter(a => a && a.id !== 'addr-candaba' && a.id !== 'addr-clark' && a.id !== 'addr-bgc' && a.recipientName !== 'Paolo Magisa');
-                if (cloudAddrs && cloudAddrs.length > 0) {
-                    this.addresses = cloudAddrs;
-                    this.saveLocalBackup('ecohaven_saved_addresses', cloudAddrs);
-                    console.log("📍 EcoHaven: Real-time Saved Addresses Synced:", cloudAddrs.length, "addresses.");
-                } else {
-                    this.addresses = [];
-                    this.saveLocalBackup('ecohaven_saved_addresses', this.addresses);
-                }
+                this.addresses = cloudAddrs || [];
+                this.saveLocalBackup('ecohaven_saved_addresses', this.addresses);
+                console.log("📍 EcoHaven: Real-time Saved Addresses Synced (Firebase Priority):", this.addresses.length, "addresses.");
                 window.dispatchEvent(new CustomEvent('ecohaven_addresses_updated', { detail: this.addresses }));
             });
 
-            // Sync Workshop Inventory & Finished Products
+            // Sync Workshop Inventory & Finished Products (Firebase Priority -> LocalStorage Mirror)
             const invRef = window.ecoHavenDb.ref('ecohaven/inventory');
             invRef.on('value', (snap) => {
                 const cloudInv = snap.val();
@@ -465,7 +422,7 @@ class EcoHavenStore {
                     if (cloudInv.products) this.inventory.products = cloudInv.products;
                     if (cloudInv.materials) this.inventory.materials = cloudInv.materials;
                     this.saveLocalBackup('ecohaven_inventory_cache', this.inventory);
-                    console.log("🪵 EcoHaven: Real-time Workshop Inventory Synced.");
+                    console.log("🪵 EcoHaven: Real-time Workshop Inventory Synced (Firebase Priority).");
                 } else {
                     console.log("🪵 Seeding default workshop inventory to Firebase...");
                     invRef.set(DEFAULT_INVENTORY);
@@ -473,14 +430,76 @@ class EcoHavenStore {
                 window.dispatchEvent(new CustomEvent('ecohaven_inventory_updated', { detail: this.inventory }));
             });
 
-
-            // Sync Users
+            // Sync Users & Mirror Active Logged-in User from Firebase RTDB to LocalStorage
             const usersRef = window.ecoHavenDb.ref('ecohaven/users');
             usersRef.on('value', (snap) => {
                 const cloudUsers = snap.val();
                 if (cloudUsers) {
                     this.users = cloudUsers;
-                    console.log("👤 EcoHaven: Real-time Users Synced:", Object.keys(cloudUsers).length, "users active.");
+                    try {
+                        const localUserStr = localStorage.getItem('ecohaven_user');
+                        if (localUserStr) {
+                            const localU = JSON.parse(localUserStr);
+                            if (localU && localU.uid && cloudUsers[localU.uid]) {
+                                const mergedUser = { ...localU, ...cloudUsers[localU.uid] };
+                                localStorage.setItem('ecohaven_user', JSON.stringify(mergedUser));
+                                localStorage.setItem('currentUser', JSON.stringify(mergedUser));
+                            }
+                        }
+                    } catch (e) {}
+                    console.log("👤 EcoHaven: Real-time Users Synced (Firebase Priority):", Object.keys(cloudUsers).length, "users active.");
+                }
+            });
+
+            // Sync Customer Reviews (Panel Suggestion #5 - Firebase Priority -> LocalStorage Mirror)
+            const reviewsRef = window.ecoHavenDb.ref('ecohaven/reviews');
+            reviewsRef.on('value', (snap) => {
+                const cloudReviews = snap.val();
+                if (cloudReviews && Object.keys(cloudReviews).length > 0) {
+                    this.reviews = cloudReviews;
+                    this.saveLocalBackup('ecohaven_reviews_cache', cloudReviews);
+                    console.log("⭐ EcoHaven: Real-time Customer Reviews Synced (Firebase Priority):", Object.keys(cloudReviews).length, "reviews.");
+                } else {
+                    this.reviews = { ...DEFAULT_REVIEWS };
+                    this.saveLocalBackup('ecohaven_reviews_cache', this.reviews);
+                    reviewsRef.set(this.reviews);
+                }
+                window.dispatchEvent(new CustomEvent('ecohaven_reviews_updated', { detail: this.reviews }));
+            });
+
+            // Sync Live Customer Chats (Panel Suggestion #4) - FIREBASE IS THE SINGLE SOURCE OF TRUTH
+            const chatsRef = window.ecoHavenDb.ref('ecohaven/chats');
+            chatsRef.on('value', (snap) => {
+                const cloudChats = snap.val();
+                if (cloudChats && typeof cloudChats === 'object' && Object.keys(cloudChats).length > 0) {
+                    const roomsArray = Object.values(cloudChats);
+                    this.chats = roomsArray;
+                    this.saveLocalBackup('ecohaven_seller_chat_rooms', roomsArray);
+                    console.log("💬 EcoHaven: Real-time Live Chats Synced from Cloud:", roomsArray.length, "rooms.");
+                    window.dispatchEvent(new CustomEvent('ecohaven_seller_chats_updated', { detail: roomsArray }));
+                } else {
+                    // Respect Firebase deletion - do NOT restore deleted rooms
+                    this.chats = [];
+                    this.saveLocalBackup('ecohaven_seller_chat_rooms', []);
+                    window.dispatchEvent(new CustomEvent('ecohaven_seller_chats_updated', { detail: [] }));
+                }
+            });
+
+            // Sync Customer Email Inbox (Panel Suggestion #7) - FIREBASE IS THE SINGLE SOURCE OF TRUTH
+            const emailsRef = window.ecoHavenDb.ref('ecohaven/emails');
+            emailsRef.on('value', (snap) => {
+                const cloudEmails = snap.val();
+                if (cloudEmails && typeof cloudEmails === 'object' && Object.keys(cloudEmails).length > 0) {
+                    const emailsArray = Object.values(cloudEmails);
+                    this.emails = emailsArray;
+                    this.saveLocalBackup('ecohaven_seller_emails', emailsArray);
+                    console.log("✉️ EcoHaven: Real-time Customer Emails Synced from Cloud:", emailsArray.length, "emails.");
+                    window.dispatchEvent(new CustomEvent('ecohaven_seller_emails_updated', { detail: emailsArray }));
+                } else {
+                    // Respect Firebase deletion - do NOT restore deleted emails
+                    this.emails = [];
+                    this.saveLocalBackup('ecohaven_seller_emails', []);
+                    window.dispatchEvent(new CustomEvent('ecohaven_seller_emails_updated', { detail: [] }));
                 }
             });
         } else {
@@ -513,16 +532,18 @@ class EcoHavenStore {
         if (!identifier) return null;
         const clean = identifier.trim().toLowerCase();
         
-        // Sync latest orders from localStorage if available
-        try {
-            const raw = localStorage.getItem('ecohaven_orders');
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                if (parsed && typeof parsed === 'object') {
-                    this.orders = Object.assign({}, parsed, this.orders);
+        // Only fall back to localStorage cache if Firebase RTDB has not yet connected
+        if (!this.cloudSynced) {
+            try {
+                const raw = localStorage.getItem('ecohaven_cloud_orders_cache');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        this.orders = Object.assign({}, parsed, this.orders);
+                    }
                 }
-            }
-        } catch(e) {}
+            } catch(e) {}
+        }
 
         // 1. Exact match on Order ID
         for (const id in this.orders) {
@@ -662,6 +683,131 @@ class EcoHavenStore {
             this.saveLocalBackup('ecohaven_cloud_orders_cache', this.orders);
             window.dispatchEvent(new CustomEvent('ecohaven_orders_updated', { detail: this.orders }));
         }
+    }
+
+    // 4B. CUSTOMER CONFIRM RECEIPT (PANEL SUGGESTION #2 & #7)
+    async customerConfirmReceipt(orderId) {
+        if (!orderId) return null;
+        const ord = this.orders[orderId] || this.getOrder(orderId) || {};
+        const total = parseFloat(ord.totalAmount || (ord.pricing && ord.pricing.totalAmount) || 7184.00) || 0;
+        const serialTail = (String(orderId).replace(/[^0-9]/g, '').slice(-5) || Math.floor(10000 + Math.random() * 90000));
+        const warrantyCode = 'WARR-CANDABA-2026-' + serialTail;
+        const nowIso = new Date().toISOString();
+
+        const updates = {
+            'stage': 5,
+            'stageName': 'Delivered & Complete',
+            'orderStatus': 'Customer Confirmed Receipt',
+            'balanceDue': 0,
+            'amountPaid': total,
+            'downPaymentPaid': total,
+            'paymentStatus': 'paid_in_full',
+            'deliveredAt': ord.deliveredAt || nowIso,
+            'confirmedReceivedAt': nowIso,
+            'warrantyStatus': 'Active (5-Year Structural Frame Guarantee)',
+            'warrantyCode': warrantyCode,
+            'updatedAt': nowIso
+        };
+
+        if (window.ecoHavenDb) {
+            try {
+                await window.ecoHavenDb.ref('ecohaven/orders/' + orderId).update(updates);
+                console.log("✅ Customer confirmed receipt in Firebase for order:", orderId);
+            } catch (err) {
+                console.warn("Firebase customerConfirmReceipt error:", err);
+            }
+        }
+
+        if (this.orders[orderId]) {
+            Object.assign(this.orders[orderId], updates);
+            this.saveLocalBackup('ecohaven_cloud_orders_cache', this.orders);
+            window.dispatchEvent(new CustomEvent('ecohaven_orders_updated', { detail: this.orders }));
+        }
+
+        // AUTO-TRIGGER DELIVERY CONFIRMATION & 5-YEAR WARRANTY EMAIL (PANEL SUGGESTION #7)
+        const recipientEmail = ord.customerEmail || (window.ecohavenAuth && window.ecohavenAuth.currentUser && window.ecohavenAuth.currentUser.email) || 'paolo.magisa@gmail.com';
+        const recipientPhone = ord.contactPhone || ord.customerPhone || '09812558028';
+        const customerName = ord.customerName || 'Valued Homeowner';
+        const courierTitle = ord.courierName || 'EcoHaven Workshop Van';
+        const waybill = ord.courierTracking || 'EH-FLEET-CBD4821';
+
+        if (typeof window.simulateEmailNotification === 'function') {
+            window.simulateEmailNotification({
+                to: recipientEmail,
+                subject: `🎉 Official Handover Confirmed: 5-Year Structural Frame Warranty Activated for Order #${orderId}`,
+                body: `Dear ${customerName},\n\nWe hereby confirm the official doorstep handover of your handcrafted furniture by ${courierTitle} (Waybill: ${waybill}).\n\n🛡️ 5-YEAR STRUCTURAL FRAME WARRANTY CERTIFICATE:\n• Policy ID: ${warrantyCode}\n• Kiln Stabilized: 11.4% Moisture Content Philippine Mahogany\n• Termite Seal: Solignum Deep-Pressure Treatment\n• Balance Status: 100% Settled (₱0.00 Remaining)\n\nThank you for championing authentic Candaba craftsmanship! Please share your experience and rate our artisans with a 5-star review.`,
+                orderId: orderId,
+                category: 'Delivery Confirmation & Warranty'
+            });
+        }
+
+        if (typeof window.simulateSmsNotification === 'function') {
+            window.simulateSmsNotification({
+                to: recipientPhone,
+                message: `[EcoHaven PH] Handover confirmed for Order #${orderId}! Your 5-Year Frame Warranty (${warrantyCode}) is now ACTIVE. Balance settled. Maraming salamat po!`,
+                orderId: orderId,
+                category: 'Order Status'
+            });
+        }
+
+        return updates;
+    }
+
+    // 4C. REVIEWS & FEEDBACK ENGINE (PANEL SUGGESTION #5)
+    async submitReview(reviewData) {
+        if (!reviewData) return null;
+        const revId = 'rev-' + Date.now();
+        const review = {
+            id: revId,
+            author: reviewData.author || 'Pampanga Homeowner',
+            location: reviewData.location || 'Pampanga, Philippines',
+            rating: parseInt(reviewData.rating, 10) || 5,
+            productName: reviewData.productName || 'TetraTable 4-in-1 Suite',
+            finish: reviewData.finish || 'Natural Warm Teak',
+            orderId: reviewData.orderId || null,
+            comment: reviewData.comment || 'Exceptional handcrafted quality and smooth joinery.',
+            tags: reviewData.tags || ['Smooth 320-Grit Sanding', 'Sturdy Joinery'],
+            verifiedBuyer: true,
+            createdAt: new Date().toISOString()
+        };
+
+        if (!this.reviews) this.reviews = {};
+        this.reviews[revId] = review;
+
+        if (window.ecoHavenDb) {
+            try {
+                await window.ecoHavenDb.ref('ecohaven/reviews/' + revId).set(review);
+                console.log("⭐ Review synced to Firebase RTDB:", revId);
+            } catch(e) {
+                console.warn("Firebase submitReview error:", e);
+            }
+        }
+
+        this.saveLocalBackup('ecohaven_reviews_cache', this.reviews);
+        window.dispatchEvent(new CustomEvent('ecohaven_reviews_updated', { detail: this.reviews }));
+
+        if (typeof window.showEcoHavenToast === 'function') {
+            window.showEcoHavenToast("✨ Salamat! Your review has been published to the live showroom.", "success");
+        }
+        return review;
+    }
+
+    getReviews() {
+        if (this.reviews && Object.keys(this.reviews).length > 0) {
+            return Object.values(this.reviews).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        }
+        return Object.values(this.loadInitialReviews());
+    }
+
+    loadInitialReviews() {
+        try {
+            const cached = localStorage.getItem('ecohaven_reviews_cache');
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (parsed && Object.keys(parsed).length > 0) return parsed;
+            }
+        } catch(e) {}
+        return { ...DEFAULT_REVIEWS };
     }
 
     // ==========================================================
@@ -1214,26 +1360,15 @@ class EcoHavenStore {
             if (this.drawerPaymentMode === 'fifty') {
                 this.drawerPaymentMode = 'full';
             }
-        } else if (isTier2) {
+        } else {
+            // Unlocked for Tier 2 and Tier 3 (All Artisan Suites including TetraTable)
             if (optFifty) {
                 optFifty.classList.remove('hidden');
-                if (fiftyTitle) fiftyTitle.innerText = "50% Earnest Down Payment";
-                if (fiftySub) fiftySub.innerText = "Optional milestone escrow for orders ₱2k–₱5k";
+                if (fiftyTitle) fiftyTitle.innerText = "50% Down Payment";
+                if (fiftySub) fiftySub.innerText = "Pay half now, balance upon delivery";
             }
             if (optFull) optFull.classList.remove('hidden');
             if (optCod) optCod.classList.remove('hidden');
-        } else {
-            // isTier3 (> 5000): Downpayment is MANDATORY! COD is HIDDEN
-            if (optFifty) {
-                optFifty.classList.remove('hidden');
-                if (fiftyTitle) fiftyTitle.innerText = "50% Down Payment (Mandatory)";
-                if (fiftySub) fiftySub.innerText = "Required earnest deposit to begin bespoke woodworking";
-            }
-            if (optFull) optFull.classList.remove('hidden');
-            if (optCod) optCod.classList.add('hidden');
-            if (this.drawerPaymentMode === 'cod') {
-                this.drawerPaymentMode = 'fifty';
-            }
         }
 
         // Sync radio check state
@@ -1407,24 +1542,31 @@ class EcoHavenStore {
         }
     }
 
-// ==========================================================
-    // 8. SAVED DELIVERY ADDRESS BOOK
+    // ==========================================================
+    // 8. SAVED DELIVERY ADDRESS BOOK (For Logged-In Account Holders)
     // ==========================================================
     loadAddresses() {
         try {
             const saved = localStorage.getItem('ecohaven_saved_addresses');
             if (saved) {
                 const parsed = JSON.parse(saved);
-                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                if (Array.isArray(parsed)) {
+                    // Purge any legacy dummy test addresses that have no real user association
+                    const cleaned = parsed.filter(a => a && a.id && !['addr-candaba', 'addr-clark', 'addr-bgc'].includes(a.id) && (a.uid || a.email));
+                    if (cleaned.length !== parsed.length) {
+                        this.saveLocalBackup('ecohaven_saved_addresses', cleaned);
+                    }
+                    return cleaned;
+                }
             }
         } catch (e) {
             console.warn("Storage read error for addresses:", e);
         }
-        return []; // Guests have zero default addresses
+        return [];
     }
 
     saveAddresses(addresses) {
-        this.addresses = addresses;
+        this.addresses = Array.isArray(addresses) ? addresses : [];
         this.saveLocalBackup('ecohaven_saved_addresses', this.addresses);
         if (window.ecoHavenDb) {
             try {
@@ -1437,26 +1579,26 @@ class EcoHavenStore {
     }
 
     getAddresses() {
-        // Saved address book is a privilege for REGISTERED logged-in users only
         let user = null;
         try {
             const uStr = localStorage.getItem('ecohaven_user');
             if (uStr) user = JSON.parse(uStr);
         } catch(e) {}
 
+        // GUEST CUSTOMER: Zero saved addresses. Guest customers type their own details manually.
         if (!user) {
-            return []; // Anonymous / guest customers have 0 saved addresses
+            return [];
         }
 
-        const all = (this.addresses && this.addresses.length > 0) ? this.addresses : this.loadAddresses();
+        const all = (this.addresses && Array.isArray(this.addresses)) ? this.addresses : this.loadAddresses();
         const userEmail = (user.email || '').toLowerCase().trim();
         const userPhone = (user.phone || '').replace(/[^0-9]/g, '');
         const userUid = user.uid || '';
 
-        // Only return addresses that belong to THIS registered user (excluding any prototype mock entries)
+        // Only return addresses saved by and associated with this specific logged-in user
         return all.filter(a => {
             if (!a) return false;
-            if (a.id === 'addr-candaba' || a.id === 'addr-clark' || a.id === 'addr-bgc' || a.recipientName === 'Paolo Magisa') return false;
+            if (['addr-candaba', 'addr-clark', 'addr-bgc'].includes(a.id)) return false;
             if (a.uid && userUid && a.uid === userUid) return true;
             if (a.email && userEmail && a.email.toLowerCase().trim() === userEmail) return true;
             if (a.phone && userPhone && a.phone.replace(/[^0-9]/g, '') === userPhone) return true;
@@ -1596,6 +1738,10 @@ class EcoHavenStore {
         this.saveAddresses(all);
         window.showEcoHavenToast(`Address "${addrData.label || 'New Address'}" saved!`, "success");
         return id;
+    }
+
+    saveAddress(addrData) {
+        return this.saveOrUpdateAddress(addrData);
     }
 
     deleteAddress(id) {

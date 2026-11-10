@@ -274,6 +274,10 @@
 <span id="cta-button-text">Reserve Unit with 50% Deposit (₱3,467.00)</span>
 <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
 </button>
+<button type="button" class="w-full py-2.5 px-4 rounded-xl border border-outline-variant/60 bg-surface hover:bg-surface-container text-on-surface text-xs font-bold transition-all flex items-center justify-center gap-1.5" onclick="window.openEcoHavenChat({ productName: 'TetraTable 4-in-1 Suite' })">
+<span class="material-symbols-outlined text-primary text-[18px]">chat</span>
+<span>Have Questions About Wood or Custom Sizes? Chat with Seller</span>
+</button>
 <div class="flex flex-col gap-1 pt-1">
 <div class="flex items-center justify-center gap-2 font-caption text-caption text-tertiary">
 <span class="material-symbols-outlined text-[15px]">local_shipping</span>
@@ -337,6 +341,7 @@
 </div>
 </div>
 </section>
+
 <!-- Technical Joinery Engineering Bento Grid Section -->
 <section class="w-full py-space-xl bg-surface-container-low">
 <div class="max-w-7xl mx-auto px-gutter flex flex-col gap-space-lg">
@@ -500,6 +505,7 @@
 </div>
 </div>
 </section>
+
 <!-- ======================================================== -->
 <!-- SOURCING & PROCUREMENT BILL OF MATERIALS (eProcurement Specification) -->
 <!-- ======================================================== -->
@@ -633,160 +639,108 @@
   </div>
 </section>
 
-<!-- Client Interaction & Configurator Engine Script -->
-<script>
-    // State Variables
-    let currentMode = 'A';
-    let currentFinish = 'Natural Polished Mahogany';
-    const basePrice = 6934.00;
-    const cushionPrice = 1250.00;
-    const waxPrice = 580.00;
+<!-- ======================================================== -->
+<!-- CUSTOMER FEEDBACK & VERIFIED REVIEWS (Panel Suggestion #5) -->
+<!-- ======================================================== -->
+<section class="w-full py-space-xl bg-surface-container-low border-t border-outline-variant/30">
+  <div class="max-w-7xl mx-auto px-gutter flex flex-col gap-space-lg">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div>
+        <span class="font-label-caps text-label-caps uppercase text-primary font-bold tracking-widest">Verified Homeowner Feedback</span>
+        <h2 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">TetraTable Customer Reviews</h2>
+        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Real ratings from condo owners and families across Pampanga, Bulacan, and Metro Manila.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button type="button" onclick="window.openReviewModal(null, 'TetraTable 4-in-1 Modular', 'Natural Polished Mahogany')" class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-white text-xs font-bold transition-all shadow-md flex items-center gap-2 active:scale-95">
+          <span class="material-symbols-outlined text-[17px]">rate_review</span>
+          <span>Write a Review / Share Feedback</span>
+        </button>
+      </div>
+    </div>
 
-        // Stain Swatch Selector
-    function selectStain(stainName, el) {
-      currentFinish = stainName;
-      document.getElementById('selected-finish-name').textContent = stainName;
-      document.getElementById('queue-selected-finish').textContent = 'Stain: ' + stainName;
+    <!-- Reviews Dynamic Grid -->
+    <div id="tetratableReviewsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <!-- Fallback Review 1 -->
+      <div class="p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col justify-between shadow-xs">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center text-amber-500">
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">VERIFIED HOMEOWNER</span>
+          </div>
+          <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed font-body-sm">
+            "Sobrang ganda ng joinery! The 4 chairs unlatch so smoothly without tools. Perfect for our 28sqm condo in Angeles City."
+          </p>
+        </div>
+        <div class="mt-4 pt-4 border-t border-outline-variant/20 flex items-center justify-between text-xs">
+          <div>
+            <span class="font-bold text-on-surface block font-body-sm">Rose Timbol</span>
+            <span class="text-[11px] text-outline font-mono">Natural Polished Mahogany</span>
+          </div>
+          <span class="text-on-surface-variant text-[11px]">San Fernando, Pampanga</span>
+        </div>
+      </div>
 
-      // Update Swatch ring classes
-      const allSwatches = document.querySelectorAll('.swatch-btn');
-      allSwatches.forEach(btn => {
-        btn.classList.remove('ring-2', 'ring-primary');
-        btn.classList.add('ring-0');
-        btn.innerHTML = '';
-      });
+      <!-- Fallback Review 2 -->
+      <div class="p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col justify-between shadow-xs">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center text-amber-500">
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">VERIFIED HOMEOWNER</span>
+          </div>
+          <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed font-body-sm">
+            "Solid mahogany talaga, amoy beeswax barnis. Very sturdy even for adult guests. Fast doorstep delivery in Candaba."
+          </p>
+        </div>
+        <div class="mt-4 pt-4 border-t border-outline-variant/20 flex items-center justify-between text-xs">
+          <div>
+            <span class="font-bold text-on-surface block font-body-sm">Ar. Kevin Morales</span>
+            <span class="text-[11px] text-outline font-mono">Dark Walnut Stain</span>
+          </div>
+          <span class="text-on-surface-variant text-[11px]">Clark, Pampanga</span>
+        </div>
+      </div>
 
-      el.classList.remove('ring-0');
-      el.classList.add('ring-2', 'ring-primary');
-      el.innerHTML = '<span class="material-symbols-outlined text-[14px] text-on-primary flex items-center justify-center">check</span>';
-    }
+      <!-- Fallback Review 3 -->
+      <div class="p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col justify-between shadow-xs">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center text-amber-500">
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+              <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">VERIFIED HOMEOWNER</span>
+          </div>
+          <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed font-body-sm">
+            "The 50% downpayment option with transparent proof inspection made our online order worry-free. Outstanding quality!"
+          </p>
+        </div>
+        <div class="mt-4 pt-4 border-t border-outline-variant/20 flex items-center justify-between text-xs">
+          <div>
+            <span class="font-bold text-on-surface block font-body-sm">Patricia Galang</span>
+            <span class="text-[11px] text-outline font-mono">Natural Warm Teak</span>
+          </div>
+          <span class="text-on-surface-variant text-[11px]">BGC, Taguig</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    // Gallery Thumbnail Switching
-    function setPreview(idx) {
-      const thumbs = document.querySelectorAll('.thumb-btn');
-      const mainImg = document.getElementById('main-product-img');
-      const hotspotsLayer = document.getElementById('hotspots-layer');
-      thumbs.forEach((t, i) => {
-        if(i === idx) {
-          t.classList.remove('ring-0');
-          t.classList.add('ring-2', 'ring-primary');
-          const thumbImg = t.querySelector('img');
-          if (thumbImg && mainImg) {
-            mainImg.src = thumbImg.src;
-          }
-        } else {
-          t.classList.remove('ring-2', 'ring-primary');
-          t.classList.add('ring-0');
-        }
-      });
-      if (hotspotsLayer) {
-        if (idx === 0) {
-          hotspotsLayer.classList.remove('opacity-0', 'pointer-events-none');
-          hotspotsLayer.classList.add('opacity-100');
-        } else {
-          hotspotsLayer.classList.add('opacity-0', 'pointer-events-none');
-          hotspotsLayer.classList.remove('opacity-100');
-        }
-      }
-    }
-
-    // Dynamic Price Calculation Engine
-    function recalculatePrice() {
-      let total = basePrice;
-      const cushionsChecked = document.getElementById('addon-cushions').checked;
-      const waxChecked = document.getElementById('addon-wax').checked;
-
-      if (cushionsChecked) total += cushionPrice;
-      if (waxChecked) total += waxPrice;
-
-      const deposit = total / 2;
-
-      const formattedTotal = '₱' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      const formattedDeposit = '₱' + deposit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-      document.getElementById('full-settled-price').textContent = formattedTotal;
-      document.getElementById('deposit-price').textContent = formattedDeposit;
-      document.getElementById('cta-button-text').textContent = 'Reserve Unit with 50% Deposit (' + formattedDeposit + ')';
-
-      // Update Order Queue Drawer Values
-      document.getElementById('queue-full-total').textContent = formattedTotal;
-      document.getElementById('queue-deposit-total').textContent = formattedDeposit;
-
-      // Update Queue Addons breakdown
-      const addonsContainer = document.getElementById('queue-addons-container');
-      addonsContainer.innerHTML = '';
-
-      if (cushionsChecked) {
-        addonsContainer.innerHTML += `
-          <div class="flex items-center justify-between p-2 rounded bg-surface-container text-xs text-on-surface">
-            <span>+ Orthopedic Linen Cushions (x4)</span>
-            <span class="font-semibold">₱1,250.00</span>
-          </div>`;
-      }
-      if (waxChecked) {
-        addonsContainer.innerHTML += `
-          <div class="flex items-center justify-between p-2 rounded bg-surface-container text-xs text-on-surface">
-            <span>+ Mt. Arayat Beeswax Care Kit</span>
-            <span class="font-semibold">₱580.00</span>
-          </div>`;
-      }
-    }
-
-    // Drawer Controls
-    
-    function addTetraTableToCart() {
-      const cushions = document.getElementById('addon-cushions')?.checked;
-      const wax = document.getElementById('addon-wax')?.checked;
-      
-      if (window.ecohaven) {
-        window.ecohaven.cart = []; // Fresh configuration
-        window.ecohaven.addToCart({
-          id: 'tetratable-configured',
-          name: 'TetraTable 4-in-1 Suite',
-          price: 6934,
-          finish: currentFinish || 'Natural Polished Mahogany',
-          wood: '100% Solid Philippine Mahogany',
-          image: '../assets/images/tetratable-luxury-living-room.jpg'
-        });
-
-        if (cushions) {
-          window.ecohaven.addToCart({
-            id: 'addon-cushions',
-            name: 'Orthopedic Linen Cushions (Set of 4)',
-            price: 1250,
-            finish: 'Water-Repellent Philippine Weave Linen',
-            wood: 'High-Density Foam & Linen',
-            image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCylNZ1L5V_L7-w6Y8G6VWv0kQruGGMKbeJnh-OqCkwxJo75UhUFnVh0lC0l-dxdgzW21I9OwEUCaojz3HQEp86hSP5bE0q5BeqF-4DSyb2edYHJK6UwpAQENhFGiqq0_QsreyCojYavxMA7wYmwHy3yglF2Z2CmB7A_k6bDj2al9pd-grll0abjePgSi3p58NcQSna4yXB5ODAc0blCVH-nIGcTbOuQTIYT4JTwq90'
-          });
-        }
-
-        if (wax) {
-          window.ecohaven.addToCart({
-            id: 'addon-wax',
-            name: 'Mt. Arayat Beeswax Care Kit',
-            price: 580,
-            finish: 'Organic Beeswax & Virgin Coconut Oil Balm',
-            wood: 'Candaba Workshop Care',
-            image: '../assets/images/candaba-wood-care-kit.jpg'
-          });
-        }
-      }
-      openCartDrawer();
-    }
-
-    function openCartDrawer() {
-      recalculatePrice();
-      if (window.ecohaven && typeof window.ecohaven.openCartDrawer === 'function') {
-        window.ecohaven.openCartDrawer();
-      }
-    }
-
-    function closeCartDrawer() {
-      if (window.ecohaven && typeof window.ecohaven.closeCartDrawer === 'function') {
-        window.ecohaven.closeCartDrawer();
-      }
-    }
-  </script>
 </div></main><footer class="w-full bg-inverse-surface text-inverse-on-surface pt-space-xl pb-space-lg"><div class="max-w-7xl mx-auto px-gutter"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg pb-space-lg"><div class="flex flex-col gap-space-sm"><div class="flex items-center gap-space-xs"><img alt="EcoHaven Furniture Emblem" class="h-8 w-auto object-contain" src="../assets/images/logo.avif"/><span class="font-headline-sm text-headline-sm text-surface tracking-tight font-semibold">EcoHaven</span></div><p class="font-body-sm text-body-sm text-inverse-on-surface/80 leading-relaxed">Live Smarter. Make Room for More. Space-saving furniture handcrafted from solid Philippine Mahogany in Candaba, Pampanga.</p><div class="flex items-center gap-space-xs pt-1"><span class="font-caption text-caption text-primary-fixed bg-surface-container-highest/20 px-2 py-1 rounded">DTI Reg. #4918230</span><span class="font-caption text-caption text-tertiary-fixed bg-surface-container-highest/20 px-2 py-1 rounded">Est. 2026</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Workshop &amp; Coordinates</span><div class="flex items-start gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed mt-0.5">location_on</span><span>Dalan Batu, Pasig, Candaba, Pampanga, Philippines</span></div><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed">call</span><a href="tel:+639812558028" class="hover:underline">Direct Hotline: +63 981 255 8028</a></div><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-inverse-on-surface/80"><span class="material-symbols-outlined text-[18px] text-primary-fixed">mail</span><a href="mailto:ecohavenfurniture@gmail.com" class="hover:underline">ecohavenfurniture@gmail.com</a></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Navigation</span><div class="flex flex-col gap-2 font-body-sm text-body-sm text-inverse-on-surface/80"><a class="hover:text-primary-fixed transition-colors" href="../index.html">Home Storefront</a><a class="hover:text-primary-fixed transition-colors text-white font-bold" href="tetratable.html">TetraTable 4-in-1 Modular</a><a class="hover:text-primary-fixed transition-colors" href="shop.html">Shop All Products</a><a class="hover:text-primary-fixed transition-colors" href="about.html">About Us</a><a class="hover:text-primary-fixed transition-colors" href="contact.html">Contact Us</a></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-md text-label-md font-semibold text-primary-fixed uppercase tracking-wider">Follow Our Craft</span><p class="font-body-sm text-body-sm text-inverse-on-surface/80">Connect with us on official social media channels for live workshop demonstrations and customer photos.</p><div class="flex items-center gap-3 pt-1"><a href="https://www.facebook.com/profile.php?id=61588914923992&rdid=JkQTafkpCiS2BW1d&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1CBMxNxPbk%2F#" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#1877F2] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Facebook"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a><a href="https://www.tiktok.com/@ecohavenfurnitureph" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-black hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="TikTok (@ecohavenfurnitureph)"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.97v7.54c.03 2.5-1.28 4.9-3.4 6.13-2.15 1.25-4.94 1.19-7.03-.15-2.07-1.32-3.13-3.76-2.69-6.17.43-2.39 2.37-4.27 4.79-4.67.65-.11 1.31-.1 1.96.01v4.06c-.46-.17-.97-.2-1.45-.1-.99.2-1.77.96-1.99 1.94-.22.98.15 2.02.94 2.63.78.61 1.86.68 2.7.18.84-.49 1.34-1.41 1.32-2.38V.02h-.01z"/></svg></a><a href="https://www.instagram.com/ecohavenfuniture?psln=bHN3dzI4dW1oMnY3" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-full bg-white/10 hover:bg-[#E4405F] hover:text-white text-inverse-on-surface flex items-center justify-center transition-all" title="Instagram (@ecohavenfuniture)"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a></div></div></div><div class="pt-space-md flex flex-col sm:flex-row items-center justify-between gap-space-sm"><p class="font-caption text-caption text-inverse-on-surface/60">© 2026 EcoHaven Furniture. All rights reserved. Dalan Batu, Pasig, Candaba, Pampanga.</p><div class="flex items-center gap-space-md font-caption text-caption text-inverse-on-surface/70"><a class="hover:text-primary-fixed transition-colors" href="about.html">About EcoHaven</a><a class="hover:text-primary-fixed transition-colors" href="contact.html">Contact Us</a><a class="hover:text-primary-fixed transition-colors" href="legal.html">Compliance &amp; Warranty</a></div></div></div></footer><!-- Firebase Realtime Database SDK (Official CDN - Zero Build Step) -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
@@ -794,7 +748,41 @@
 <script src="../js/firebase-config.js"></script>
 <script src="../js/store.js"></script>
 <script>
-        function handleHeaderAlertClick() {
+    function renderTetratableReviews() {
+      const grid = document.getElementById('tetratableReviewsGrid');
+      if (!grid) return;
+      const reviews = (window.ecohaven && typeof window.ecohaven.getReviews === 'function') ? window.ecohaven.getReviews() : [];
+      if (!reviews || reviews.length === 0) return;
+
+      grid.innerHTML = reviews.slice(0, 6).map(rev => {
+        const starCount = Math.min(5, Math.max(1, parseInt(rev.rating, 10) || 5));
+        const stars = Array(starCount).fill('<span class="material-symbols-outlined text-[18px] fill-1 text-amber-500">star</span>').join('');
+        return `
+          <div class="p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col justify-between shadow-xs hover:shadow-md transition-all">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">${stars}</div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">VERIFIED HOMEOWNER</span>
+              </div>
+              <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed font-body-sm">
+                "${rev.comment}"
+              </p>
+            </div>
+            <div class="mt-4 pt-4 border-t border-outline-variant/20 flex items-center justify-between text-xs">
+              <div>
+                <span class="font-bold text-on-surface block font-body-sm">${rev.author}</span>
+                <span class="text-[11px] text-outline font-mono">${rev.finish || 'Natural Warm Teak'}</span>
+              </div>
+              <span class="text-on-surface-variant text-[11px]">${rev.location || 'Pampanga'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    window.addEventListener('ecohaven_reviews_updated', renderTetratableReviews);
+    window.addEventListener('DOMContentLoaded', () => setTimeout(renderTetratableReviews, 300));
+
+    function handleHeaderAlertClick() {
       if (typeof window.showEcoHavenToast === 'function') {
         window.showEcoHavenToast("🔔 Workshop Notifications: You're all caught up! Order & milestone alerts will appear here.", 'info');
       } else {
@@ -826,6 +814,8 @@
     }
   </script>
     <script src="../assets/simulated-comms.js"></script>
+  <script src="../assets/chat-widget.js"></script>
+  <script src="../assets/reviews-modal.js"></script>
   <script src="../assets/notifications.js"></script>
   <script src="../assets/auth-modal.js"></script>
   <script src="../assets/animations.js"></script>

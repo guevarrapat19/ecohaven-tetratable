@@ -240,27 +240,83 @@
     <div class="flex items-center gap-1.5">
       <span class="material-symbols-outlined text-[20px] text-primary">pin_drop</span>
       <label class="font-label-md text-label-md text-on-surface font-bold">
-        Saved Delivery Destination (1-Tap Express Select)
+        Personal Delivery Destination
       </label>
     </div>
-    <a href="dashboard.html" id="manageProfileAddressLink" class="hidden text-xs font-bold text-primary hover:underline flex items-center gap-1 transition-colors">
-      <span class="material-symbols-outlined text-[15px]">manage_accounts</span>
-      Manage in Profile
-    </a>
-  </div>
-
-  <!-- Guest Notice for Anonymous Shoppers -->
-  <div id="savedAddressGuestNotice" class="p-3 rounded-lg bg-surface-container-lowest border border-dashed border-outline-variant/60 text-xs text-on-surface-variant flex items-center justify-between">
-    <div class="flex items-center gap-1.5">
-      <span class="material-symbols-outlined text-outline text-[16px]">account_circle</span>
-      <span>Ordering as Guest. <button type="button" onclick="openAuthModal('signin')" class="text-primary font-bold hover:underline">Log in</button> or <button type="button" onclick="openAuthModal('register')" class="text-primary font-bold hover:underline">Register</button> to unlock 1-click saved addresses.</span>
+    <div class="flex items-center gap-2">
+      <button type="button" id="btnManageAddresses" onclick="openCheckoutAddressListModal()" class="hidden text-xs font-bold text-primary hover:underline flex items-center gap-1 transition-colors">
+        <span class="material-symbols-outlined text-[16px]">list_alt</span>
+        <span>My Address List (<span id="savedAddressCount">0</span>)</span>
+      </button>
+      <a href="dashboard.html" id="manageProfileAddressLink" class="hidden text-xs font-bold text-outline hover:text-primary hover:underline flex items-center gap-1 transition-colors">
+        <span class="material-symbols-outlined text-[15px]">manage_accounts</span>
+        Dashboard
+      </a>
     </div>
   </div>
 
-  <!-- Saved Address Dropdown Selector (Active ONLY for registered logged-in users with saved addresses) -->
+  <!-- Guest Notice for Anonymous Shoppers (Guest Customer inputs address directly) -->
+  <div id="savedAddressGuestNotice" class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 text-xs text-on-surface-variant flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-outline flex-shrink-0">
+        <span class="material-symbols-outlined text-[18px]">person</span>
+      </div>
+      <div>
+        <p class="font-bold text-on-surface">Guest Customer Checkout</p>
+        <p class="text-[11px] text-on-surface-variant">Please input your contact information and delivery address details below.</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-1.5 flex-shrink-0">
+      <button type="button" onclick="openAuthModal('signin')" class="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-bold text-xs transition-colors">
+        Log In
+      </button>
+      <button type="button" onclick="openAuthModal('register')" class="px-2.5 py-1 rounded-lg bg-primary text-white font-bold text-xs hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-2xs">
+        Register
+      </button>
+    </div>
+  </div>
+
+  <!-- Registered User Saved Addresses Section (Hidden for Guests; only rendered if account has saved addresses) -->
+  <div id="registeredAddressBookSection" style="display: none;" class="flex-col gap-2.5">
+    <div class="flex items-center justify-between pb-0.5">
+      <div class="flex items-center gap-1.5 text-xs font-bold text-on-surface">
+        <span class="material-symbols-outlined text-primary text-[16px]">menu_book</span>
+        <span>My Saved Addresses (<span id="userSavedAddressCount">0</span>):</span>
+      </div>
+      <button type="button" onclick="openCheckoutAddressListModal()" class="text-[11px] font-bold text-primary hover:underline flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">list_alt</span>
+        <span>Manage Address Book →</span>
+      </button>
+    </div>
+    <div id="quickAddressPresetsBar" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+      <!-- Populated dynamically via renderSavedAddressesDropdown() for logged-in accounts -->
+    </div>
+  </div>
+
+  <!-- Active Selected Address Display Card -->
+  <div id="activeAddressCard" style="display: none;" class="p-3 rounded-xl bg-surface-container-lowest border border-primary/40 shadow-xs items-start justify-between gap-3">
+    <div class="flex items-start gap-2.5 min-w-0">
+      <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span class="material-symbols-outlined text-[18px]">location_on</span>
+      </div>
+      <div class="min-w-0">
+        <div class="flex items-center gap-2 mb-0.5">
+          <span id="activeAddressLabel" class="text-xs font-bold text-on-surface uppercase tracking-wider bg-surface-container px-2 py-0.5 rounded">Home</span>
+          <span id="activeAddressRecipient" class="text-xs font-semibold text-on-surface truncate"></span>
+        </div>
+        <p id="activeAddressText" class="text-xs text-on-surface-variant font-medium leading-relaxed"></p>
+        <span id="activeAddressPhone" class="text-[11px] font-mono text-outline block mt-0.5"></span>
+      </div>
+    </div>
+    <button type="button" onclick="openCheckoutAddressListModal()" class="flex-shrink-0 px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-bold text-xs transition-colors flex items-center gap-1">
+      <span class="material-symbols-outlined text-[14px]">swap_horiz</span>
+      Change
+    </button>
+  </div>
+
+  <!-- Fallback Dropdown Selector for accessibility -->
   <div id="savedAddressSelectContainer" class="relative hidden">
     <select id="savedAddressSelect" onchange="onSavedAddressSelect(this.value)" class="w-full bg-surface-container-lowest border border-primary/30 py-2.5 px-3 rounded-lg font-body-md text-body-md text-on-surface font-medium focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer shadow-xs">
-      <!-- Options dynamically rendered via renderSavedAddressesDropdown() -->
     </select>
   </div>
 
@@ -324,6 +380,98 @@
     </label>
   </div>
 </div>
+<!-- Fulfillment Logistics Carrier Partner (Item #6) -->
+<div class="flex flex-col gap-2 pt-1 mb-2">
+  <div class="flex items-center justify-between">
+    <label class="font-label-md text-label-md text-on-surface font-semibold flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[18px] text-primary">local_shipping</span>
+      Courier &amp; Logistics Partner
+    </label>
+    <span class="text-[10px] text-tertiary font-bold bg-tertiary-fixed/30 px-2 py-0.5 rounded-full">Solid Furniture Certified</span>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+    <!-- Carrier 1: EcoHaven Dedicated Van -->
+    <label class="relative flex flex-col p-3 rounded-xl border-2 border-primary bg-primary/5 cursor-pointer transition-all shadow-xs" id="carrierCardVan">
+      <input type="radio" name="courier_partner" value="van" checked onchange="onCourierChange('van')" class="sr-only"/>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-bold text-on-surface flex items-center gap-1">
+          <span class="material-symbols-outlined text-[16px] text-primary">airport_shuttle</span>
+          Workshop Van
+        </span>
+        <span class="text-[9px] font-bold text-white bg-primary px-1.5 py-0.5 rounded">Assembled</span>
+      </div>
+      <span class="text-[11px] text-on-surface-variant font-medium leading-tight">Direct Candaba atelier truck (CBD 4821). Inside-room placement.</span>
+    </label>
+    <!-- Carrier 2: J&T Cargo -->
+    <label class="relative flex flex-col p-3 rounded-xl border border-outline-variant/30 hover:border-red-500/40 bg-surface-container-lowest cursor-pointer transition-all shadow-xs" id="carrierCardJnt">
+      <input type="radio" name="courier_partner" value="jnt" onchange="onCourierChange('jnt')" class="sr-only"/>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-bold text-on-surface flex items-center gap-1">
+          <span class="w-3.5 h-3.5 rounded-full bg-red-600 inline-flex items-center justify-center text-[9px] text-white font-black">J</span>
+          J&amp;T Cargo
+        </span>
+        <span class="text-[9px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">Heavy Crating</span>
+      </div>
+      <span class="text-[11px] text-on-surface-variant font-medium leading-tight">Heavy crated cargo with J&amp;T barcode tracking. Doorstep COD.</span>
+    </label>
+    <!-- Carrier 3: Flash Express -->
+    <label class="relative flex flex-col p-3 rounded-xl border border-outline-variant/30 hover:border-amber-500/40 bg-surface-container-lowest cursor-pointer transition-all shadow-xs" id="carrierCardFlash">
+      <input type="radio" name="courier_partner" value="flash" onchange="onCourierChange('flash')" class="sr-only"/>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-bold text-on-surface flex items-center gap-1">
+          <span class="w-3.5 h-3.5 rounded-full bg-amber-500 inline-flex items-center justify-center text-[9px] text-neutral-950 font-black">⚡</span>
+          Flash Express
+        </span>
+        <span class="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">Regional Rapid</span>
+      </div>
+      <span class="text-[11px] text-on-surface-variant font-medium leading-tight">Bulky cargo sorting network across Central Luzon &amp; NCR.</span>
+    </label>
+  </div>
+  <!-- Live Animated Fleet Dispatch & POD Dock (User Vehicle Animation & Uniform POD Feature) -->
+  <div id="courierAnimationDock" class="mt-2.5 p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 overflow-hidden relative transition-all duration-300 shadow-xs">
+    <div class="flex items-center justify-between mb-2">
+      <div class="flex items-center gap-2">
+        <span id="courierDockDot" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="courierDockStatus" class="text-xs font-bold text-on-surface">Live Fleet Transit Ready</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span id="courierDockBadge" class="text-[10px] font-mono font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full">PLATE: CBD 4821</span>
+        <button type="button" onclick="openPodPreviewModal()" class="text-[10px] font-bold text-tertiary hover:underline flex items-center gap-0.5 bg-tertiary/10 px-2 py-0.5 rounded-full">
+          <span class="material-symbols-outlined text-[13px]">badge</span>
+          <span>View Courier Uniform</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Animated Road & Vehicle Stage -->
+    <div class="relative h-24 bg-gradient-to-b from-surface-container-lowest to-surface-container-low rounded-xl overflow-hidden border border-outline-variant/25 flex items-center justify-center p-2">
+      <!-- Animated Dashed Road Ground -->
+      <div class="absolute bottom-2 inset-x-0 h-4 bg-neutral-800/10 border-t border-neutral-700/20 flex items-center">
+        <div class="w-full h-0.5 border-b-2 border-dashed border-primary/50 animate-pulse"></div>
+      </div>
+
+      <!-- Vehicle Stage Container (Smooth Morph & Suspension Bounce) -->
+      <div id="courierVehicleStage" class="relative z-10 transition-all duration-500 transform hover:scale-105 flex items-center justify-center">
+        <!-- Injected via renderCourierVehicleSVG() -->
+      </div>
+    </div>
+
+    <!-- Live Courier & POD Guarantee Details -->
+    <div class="mt-2.5 pt-2 border-t border-outline-variant/15 flex flex-wrap items-center justify-between gap-2 text-xs">
+      <div class="flex items-center gap-1.5 min-w-0">
+        <span id="courierPodThumbnail" class="w-6 h-6 rounded-full overflow-hidden border border-primary/40 flex-shrink-0 cursor-pointer shadow-xs" onclick="openPodPreviewModal()" title="Click to view uniform">
+          <img id="courierPodThumbImg" src="../assets/images/pod/pod-workshop-van.jpg" alt="Courier Personnel" class="w-full h-full object-cover"/>
+        </span>
+        <span id="courierDockDesc" class="font-medium text-[11px] text-on-surface-variant truncate">Mang Ronaldo • EcoHaven Workshop Driver (CBD 4821)</span>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <span id="courierDockEta" class="font-bold text-primary text-[11px]">EST: 24-48h</span>
+        <span class="text-[10px] text-outline">• Free inside-room assembly</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Luzon Logistics Freight Selector -->
 <div class="flex flex-col gap-space-sm">
 <div class="flex items-center justify-between">
@@ -384,13 +532,6 @@
 </label>
 </div>
 </div>
-<!-- Mandatory Legal & Compliance Checkbox -->
-<div class="bg-surface-container-high/40 p-space-md rounded-xl flex items-start gap-space-sm">
-<input checked="" class="mt-1 accent-primary h-4 w-4 flex-shrink-0" id="legalTerms" type="checkbox"/>
-<label class="font-caption text-caption text-on-surface cursor-pointer select-none leading-relaxed" for="legalTerms">
-            I confirm that I have reviewed and agree to the <a href="legal.html#terms" target="_blank" class="underline text-primary font-bold hover:text-primary-container">Terms and Conditions</a>, acknowledging that custom furniture orders require a 50% non-refundable earnest deposit to secure timber allocation in Pampanga under RA 8792.
-          </label>
-</div>
 <!-- Candaba Workshop Quality Guarantee -->
 <div class="flex items-center justify-between p-space-sm rounded-lg bg-inverse-surface text-inverse-on-surface">
 <div class="flex items-center gap-space-sm">
@@ -432,18 +573,18 @@
       <span class="font-label-md text-label-md font-semibold text-on-surface" id="arrangementTitle">Payment Arrangement</span>
       <span class="font-caption text-caption text-primary font-bold" id="arrangementBadge">Candaba Workshop Benefit</span>
     </div>
-    <div class="grid grid-cols-2 p-1 bg-surface-container rounded-xl gap-1.5 border border-outline-variant/20 transition-all" id="arrangementToggleGrid">
+    <div class="grid grid-cols-1 sm:grid-cols-3 p-1 bg-surface-container rounded-xl gap-1.5 border border-outline-variant/20 transition-all" id="arrangementToggleGrid">
       <button type="button" class="py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-primary-container text-on-primary-container shadow-sm flex flex-col items-center justify-center" id="toggleFifty" onclick="setPaymentMode('fifty')">
         <span class="font-bold text-xs sm:text-sm">50% Down Payment</span>
-        <span class="text-[10px] opacity-90 font-medium" id="toggleFiftySubtext">Earnest Escrow (Recommended)</span>
+        <span class="text-[10px] opacity-90 font-medium" id="toggleFiftySubtext">Earnest Escrow</span>
       </button>
       <button type="button" class="py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center" id="toggleFull" onclick="setPaymentMode('full')">
         <span class="font-bold text-xs sm:text-sm">Paid in Full</span>
-        <span class="text-[10px] opacity-90 font-medium" id="toggleFullSubtext">100% Upfront (Instant Dispatch)</span>
+        <span class="text-[10px] opacity-90 font-medium" id="toggleFullSubtext">100% Upfront</span>
       </button>
-      <button type="button" class="hidden py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center" id="toggleCod" onclick="setPaymentMode('cod')">
+      <button type="button" class="py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center" id="toggleCod" onclick="setPaymentMode('cod')">
         <span class="font-bold text-xs sm:text-sm">Cash on Delivery</span>
-        <span class="text-[10px] opacity-90 font-medium text-tertiary" id="toggleCodSubtext">Pay upon Handover (COD)</span>
+        <span class="text-[10px] opacity-90 font-medium text-tertiary" id="toggleCodSubtext">₱0 Upfront (COD)</span>
       </button>
     </div>
   </div>
@@ -522,18 +663,19 @@
         </div>
       </label>
 
-      <!-- Cash on Delivery -->
+      <!-- Cash on Delivery (COD) -->
       <label class="group relative flex items-center justify-between p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container cursor-pointer shadow-xs border border-outline-variant/30 transition-all" id="gatewayLabelCod">
         <div class="flex items-center gap-3">
           <input class="accent-primary h-4 w-4" name="payment_method" type="radio" value="cod" onchange="onPaymentMethodChange(this.value)"/>
           <div class="flex flex-col">
             <div class="flex items-center gap-2">
-              <span class="font-title-md text-sm sm:text-base font-bold text-on-surface">💵 Cash on Delivery (Balance)</span>
+              <span class="font-title-md text-sm sm:text-base font-bold text-on-surface">💵 Cash on Delivery (COD)</span>
+              <span class="bg-emerald-700 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">₱0 Upfront</span>
             </div>
-            <span class="text-[11px] text-on-surface-variant">Settle remaining balance upon white-glove handover</span>
+            <span class="text-[11px] text-on-surface-variant">Pay 100% at doorstep upon inspection • Zero advance payment required</span>
           </div>
         </div>
-        <span class="text-[11px] font-semibold text-outline">Upon Handover</span>
+        <span class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">Pay at Doorstep</span>
       </label>
     </div>
 
@@ -653,14 +795,6 @@
     </div>
   </div>
 
-  <!-- Mandatory Order & Escrow Agreement Checkbox (Requirement 4) -->
-  <div class="p-3.5 rounded-xl bg-surface-container-low border border-primary/25 flex items-start gap-3 transition-all hover:bg-surface-container hover:border-primary/45" id="orderAgreementContainer">
-    <input type="checkbox" id="orderAgreementCheckbox" checked onchange="toggleAgreementValidation()" class="mt-1 accent-primary h-4 w-4 rounded flex-shrink-0 cursor-pointer" />
-    <label for="orderAgreementCheckbox" class="text-xs text-on-surface leading-relaxed select-none cursor-pointer">
-      I confirm that I have reviewed and agree to the <a href="legal.html#terms" target="_blank" class="underline text-primary font-bold hover:text-primary-container">Terms and Conditions</a>, acknowledging that custom furniture orders require a 50% non-refundable earnest deposit to secure timber allocation in Pampanga under RA 8792.
-    </label>
-  </div>
-
   <!-- Primary Call to Action Button: Dynamic Gateway Trigger -->
   <div class="space-y-1.5 pt-1">
     <button id="primaryPaymentBtn" class="w-full bg-[#005CE6] hover:bg-[#0047b3] text-white py-4 px-6 rounded-xl font-title-md text-title-md font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group active:scale-[0.99]" onclick="handlePrimaryPaymentClick()">
@@ -668,7 +802,7 @@
       <span id="primaryPaymentBtnText">Launch GCash App-to-App Payment →</span>
     </button>
     <p class="text-center font-caption text-caption text-outline">
-      Redirects to verified e-wallet app or generates instant dynamic QRPH standard payload.
+      By completing your order, you agree to EcoHaven's <a href="legal.html#terms" target="_blank" class="underline text-primary font-semibold hover:text-primary-container">Terms and Conditions</a> under RA 8792.
     </p>
   </div>
 </section>
@@ -1509,10 +1643,14 @@
       const select = document.getElementById('savedAddressSelect');
       const selectContainer = document.getElementById('savedAddressSelectContainer');
       const guestNotice = document.getElementById('savedAddressGuestNotice');
+      const regSection = document.getElementById('registeredAddressBookSection');
+      const presetsBar = document.getElementById('quickAddressPresetsBar');
       const manageLink = document.getElementById('manageProfileAddressLink');
+      const btnManage = document.getElementById('btnManageAddresses');
       const saveAsDefaultRow = document.getElementById('saveAsDefaultRow');
       const badge = document.getElementById('selectedAddressBadge');
-      if (!select) return;
+      const countEl = document.getElementById('userSavedAddressCount');
+      const btnCountEl = document.getElementById('savedAddressCount');
 
       const userStr = localStorage.getItem('ecohaven_user');
       let currentUser = null;
@@ -1523,12 +1661,18 @@
       // 1. GUEST / ANONYMOUS CUSTOMER (NOT LOGGED IN)
       if (!currentUser) {
         if (selectContainer) selectContainer.classList.add('hidden');
+        if (regSection) {
+          regSection.classList.add('hidden');
+          regSection.style.display = 'none';
+        }
         if (guestNotice) guestNotice.classList.remove('hidden');
         if (manageLink) manageLink.classList.add('hidden');
+        if (btnManage) btnManage.classList.add('hidden');
         if (saveAsDefaultRow) saveAsDefaultRow.classList.add('hidden');
         if (badge) badge.innerText = 'Manual Entry';
+        updateActiveAddressCardDisplay(null);
 
-        // ZERO default address - leave inputs completely blank
+        // ZERO default address for guest customer - inputs left blank for user input
         const nameInp = document.getElementById('customerNameInput');
         const phoneInp = document.getElementById('customerPhoneInput');
         const emailInp = document.getElementById('customerEmailInput');
@@ -1537,13 +1681,14 @@
         const hiddenAddr = document.getElementById('customerAddressInput');
         const preview = document.getElementById('fullAddressPreview');
 
-        if (nameInp && nameInp.value === 'Juan Dela Cruz') nameInp.value = '';
-        if (phoneInp && phoneInp.value === '09175551234') phoneInp.value = '';
-        if (emailInp && emailInp.value === 'juan.delacruz@email.ph') emailInp.value = '';
-        if (hiddenAddr && hiddenAddr.value.includes('Dalan Batu')) hiddenAddr.value = '';
-        if (preview && preview.innerText.includes('Dalan Batu')) {
+        if (nameInp && (nameInp.value === 'Juan Dela Cruz' || nameInp.value === 'Warren Santos' || nameInp.value === 'Patrick Guevarra' || nameInp.value === 'Maria Clara Santos')) nameInp.value = '';
+        if (phoneInp && (phoneInp.value === '09175551234' || phoneInp.value === '09812558028' || phoneInp.value === '09662447106')) phoneInp.value = '';
+        if (emailInp && (emailInp.value === 'juan.delacruz@email.ph' || emailInp.value.includes('@ecohaven.ph'))) emailInp.value = '';
+        if (hiddenAddr && (hiddenAddr.value.includes('Dalan Batu') || hiddenAddr.value.includes('Jose Abad') || hiddenAddr.value.includes('High Street'))) hiddenAddr.value = '';
+        if (preview && (preview.innerText.includes('Dalan Batu') || preview.innerText.includes('Jose Abad') || preview.innerText.includes('High Street'))) {
           preview.innerText = 'Please enter your delivery destination below';
         }
+        window._lastCheckoutUserEmail = null;
         return;
       }
 
@@ -1556,13 +1701,16 @@
       const nameInp = document.getElementById('customerNameInput');
       const phoneInp = document.getElementById('customerPhoneInput');
       const emailInp = document.getElementById('customerEmailInput');
-      if (nameInp && (!nameInp.value || nameInp.value === 'Juan Dela Cruz')) {
+      const userChanged = window._lastCheckoutUserEmail !== (currentUser.email || currentUser.uid);
+      window._lastCheckoutUserEmail = currentUser.email || currentUser.uid;
+
+      if (nameInp && (userChanged || !nameInp.value || nameInp.value === 'Juan Dela Cruz')) {
         nameInp.value = currentUser.displayName || currentUser.fullName || '';
       }
-      if (emailInp && (!emailInp.value || emailInp.value === 'juan.delacruz@email.ph')) {
+      if (emailInp && (userChanged || !emailInp.value || emailInp.value === 'juan.delacruz@email.ph')) {
         emailInp.value = currentUser.email || '';
       }
-      if (phoneInp && (!phoneInp.value || phoneInp.value === '09175551234')) {
+      if (phoneInp && (userChanged || !phoneInp.value || phoneInp.value === '09175551234')) {
         phoneInp.value = currentUser.phone || '';
       }
 
@@ -1574,23 +1722,59 @@
         : null;
 
       if (addresses.length > 0) {
+        if (countEl) countEl.innerText = addresses.length;
+        if (btnCountEl) btnCountEl.innerText = addresses.length;
+        if (btnManage) btnManage.classList.remove('hidden');
+        if (regSection) regSection.classList.remove('hidden');
         if (selectContainer) selectContainer.classList.remove('hidden');
-        let optionsHtml = '';
-        addresses.forEach(addr => {
-          const isDef = addr.isDefault ? ' [Default]' : '';
-          const shortAddr = addr.address ? (addr.address.length > 55 ? addr.address.substring(0, 52) + '...' : addr.address) : '';
-          optionsHtml += `<option value="${addr.id}" ${addr.isDefault ? 'selected' : ''}>📍 ${addr.label}${isDef} — ${addr.recipientName || ''}, ${shortAddr}</option>`;
-        });
-        optionsHtml += `<option value="new">➕ + Use / Enter a New Delivery Address...</option>`;
-        select.innerHTML = optionsHtml;
 
+        // Render quick preset address cards for the logged-in user
+        if (presetsBar) {
+          presetsBar.innerHTML = addresses.slice(0, 3).map((a, idx) => {
+            const isDef = a.isDefault ? '<span class="text-[9px] font-mono text-emerald-800 bg-emerald-100 px-1.5 py-0.2 rounded font-bold">Default</span>' : '';
+            const isSelected = (defaultAddr && defaultAddr.id === a.id) || (!defaultAddr && idx === 0);
+            const borderCls = isSelected ? 'border-2 border-primary bg-primary/5' : 'border border-outline-variant/30 hover:border-primary/40 bg-surface-container-lowest';
+            return `
+              <div onclick="selectPresetAddress('${a.id}')" id="presetCard_${a.id}" class="p-2.5 rounded-xl ${borderCls} cursor-pointer transition-all flex flex-col justify-between shadow-xs">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-primary truncate">📍 ${a.label || 'Address'}</span>
+                  ${isDef}
+                </div>
+                <p class="text-xs font-bold text-on-surface truncate">${a.recipientName || currentUser.displayName || ''}</p>
+                <p class="text-[11px] text-on-surface-variant truncate">${a.city || ''}, ${a.province || ''}</p>
+              </div>
+            `;
+          }).join('');
+        }
+
+        if (select) {
+          let optionsHtml = '';
+          addresses.forEach(addr => {
+            const isDef = addr.isDefault ? ' [Default]' : '';
+            const shortAddr = addr.address ? (addr.address.length > 55 ? addr.address.substring(0, 52) + '...' : addr.address) : '';
+            optionsHtml += `<option value="${addr.id}" ${addr.isDefault ? 'selected' : ''}>📍 ${addr.label}${isDef} — ${addr.recipientName || ''}, ${shortAddr}</option>`;
+          });
+          optionsHtml += `<option value="new">➕ + Use / Enter a New Delivery Address...</option>`;
+          select.innerHTML = optionsHtml;
+        }
+
+        if (regSection) regSection.style.display = 'flex';
         if (defaultAddr) {
           applyAddressToInputs(defaultAddr);
+          updateActiveAddressCardDisplay(defaultAddr);
+        } else if (addresses.length > 0) {
+          applyAddressToInputs(addresses[0]);
+          updateActiveAddressCardDisplay(addresses[0]);
         }
       } else {
-        // Registered user without any saved addresses yet
+        // Registered user without any saved addresses yet — still show My Address List button so they can add addresses!
+        if (countEl) countEl.innerText = '0';
+        if (btnCountEl) btnCountEl.innerText = '0';
+        if (btnManage) btnManage.classList.remove('hidden');
+        if (regSection) regSection.style.display = 'none';
         if (selectContainer) selectContainer.classList.add('hidden');
         if (badge) badge.innerText = 'New Address';
+        updateActiveAddressCardDisplay(null);
       }
     }
 
@@ -1605,8 +1789,13 @@
       if (document.getElementById('customerEmailInput') && addr.email) {
         document.getElementById('customerEmailInput').value = addr.email;
       }
-      if (addr.address) {
-        parseAddressToFields(addr.address);
+      const fullAddrStr = addr.fullAddress || addr.address || `${addr.street || ''}, ${addr.barangay || ''}, ${addr.city || ''}, ${addr.province || ''} ${addr.zipCode || ''}`;
+      if (fullAddrStr) {
+        parseAddressToFields(fullAddrStr);
+        const hiddenInput = document.getElementById('customerAddressInput');
+        const preview = document.getElementById('fullAddressPreview');
+        if (hiddenInput && !hiddenInput.value) hiddenInput.value = fullAddrStr;
+        if (preview) preview.innerText = fullAddrStr;
       }
 
       // Update badge
@@ -1771,181 +1960,99 @@
       const arrangementToggleGrid = document.getElementById('arrangementToggleGrid');
       const gatewayLabelCod = document.getElementById('gatewayLabelCod');
 
-      // =========================================================================
-      // THREE PAYMENT MODALITY TIERS BASED ON TOTAL PRODUCT PURCHASE (basePrice)
-      // 1. Below ₱2,000: Paid in Full OR Cash on Delivery (COD). 50% DP is HIDDEN.
-      // 2. ₱2,000 – ₱5,000: 50% Down Payment, Paid in Full, OR COD available.
-      // 3. More than ₱5,000: Downpayment is MANDATORY! COD is STRICTLY PROHIBITED.
-      // =========================================================================
-      if (basePrice < 2000) {
-        // TIER 1: Below ₱2,000
+      // Ensure all 3 arrangement buttons are properly configured
+      if (arrangementToggleGrid) {
+        arrangementToggleGrid.className = "grid grid-cols-1 sm:grid-cols-3 p-1 bg-surface-container rounded-xl gap-1.5 border border-outline-variant/20 transition-all";
+      }
+      if (toggleFifty) {
+        toggleFifty.classList.remove('hidden');
+        toggleFifty.style.display = 'flex';
+      }
+      if (toggleFull) {
+        toggleFull.classList.remove('hidden');
+        toggleFull.style.display = 'flex';
+      }
+      if (toggleCod) {
+        toggleCod.classList.remove('hidden');
+        toggleCod.style.display = 'flex';
+      }
+      if (gatewayLabelCod) {
+        gatewayLabelCod.classList.remove('hidden');
+        gatewayLabelCod.style.display = 'flex';
+      }
+
+      // Check whether Cash on Delivery (COD) is active
+      const isCodActive = (paymentMode === 'cod' || selectedGateway === 'cod');
+
+      if (isCodActive) {
+        paymentMode = 'cod';
+        selectedGateway = 'cod';
+        const codRadio = document.querySelector('input[name="payment_method"][value="cod"]');
+        if (codRadio) codRadio.checked = true;
+
+        // DISABLE DOWNPAYMENT FOR COD: Payment is collected 100% at doorstep upon handover
         if (toggleFifty) {
-          toggleFifty.classList.add('hidden');
-          toggleFifty.style.display = 'none';
+          toggleFifty.disabled = true;
+          toggleFifty.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all opacity-40 cursor-not-allowed bg-surface-container text-outline flex flex-col items-center justify-center";
+          if (toggleFiftySubtext) toggleFiftySubtext.innerText = "Disabled for COD (₱0 Upfront)";
         }
         if (toggleFull) {
-          toggleFull.classList.remove('hidden');
-          toggleFull.style.display = 'flex';
-          if (toggleFullSubtext) toggleFullSubtext.innerText = "100% Upfront (Instant Dispatch)";
+          toggleFull.disabled = true;
+          toggleFull.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all opacity-40 cursor-not-allowed bg-surface-container text-outline flex flex-col items-center justify-center";
+          if (toggleFullSubtext) toggleFullSubtext.innerText = "Disabled for COD";
         }
         if (toggleCod) {
-          toggleCod.classList.remove('hidden');
-          toggleCod.style.display = 'flex';
-          if (toggleCodSubtext) toggleCodSubtext.innerText = "Pay upon Handover (COD)";
-        }
-        if (gatewayLabelCod) {
-          gatewayLabelCod.classList.remove('hidden');
-          gatewayLabelCod.style.display = 'flex';
-        }
-        if (arrangementToggleGrid) {
-          arrangementToggleGrid.className = "grid grid-cols-2 p-1 bg-surface-container rounded-xl gap-1.5 border border-outline-variant/20 transition-all";
-        }
-
-        if (paymentMode === 'fifty') {
-          paymentMode = 'full';
+          toggleCod.disabled = false;
+          toggleCod.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-tertiary text-white shadow-sm flex flex-col items-center justify-center ring-2 ring-tertiary/40";
+          if (toggleCodSubtext) toggleCodSubtext.innerText = "Pay 100% on Handover (Active)";
         }
 
         if (arrangementBadge) {
-          arrangementBadge.innerText = "Order < ₱2,000: Paid in Full or COD";
+          arrangementBadge.innerText = "Cash on Delivery: 100% Doorstep Settlement";
         }
         if (escrowInfoBanner) {
-          escrowInfoBanner.innerHTML = `<span class="material-symbols-outlined text-[16px] text-tertiary">local_shipping</span> Orders below ₱2,000 qualify for <strong>Paid in Full</strong> or <strong>Cash on Delivery (COD)</strong>. Zero downpayment required.`;
+          escrowInfoBanner.innerHTML = `<span class="material-symbols-outlined text-[16px] text-tertiary">local_shipping</span> <strong>Cash on Delivery (COD) Selected</strong>: Zero payment required today (<strong>₱0.00 Due Today</strong>). Downpayment is disabled because your 100% balance will be settled at your doorstep upon white-glove unboxing &amp; physical inspection.`;
         }
         if (agreementTermsText) {
-          agreementTermsText.innerHTML = `I confirm that I have reviewed and agree to the <a href="legal.html#terms" target="_blank" class="underline text-primary font-bold hover:text-primary-container">Terms and Conditions</a> for prompt Candaba workshop dispatch and delivery under RA 8792.`;
-        }
-
-        if (paymentMode === 'cod') {
-          if (toggleCod) toggleCod.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-tertiary text-white shadow-sm flex flex-col items-center justify-center";
-          if (toggleFull) toggleFull.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center";
-          selectedGateway = 'cod';
-          const codRadio = document.querySelector('input[name="payment_method"][value="cod"]');
-          if (codRadio) codRadio.checked = true;
-        } else {
-          // paymentMode === 'full'
-          if (toggleFull) toggleFull.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-primary-container text-on-primary-container shadow-sm flex flex-col items-center justify-center";
-          if (toggleCod) toggleCod.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center";
-          if (selectedGateway === 'cod') {
-            selectedGateway = 'gcash';
-            const gcashRadio = document.querySelector('input[name="payment_method"][value="gcash"]');
-            if (gcashRadio) gcashRadio.checked = true;
-          }
-        }
-      } else if (basePrice <= 5000) {
-        // TIER 2: ₱2,000 – ₱5,000 (Option of 50% Downpayment, Paid in Full, or COD)
-        if (toggleFifty) {
-          toggleFifty.classList.remove('hidden');
-          toggleFifty.style.display = 'flex';
-          toggleFifty.disabled = false;
-          if (toggleFiftySubtext) toggleFiftySubtext.innerText = "50% Earnest Escrow (Optional)";
-        }
-        if (toggleFull) {
-          toggleFull.classList.remove('hidden');
-          toggleFull.style.display = 'flex';
-          toggleFull.disabled = false;
-          if (toggleFullSubtext) toggleFullSubtext.innerText = "100% Upfront (Instant Dispatch)";
-        }
-        if (toggleCod) {
-          toggleCod.classList.remove('hidden');
-          toggleCod.style.display = 'flex';
-          if (toggleCodSubtext) toggleCodSubtext.innerText = "Pay upon Handover (COD)";
-        }
-        if (gatewayLabelCod) {
-          gatewayLabelCod.classList.remove('hidden');
-          gatewayLabelCod.style.display = 'flex';
-        }
-        if (arrangementToggleGrid) {
-          arrangementToggleGrid.className = "grid grid-cols-1 sm:grid-cols-3 p-1 bg-surface-container rounded-xl gap-1.5 border border-outline-variant/20 transition-all";
-        }
-
-        if (arrangementBadge) {
-          arrangementBadge.innerText = "Order ₱2k–₱5k: 50% DP, Full, or COD";
-        }
-        if (escrowInfoBanner) {
-          escrowInfoBanner.innerHTML = `<span class="material-symbols-outlined text-[16px] text-tertiary">check_circle</span> Orders from ₱2,000 to ₱5,000: Choose between <strong>50% Down Payment</strong>, <strong>Paid in Full</strong>, or <strong>Cash on Delivery (COD)</strong>.`;
-        }
-        if (agreementTermsText) {
-          agreementTermsText.innerHTML = `I confirm that I have reviewed and agree to the <a href="legal.html#terms" target="_blank" class="underline text-primary font-bold hover:text-primary-container">Terms and Conditions</a> for prompt Candaba workshop dispatch and delivery under RA 8792.`;
-        }
-
-        // Reset default classes
-        if (toggleFifty) toggleFifty.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center";
-        if (toggleFull) toggleFull.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center";
-        if (toggleCod) toggleCod.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center";
-
-        if (paymentMode === 'fifty') {
-          if (toggleFifty) toggleFifty.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-primary-container text-on-primary-container shadow-sm flex flex-col items-center justify-center";
-          if (selectedGateway === 'cod') {
-            selectedGateway = 'gcash';
-            const gcashRadio = document.querySelector('input[name="payment_method"][value="gcash"]');
-            if (gcashRadio) gcashRadio.checked = true;
-          }
-        } else if (paymentMode === 'cod') {
-          if (toggleCod) toggleCod.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-tertiary text-white shadow-sm flex flex-col items-center justify-center";
-          selectedGateway = 'cod';
-          const codRadio = document.querySelector('input[name="payment_method"][value="cod"]');
-          if (codRadio) codRadio.checked = true;
-        } else {
-          // paymentMode === 'full'
-          if (toggleFull) toggleFull.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-primary-container text-on-primary-container shadow-sm flex flex-col items-center justify-center";
-          if (selectedGateway === 'cod') {
-            selectedGateway = 'gcash';
-            const gcashRadio = document.querySelector('input[name="payment_method"][value="gcash"]');
-            if (gcashRadio) gcashRadio.checked = true;
-          }
+          agreementTermsText.innerHTML = `I confirm that I have reviewed and agree to the <a href="legal.html#terms" target="_blank" class="underline text-primary font-bold hover:text-primary-container">Terms and Conditions</a> for <strong>Cash on Delivery (COD)</strong>, acknowledging that zero downpayment is collected today (₱0.00 Due Today) and the full 100% balance will be settled at doorstep upon physical inspection of the furniture under RA 8792.`;
         }
       } else {
-        // TIER 3: More than ₱5,000 -> DOWNPAYMENT IS MANDATORY! COD is NOT PERMITTED.
+        // E-WALLET / BANK TRANSFER (GCash, Maya, Bank Transfer)
         if (toggleFifty) {
-          toggleFifty.classList.remove('hidden');
-          toggleFifty.style.display = 'flex';
           toggleFifty.disabled = false;
-          if (toggleFiftySubtext) toggleFiftySubtext.innerText = "Mandatory Escrow (> ₱5,000)";
+          if (toggleFiftySubtext) toggleFiftySubtext.innerText = "50% Earnest Escrow (Recommended)";
         }
         if (toggleFull) {
-          toggleFull.classList.remove('hidden');
-          toggleFull.style.display = 'flex';
           toggleFull.disabled = false;
           if (toggleFullSubtext) toggleFullSubtext.innerText = "100% Upfront (Instant Dispatch)";
         }
         if (toggleCod) {
-          toggleCod.classList.add('hidden');
-          toggleCod.style.display = 'none';
-        }
-        if (gatewayLabelCod) {
-          gatewayLabelCod.classList.add('hidden');
-          gatewayLabelCod.style.display = 'none';
-        }
-        if (arrangementToggleGrid) {
-          arrangementToggleGrid.className = "grid grid-cols-2 p-1 bg-surface-container rounded-xl gap-1.5 border border-outline-variant/20 transition-all";
-        }
-
-        // Strictly disallow COD for > 5k
-        if (paymentMode === 'cod') {
-          paymentMode = 'fifty';
-        }
-        if (selectedGateway === 'cod') {
-          selectedGateway = 'gcash';
-          const gcashRadio = document.querySelector('input[name="payment_method"][value="gcash"]');
-          if (gcashRadio) gcashRadio.checked = true;
-        }
-
-        if (arrangementBadge) {
-          arrangementBadge.innerText = "Order > ₱5,000: Downpayment Required";
-        }
-        if (escrowInfoBanner) {
-          escrowInfoBanner.innerHTML = `<span class="material-symbols-outlined text-[16px] text-primary">verified_user</span> Orders above ₱5,000 require <strong>50% earnest down payment</strong> to reserve sustainable Candaba lumber &amp; initiate master joinery. Cash on Delivery (COD) is not available.`;
-        }
-        if (agreementTermsText) {
-          agreementTermsText.innerHTML = `I confirm that I have reviewed and agree to the <a href="legal.html#terms" target="_blank" class="underline text-primary font-bold hover:text-primary-container">Terms and Conditions</a>, acknowledging that custom furniture orders above ₱5,000 require a 50% non-refundable earnest deposit to secure timber allocation in Pampanga under RA 8792.`;
+          toggleCod.disabled = false;
+          toggleCod.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center";
+          if (toggleCodSubtext) toggleCodSubtext.innerText = "Pay upon Handover (COD)";
         }
 
         if (paymentMode === 'fifty') {
           if (toggleFifty) toggleFifty.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-primary-container text-on-primary-container shadow-sm flex flex-col items-center justify-center";
           if (toggleFull) toggleFull.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center";
+          if (arrangementBadge) arrangementBadge.innerText = "50% Earnest Downpayment";
+          if (escrowInfoBanner) {
+            escrowInfoBanner.innerHTML = `<span class="material-symbols-outlined text-[16px] text-primary">verified_user</span> <strong>50% earnest down payment</strong> reserves sustainable Candaba lumber &amp; initiates master joinery. Remaining 50% paid on home delivery inspection.`;
+          }
+          if (agreementTermsText) {
+            agreementTermsText.innerHTML = `I confirm that I have reviewed and agree to the <a href="legal.html#terms" target="_blank" class="underline text-primary font-bold hover:text-primary-container">Terms and Conditions</a>, acknowledging that custom furniture orders require a 50% non-refundable earnest deposit to secure timber allocation in Pampanga under RA 8792.`;
+          }
         } else {
+          // full
           if (toggleFull) toggleFull.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-primary-container text-on-primary-container shadow-sm flex flex-col items-center justify-center";
           if (toggleFifty) toggleFifty.className = "py-2.5 px-3 rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center";
+          if (arrangementBadge) arrangementBadge.innerText = "100% Full Payment";
+          if (escrowInfoBanner) {
+            escrowInfoBanner.innerHTML = `<span class="material-symbols-outlined text-[16px] text-primary">workspace_premium</span> <strong>100% Full Payment</strong> includes free Candaba Botanical Wax Polish &amp; Care Kit + priority workshop bench queue.`;
+          }
+          if (agreementTermsText) {
+            agreementTermsText.innerHTML = `I confirm that I have reviewed and agree to the <a href="legal.html#terms" target="_blank" class="underline text-primary font-bold hover:text-primary-container">Terms and Conditions</a> for 100% full upfront payment and priority Candaba workshop dispatch under RA 8792.`;
+          }
         }
       }
 
@@ -2024,9 +2131,8 @@
 
       if (mode === 'cod' && basePrice > 5000) {
         if (typeof window.showEcoHavenToast === 'function') {
-          window.showEcoHavenToast("⚠️ Bespoke orders above ₱5,000 require down payment before workshop allocation. Cash on Delivery is not available.", "warning");
+          window.showEcoHavenToast("ℹ️ Cash on Delivery selected (₱0.00 Due Today). 100% balance will be collected upon doorstep inspection.", "info");
         }
-        mode = 'fifty';
       }
 
       paymentMode = mode;
@@ -2205,15 +2311,6 @@
       });
 
       if (val === 'cod') {
-        if (basePrice > 5000) {
-          if (typeof window.showEcoHavenToast === 'function') {
-            window.showEcoHavenToast("⚠️ Orders above ₱5,000 require down payment. Cash on Delivery is not available.", "warning");
-          }
-          selectedGateway = 'gcash';
-          const gcashRadio = document.querySelector('input[name="payment_method"][value="gcash"]');
-          if (gcashRadio) gcashRadio.checked = true;
-          return;
-        }
         if (paymentMode !== 'cod') {
           paymentMode = 'cod';
           recalculate();
@@ -2310,15 +2407,9 @@
         return;
       }
 
-      // 1.5. Validate Mandatory Downpayment for Orders > ₱5,000
-      if (basePrice > 5000 && (paymentMode === 'cod' || selectedGateway === 'cod')) {
-        if (typeof window.showEcoHavenToast === 'function') {
-          window.showEcoHavenToast("⚠️ Orders above ₱5,000 require down payment. Cash on Delivery is unavailable.", "error");
-        } else {
-          alert("⚠️ Orders above ₱5,000 require down payment. Cash on Delivery is unavailable.");
-        }
-        setPaymentMode('fifty');
-        return false;
+      // 1.5. COD Orders Gate: Allowed for all order values
+      if (paymentMode === 'cod' || selectedGateway === 'cod') {
+        // Enforce zero upfront payment
       }
 
       // 2. Sync phone number into all simulator stages before launch
@@ -2683,26 +2774,26 @@
       }
       closeGCashModal();
       
-      const name = document.getElementById('customerNameInput') ? document.getElementById('customerNameInput').value : "Juan Dela Cruz";
-      const phone = document.getElementById('customerPhoneInput') ? document.getElementById('customerPhoneInput').value : "+63 917 555 1234";
-      const email = document.getElementById('customerEmailInput') ? document.getElementById('customerEmailInput').value : "juan.delacruz@email.ph";
-      const address = document.getElementById('customerAddressInput') ? document.getElementById('customerAddressInput').value : "Lot 14 Blk 5, Mahogany Hills, Angeles City, Pampanga, 2009";
+      const name = (document.getElementById('customerNameInput')?.value || "").trim() || "Guest Customer";
+      const phone = (document.getElementById('customerPhoneInput')?.value || "").trim() || "+63 917 555 1234";
+      const email = (document.getElementById('customerEmailInput')?.value || "").trim() || "customer@example.ph";
+      syncSynthesizedAddress();
+      let address = (document.getElementById('customerAddressInput')?.value || "").trim();
+      if (!address) {
+        const streetVal = (document.getElementById('addrStreetInput')?.value || "").trim();
+        const brgyVal = (document.getElementById('addrBarangaySelect')?.value || "").trim();
+        const cityVal = (document.getElementById('addrCitySelect')?.value || "").trim();
+        const provVal = (document.getElementById('addrProvinceSelect')?.value || "").trim();
+        const zipVal = (document.getElementById('addrZipInput')?.value || "").trim();
+        address = [streetVal, brgyVal, cityVal, provVal, zipVal, "Philippines"].filter(Boolean).join(", ");
+      }
 
       const discountVal = appliedVoucher ? Math.round(basePrice * (appliedVoucher.discountPercent / 100) * 100) / 100 : 0;
       const discountedBase = Math.max(0, basePrice - discountVal);
       const gross = discountedBase + freightCost;
       const isCodOrder = (selectedGateway === 'cod' || paymentMode === 'cod');
 
-      // Enforce: Orders > ₱5,000 cannot be COD
-      if (basePrice > 5000 && isCodOrder) {
-        if (typeof window.showEcoHavenToast === 'function') {
-          window.showEcoHavenToast("⚠️ Orders above ₱5,000 require down payment. Cash on Delivery is unavailable.", "error");
-        } else {
-          alert("⚠️ Orders above ₱5,000 require down payment. Cash on Delivery is unavailable.");
-        }
-        setPaymentMode('fifty');
-        return;
-      }
+      // COD Allowed for all orders (> ₱5,000 enters Pending Atelier Phone Verification)
 
       const isFiftyDpOrder = (paymentMode === 'fifty' && basePrice >= 2000);
       let orderStageName = "50% Down Payment Submitted (Pending Verification)";
@@ -2722,7 +2813,9 @@
         orderPaymentMode = "full";
       }
 
-      const randRef = isCodOrder ? ('COD-' + Math.floor(100000 + Math.random() * 900000)) : ("9021-" + Math.floor(1000 + Math.random() * 9000) + "-2910");
+      const randRef = isCodOrder 
+        ? ('COD-' + Math.floor(100000 + Math.random() * 900000))
+        : ("9021-" + Math.floor(1000 + Math.random() * 9000) + "-2910");
 
       const itemsToSave = (window.ecohaven && window.ecohaven.cart && window.ecohaven.cart.length > 0)
         ? window.ecohaven.cart.map(i => ({
@@ -2747,6 +2840,9 @@
         address: address,
         destinationZone: freightName,
         deliveryFee: freightCost,
+        courierName: (typeof selectedCourier !== 'undefined' && selectedCourier === 'jnt') ? 'J&T Cargo (Heavy Crating)' : ((typeof selectedCourier !== 'undefined' && selectedCourier === 'flash') ? 'Flash Express (Flash Cargo)' : 'EcoHaven Workshop White-Glove Van'),
+        courierTracking: (typeof selectedCourier !== 'undefined' && selectedCourier === 'jnt') ? ('JNT-PH-' + Math.floor(100000 + Math.random() * 900000)) : ((typeof selectedCourier !== 'undefined' && selectedCourier === 'flash') ? ('FEX-PH-' + Math.floor(100000 + Math.random() * 900000)) : 'EH-FLEET-CBD4821'),
+        courierPartner: (typeof selectedCourier !== 'undefined') ? selectedCourier : 'van',
         stage: 1,
         stageName: orderStageName,
         orderStatus: "Pending Review",
@@ -2766,10 +2862,11 @@
       };
 
       
-      // If user typed a new address or checked save as default
+      // If logged-in user typed a new address or has 0 saved addresses and checked save as default
       const selectVal = document.getElementById('savedAddressSelect')?.value;
       const saveAsDefaultChecked = document.getElementById('saveAddressAsDefaultCheckbox')?.checked;
-      if ((selectVal === 'new' || saveAsDefaultChecked) && window.ecohaven && window.ecohaven.saveOrUpdateAddress) {
+      const existingAddrs = (window.ecohaven && window.ecohaven.getAddresses) ? window.ecohaven.getAddresses() : [];
+      if (localStorage.getItem('ecohaven_user') && (selectVal === 'new' || existingAddrs.length === 0) && saveAsDefaultChecked && window.ecohaven && window.ecohaven.saveOrUpdateAddress && address) {
         window.ecohaven.saveOrUpdateAddress({
           label: 'Saved Address (' + (address.split(',')[1] || 'Residence').trim() + ')',
           recipientName: name,
@@ -2873,6 +2970,7 @@
       renderCheckoutItems();
       initRegionDropdowns();
       renderSavedAddressesDropdown();
+      if (typeof renderCourierVehicleSVG === 'function') renderCourierVehicleSVG('van');
       if (typeof initCheckoutVoucher === 'function') initCheckoutVoucher();
       recalculate();
     }
@@ -2891,8 +2989,695 @@
 <script src="../js/firebase-config.js"></script>
 <script src="../js/store.js"></script>
   <script src="../assets/simulated-comms.js"></script>
+  <script src="../assets/chat-widget.js"></script>
+  <script src="../assets/reviews-modal.js"></script>
   <script src="../assets/notifications.js"></script>
   <script src="../assets/auth-modal.js"></script>
   <script src="../assets/animations.js"></script>
+  <script>
+    // ==========================================================
+    // COURIER & LOGISTICS PARTNER HANDLER & ANIMATED VEHICLE DOCK
+    // ==========================================================
+    window.selectedCourier = 'van';
+
+    const COURIER_META = {
+      van: {
+        name: "EcoHaven Workshop White-Glove Van",
+        trackingPrefix: "EH-FLEET-CBD4821",
+        driverName: "Mang Ronaldo (Master Craftsman & Driver)",
+        badge: "PLATE: CBD 4821",
+        desc: "Mang Ronaldo • Candaba Workshop Driver • Assembled inside your room",
+        eta: "EST: 24-48h",
+        image: "../assets/images/pod/pod-workshop-van.jpg",
+        modalTitle: "EcoHaven Workshop White-Glove Fleet",
+        modalDesc: "Our workshop master <strong>Mang Ronaldo</strong> arrives wearing his artisan canvas apron and driving the Candaba workshop truck (CBD 4821). He safely delivers, unboxes, and arranges the solid hardwood piece inside your room before capturing a digital proof of delivery."
+      },
+      jnt: {
+        name: "J&T Cargo (Heavy Crating)",
+        trackingPrefix: "JNT-PH-",
+        driverName: "J&T Express Logistics Personnel",
+        badge: "J&T CARGO • CRATED",
+        desc: "J&T Courier in official Red Uniform • Doorstep Heavy Crating Handover",
+        eta: "EST: 2-3 Days",
+        image: "../assets/images/pod/pod-jnt-cargo.jpg",
+        modalTitle: "J&T Cargo Heavy Freight Delivery",
+        modalDesc: "A verified <strong>J&T Express Courier</strong> in the signature red-and-white uniform arrives at your doorstep with heavy crated furniture packaging, scans the waybill barcode with their official handheld device, and collects doorstep COD."
+      },
+      flash: {
+        name: "Flash Express (Flash Cargo)",
+        trackingPrefix: "FEX-PH-",
+        driverName: "Flash Express Regional Courier",
+        badge: "FLASH EXP • RAPID",
+        desc: "Flash Express Courier in official Yellow Uniform • Regional Bulky Dispatch",
+        eta: "EST: 1-2 Days",
+        image: "../assets/images/pod/pod-flash-express.jpg",
+        modalTitle: "Flash Express Cargo Regional Logistics",
+        modalDesc: "A certified <strong>Flash Express Personnel</strong> in the official yellow-and-black uniform brings your heavy strapped cargo package, verifies recipient identity on their mobile terminal, and captures proof of delivery."
+      }
+    };
+
+    function renderCourierVehicleSVG(type = 'van') {
+      const stage = document.getElementById('courierVehicleStage');
+      if (!stage) return;
+
+      if (type === 'jnt') {
+        // Red J&T Express Delivery Truck
+        stage.innerHTML = `
+          <div class="flex items-center gap-2 animate-drive-in">
+            <!-- J&T Red Truck Body SVG -->
+            <svg class="w-36 h-16 drop-shadow-md" viewBox="0 0 160 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Cargo Bed (Red) -->
+              <rect x="10" y="10" width="95" height="42" rx="4" fill="#ED1C24"/>
+              <rect x="15" y="15" width="85" height="32" rx="2" fill="#D61820" opacity="0.4"/>
+              <!-- J&T Logo Text -->
+              <text x="57" y="36" fill="#FFFFFF" font-size="16" font-weight="900" font-family="sans-serif" text-anchor="middle" letter-spacing="1">J&amp;T</text>
+              <text x="57" y="45" fill="#FFFFFF" font-size="7" font-weight="700" font-family="sans-serif" text-anchor="middle" letter-spacing="2">CARGO</text>
+              <!-- Wooden Crate in Cargo Graphic -->
+              <rect x="20" y="20" width="18" height="18" rx="2" fill="#C48849" stroke="#8C531B" stroke-width="1.5"/>
+              <line x1="20" y1="20" x2="38" y2="38" stroke="#8C531B" stroke-width="1"/>
+              <!-- Cabin (Red & White) -->
+              <path d="M105 24H128L144 38V52H105V24Z" fill="#ED1C24"/>
+              <path d="M126 28L138 38H110V28H126Z" fill="#FFFFFF" opacity="0.9"/>
+              <!-- Headlight & Grille -->
+              <rect x="141" y="44" width="3" height="5" rx="1" fill="#FFE500"/>
+              <line x1="144" y1="46" x2="158" y2="46" stroke="#FFE500" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 3"/>
+              <rect x="135" y="45" width="9" height="7" fill="#222222"/>
+              <!-- Wheels with Hubcaps -->
+              <circle cx="35" cy="54" r="10" fill="#1C1C1C"/>
+              <circle cx="35" cy="54" r="5" fill="#EEEEEE"/>
+              <circle cx="85" cy="54" r="10" fill="#1C1C1C"/>
+              <circle cx="85" cy="54" r="5" fill="#EEEEEE"/>
+              <circle cx="125" cy="54" r="10" fill="#1C1C1C"/>
+              <circle cx="125" cy="54" r="5" fill="#EEEEEE"/>
+            </svg>
+            <div class="hidden sm:flex flex-col text-left">
+              <span class="text-[10px] font-black uppercase tracking-wider text-red-600 bg-red-100 px-1.5 py-0.5 rounded w-max">J&amp;T EXPRESS</span>
+              <span class="text-xs font-bold text-on-surface mt-0.5">Heavy Crating Van</span>
+            </div>
+          </div>
+        `;
+      } else if (type === 'flash') {
+        // Yellow Flash Express Truck
+        stage.innerHTML = `
+          <div class="flex items-center gap-2 animate-drive-in">
+            <!-- Flash Yellow Truck Body SVG -->
+            <svg class="w-36 h-16 drop-shadow-md" viewBox="0 0 160 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Cargo Bed (Yellow) -->
+              <rect x="10" y="10" width="95" height="42" rx="4" fill="#FFD100"/>
+              <rect x="15" y="15" width="85" height="32" rx="2" fill="#E6BC00" opacity="0.4"/>
+              <!-- Flash Lightning Logo -->
+              <path d="M54 18L44 33H55L48 46L63 31H52L58 18H54Z" fill="#111111"/>
+              <text x="75" y="37" fill="#111111" font-size="11" font-weight="900" font-family="sans-serif">FLASH</text>
+              <!-- Cabin (Yellow & Black) -->
+              <path d="M105 24H128L144 38V52H105V24Z" fill="#FFD100"/>
+              <path d="M126 28L138 38H110V28H126Z" fill="#111111" opacity="0.85"/>
+              <!-- Headlight -->
+              <rect x="141" y="44" width="3" height="5" rx="1" fill="#FFFFFF"/>
+              <line x1="144" y1="46" x2="158" y2="46" stroke="#FFE500" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 3"/>
+              <!-- Wheels -->
+              <circle cx="35" cy="54" r="10" fill="#1C1C1C"/>
+              <circle cx="35" cy="54" r="5" fill="#FFD100"/>
+              <circle cx="85" cy="54" r="10" fill="#1C1C1C"/>
+              <circle cx="85" cy="54" r="5" fill="#FFD100"/>
+              <circle cx="125" cy="54" r="10" fill="#1C1C1C"/>
+              <circle cx="125" cy="54" r="5" fill="#FFD100"/>
+            </svg>
+            <div class="hidden sm:flex flex-col text-left">
+              <span class="text-[10px] font-black uppercase tracking-wider text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded w-max">FLASH CARGO</span>
+              <span class="text-xs font-bold text-on-surface mt-0.5">Rapid Express Van</span>
+            </div>
+          </div>
+        `;
+      } else {
+        // EcoHaven White-Glove Workshop Van (Puting Candaba Atelier Truck)
+        stage.innerHTML = `
+          <div class="flex items-center gap-2 animate-drive-in">
+            <!-- White/Cream Atelier Van SVG -->
+            <svg class="w-36 h-16 drop-shadow-md" viewBox="0 0 160 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Cargo Bed (Puting Canvas & Solid Wood Accent) -->
+              <rect x="10" y="10" width="95" height="42" rx="4" fill="#FDFBF7" stroke="#E6DDCF" stroke-width="1.5"/>
+              <!-- Natural Mahogany Woodgrain Side Stripe -->
+              <rect x="10" y="32" width="95" height="7" fill="#86450D"/>
+              <!-- EcoHaven Leaf & Stencil -->
+              <text x="57" y="26" fill="#4E6B4F" font-size="10" font-weight="800" font-family="serif" text-anchor="middle">EcoHaven</text>
+              <text x="57" y="47" fill="#665E55" font-size="6" font-weight="700" font-family="sans-serif" text-anchor="middle" letter-spacing="1">CANDABA ATELIER • CBD 4821</text>
+              <!-- Cabin (Clean White) -->
+              <path d="M105 24H128L144 38V52H105V24Z" fill="#FDFBF7" stroke="#E6DDCF" stroke-width="1.5"/>
+              <path d="M126 28L138 38H110V28H126Z" fill="#3E5466" opacity="0.75"/>
+              <!-- Headlight & Chrome Bumper -->
+              <rect x="142" y="44" width="3" height="5" rx="1" fill="#FFEAA7"/>
+              <line x1="144" y1="46" x2="158" y2="46" stroke="#FFEAA7" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 3"/>
+              <rect x="135" y="48" width="10" height="4" fill="#A8A29E"/>
+              <!-- Wheels with Silver Rims -->
+              <circle cx="35" cy="54" r="10" fill="#292524"/>
+              <circle cx="35" cy="54" r="5" fill="#E7E5E4"/>
+              <circle cx="85" cy="54" r="10" fill="#292524"/>
+              <circle cx="85" cy="54" r="5" fill="#E7E5E4"/>
+              <circle cx="125" cy="54" r="10" fill="#292524"/>
+              <circle cx="125" cy="54" r="5" fill="#E7E5E4"/>
+            </svg>
+            <div class="hidden sm:flex flex-col text-left">
+              <span class="text-[10px] font-black uppercase tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded w-max">ATELIER FLEET</span>
+              <span class="text-xs font-bold text-on-surface mt-0.5">White-Glove Van</span>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function onCourierChange(type) {
+      window.selectedCourier = type;
+      const meta = COURIER_META[type] || COURIER_META['van'];
+
+      const cardVan = document.getElementById('carrierCardVan');
+      const cardJnt = document.getElementById('carrierCardJnt');
+      const cardFlash = document.getElementById('carrierCardFlash');
+
+      if (cardVan) {
+        cardVan.className = type === 'van' 
+          ? "relative flex flex-col p-3 rounded-xl border-2 border-primary bg-primary/5 cursor-pointer transition-all shadow-xs"
+          : "relative flex flex-col p-3 rounded-xl border border-outline-variant/30 hover:border-primary/40 bg-surface-container-lowest cursor-pointer transition-all shadow-xs";
+      }
+      if (cardJnt) {
+        cardJnt.className = type === 'jnt'
+          ? "relative flex flex-col p-3 rounded-xl border-2 border-red-600 bg-red-500/5 cursor-pointer transition-all shadow-xs"
+          : "relative flex flex-col p-3 rounded-xl border border-outline-variant/30 hover:border-red-500/40 bg-surface-container-lowest cursor-pointer transition-all shadow-xs";
+      }
+      if (cardFlash) {
+        cardFlash.className = type === 'flash'
+          ? "relative flex flex-col p-3 rounded-xl border-2 border-amber-500 bg-amber-500/5 cursor-pointer transition-all shadow-xs"
+          : "relative flex flex-col p-3 rounded-xl border border-outline-variant/30 hover:border-amber-500/40 bg-surface-container-lowest cursor-pointer transition-all shadow-xs";
+      }
+
+      // Update Animated Vehicle Dock
+      renderCourierVehicleSVG(type);
+
+      const dockStatus = document.getElementById('courierDockStatus');
+      const dockBadge = document.getElementById('courierDockBadge');
+      const dockDesc = document.getElementById('courierDockDesc');
+      const dockEta = document.getElementById('courierDockEta');
+      const thumbImg = document.getElementById('courierPodThumbImg');
+
+      if (dockStatus) dockStatus.innerText = `${meta.name} Active`;
+      if (dockBadge) dockBadge.innerText = meta.badge;
+      if (dockDesc) dockDesc.innerText = meta.desc;
+      if (dockEta) dockEta.innerText = meta.eta;
+      if (thumbImg) thumbImg.src = meta.image;
+
+      if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast(`Logistics partner set to ${meta.name}`, "info");
+      }
+    }
+
+    function openPodPreviewModal() {
+      const type = window.selectedCourier || 'van';
+      const meta = COURIER_META[type] || COURIER_META['van'];
+      const modal = document.getElementById('podPreviewModal');
+      if (!modal) return;
+
+      const title = document.getElementById('podModalTitle');
+      const desc = document.getElementById('podModalDescription');
+      const img = document.getElementById('podModalImg');
+      const serial = document.getElementById('podModalSerialText');
+
+      if (title) title.innerText = meta.modalTitle;
+      if (desc) desc.innerHTML = meta.modalDesc;
+      if (img) img.src = meta.image;
+      if (serial) serial.innerText = meta.badge;
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closePodPreviewModal() {
+      const modal = document.getElementById('podPreviewModal');
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // ==========================================================
+    // PERSONAL ADDRESS LIST & IN-CHECKOUT MANAGER (Item #3)
+    // ==========================================================
+    function selectPresetAddress(id) {
+      const list = (window.ecohaven && typeof window.ecohaven.getAddresses === 'function')
+        ? window.ecohaven.getAddresses()
+        : [];
+      const addr = list.find(a => a.id === id);
+      if (!addr) return;
+
+      document.querySelectorAll('[id^="presetCard_"]').forEach(card => {
+        if (card.id === 'presetCard_' + id) {
+          card.className = "p-2.5 rounded-xl border-2 border-primary bg-primary/5 cursor-pointer transition-all flex flex-col justify-between shadow-xs";
+        } else {
+          card.className = "p-2.5 rounded-xl border border-outline-variant/30 hover:border-primary/40 bg-surface-container-lowest cursor-pointer transition-all flex flex-col justify-between shadow-xs";
+        }
+      });
+
+      const nameInp = document.getElementById('customerNameInput');
+      const phoneInp = document.getElementById('customerPhoneInput');
+      const streetInp = document.getElementById('addrStreetInput');
+      const zipInp = document.getElementById('addrZipInput');
+      const provSelect = document.getElementById('addrProvinceSelect');
+
+      if (nameInp) nameInp.value = addr.recipientName || '';
+      if (phoneInp) phoneInp.value = addr.phone || '';
+      if (streetInp) streetInp.value = addr.street || '';
+      if (zipInp) zipInp.value = addr.zipCode || '';
+
+      if (provSelect) {
+        provSelect.value = addr.province;
+        onProvinceChange(addr.province);
+        setTimeout(() => {
+          const citySelect = document.getElementById('addrCitySelect');
+          if (citySelect) {
+            citySelect.value = addr.city;
+            onCityChange(addr.city);
+            setTimeout(() => {
+              const brgySelect = document.getElementById('addrBarangaySelect');
+              if (brgySelect) brgySelect.value = addr.barangay;
+              syncSynthesizedAddress();
+            }, 80);
+          }
+        }, 80);
+      }
+
+      if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast(`📍 Selected ${addr.label}: ${addr.city}, ${addr.province}`, 'info');
+      }
+    }
+
+    function openCheckoutAddressListModal() {
+      const modal = document.getElementById('checkoutAddressListModal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      renderCheckoutAddressModalList();
+      toggleAddNewAddressForm(false);
+    }
+
+    function closeCheckoutAddressListModal() {
+      const modal = document.getElementById('checkoutAddressListModal');
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function renderCheckoutAddressModalList() {
+      const container = document.getElementById('checkoutSavedAddressesListContainer');
+      if (!container) return;
+
+      const userStr = localStorage.getItem('ecohaven_user');
+      let currentUser = null;
+      try {
+        if (userStr) currentUser = JSON.parse(userStr);
+      } catch(e) {}
+
+      if (!currentUser) {
+        container.innerHTML = `
+          <div class="p-6 text-center text-xs text-on-surface-variant bg-surface-container-low rounded-xl border border-dashed border-outline-variant/40">
+            <span class="material-symbols-outlined text-outline text-[32px] block mb-2">account_circle</span>
+            <p class="font-bold text-on-surface mb-1">Guest Customer Checkout</p>
+            <p class="mb-3 text-[11px]">Guest customers enter their personal delivery destination directly on the checkout form. To save multiple addresses and enjoy 1-click checkout, please log in or create an account.</p>
+            <div class="flex items-center justify-center gap-2">
+              <button type="button" onclick="closeCheckoutAddressListModal(); openAuthModal('signin');" class="px-3.5 py-1.5 rounded-lg bg-surface-container text-on-surface text-xs font-bold hover:bg-surface-variant shadow-xs">
+                Log In
+              </button>
+              <button type="button" onclick="closeCheckoutAddressListModal(); openAuthModal('register');" class="px-3.5 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-container hover:text-on-primary-container shadow-xs">
+                Register Account
+              </button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const addresses = (window.ecohaven && typeof window.ecohaven.getAddresses === 'function')
+        ? window.ecohaven.getAddresses()
+        : [];
+
+      if (!addresses || addresses.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 text-center text-xs text-on-surface-variant bg-surface-container-low rounded-xl border border-dashed border-outline-variant/40">
+            <span class="material-symbols-outlined text-outline text-[32px] block mb-2">location_off</span>
+            <p class="font-bold text-on-surface mb-1">No Saved Personal Addresses Yet</p>
+            <p class="mb-3 text-[11px]">Click "Add Address" above to save your home, office, or personal delivery destination to your account.</p>
+            <button type="button" onclick="toggleAddNewAddressForm(true)" class="px-3.5 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-container hover:text-on-primary-container shadow-xs">
+              + Add Your First Address
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      addresses.forEach(addr => {
+        const isDef = addr.isDefault ? '<span class="text-[9px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded">Default</span>' : '';
+        const fullAddrStr = addr.fullAddress || addr.address || `${addr.street || ''}, ${addr.barangay || ''}, ${addr.city || ''}, ${addr.province || ''} ${addr.zipCode || ''}`;
+        
+        html += `
+          <div class="p-3.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest hover:border-primary/50 transition-all flex flex-col gap-2 shadow-xs group">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-on-surface uppercase tracking-wider bg-surface-container px-2 py-0.5 rounded">${addr.label || 'Address'}</span>
+                ${isDef}
+                <span class="text-xs font-semibold text-on-surface">${addr.recipientName || ''}</span>
+              </div>
+              <button type="button" onclick="deletePersonalAddressFromCheckout('${addr.id}', event)" class="p-1 rounded-md text-outline hover:text-error hover:bg-error/10 transition-colors" title="Delete this address">
+                <span class="material-symbols-outlined text-[16px]">delete</span>
+              </button>
+            </div>
+            <p class="text-xs text-on-surface-variant font-medium leading-relaxed">${fullAddrStr}</p>
+            <div class="flex items-center justify-between pt-1 border-t border-outline-variant/15 text-[11px]">
+              <span class="font-mono text-outline">${addr.phone || ''}</span>
+              <button type="button" onclick="selectCheckoutAddress('${addr.id}')" class="px-3 py-1 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-container hover:text-on-primary-container transition-all shadow-xs flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">check</span>
+                Deliver Here
+              </button>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function selectCheckoutAddress(addrId) {
+      if (!addrId || !window.ecohaven) return;
+      const addresses = window.ecohaven.getAddresses() || [];
+      const target = addresses.find(a => a.id === addrId);
+      if (!target) return;
+
+      applyAddressToInputs(target);
+      updateActiveAddressCardDisplay(target);
+      closeCheckoutAddressListModal();
+
+      if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast(`Delivery set to ${target.label} (${target.recipientName})`, "success");
+      }
+    }
+
+    function deletePersonalAddressFromCheckout(addrId, event) {
+      if (event) event.stopPropagation();
+      if (!addrId || !window.ecohaven) return;
+      if (!confirm("Are you sure you want to delete this delivery address?")) return;
+
+      window.ecohaven.deleteAddress(addrId);
+      renderCheckoutAddressModalList();
+      renderSavedAddressesDropdown();
+    }
+
+    function toggleAddNewAddressForm(forceShow) {
+      const formContainer = document.getElementById('checkoutNewAddressFormContainer');
+      if (!formContainer) return;
+
+      const isHidden = formContainer.classList.contains('hidden');
+      const show = forceShow !== undefined ? forceShow : isHidden;
+
+      if (show) {
+        formContainer.classList.remove('hidden');
+        populateModalProvinceDropdown();
+        // Prefill user details if available
+        const userStr = localStorage.getItem('ecohaven_user');
+        try {
+          if (userStr) {
+            const u = JSON.parse(userStr);
+            const nameInp = document.getElementById('modalNewAddrName');
+            const phoneInp = document.getElementById('modalNewAddrPhone');
+            if (nameInp && !nameInp.value) nameInp.value = u.displayName || u.fullName || '';
+            if (phoneInp && !phoneInp.value) phoneInp.value = u.phone || '';
+          }
+        } catch(e) {}
+      } else {
+        formContainer.classList.add('hidden');
+      }
+    }
+
+    function populateModalProvinceDropdown() {
+      const pSelect = document.getElementById('modalNewAddrProvince');
+      if (!pSelect || pSelect.options.length > 0) return;
+
+      const regions = window.PHILIPPINE_LOGISTICS_REGIONS || (typeof PHILIPPINE_LOGISTICS_REGIONS !== 'undefined' ? PHILIPPINE_LOGISTICS_REGIONS : null);
+      if (regions) {
+        let opts = '';
+        Object.keys(regions).forEach(prov => {
+          opts += `<option value="${prov}">${prov}</option>`;
+        });
+        pSelect.innerHTML = opts;
+        onModalProvinceChange(pSelect.value);
+      }
+    }
+
+    function onModalProvinceChange(prov) {
+      const cSelect = document.getElementById('modalNewAddrCity');
+      if (!cSelect) return;
+
+      const regions = window.PHILIPPINE_LOGISTICS_REGIONS || (typeof PHILIPPINE_LOGISTICS_REGIONS !== 'undefined' ? PHILIPPINE_LOGISTICS_REGIONS : null);
+      if (regions && regions[prov]) {
+        let opts = '';
+        (regions[prov].cities || []).forEach(cityObj => {
+          const cName = typeof cityObj === 'string' ? cityObj : cityObj.name;
+          opts += `<option value="${cName}">${cName}</option>`;
+        });
+        cSelect.innerHTML = opts;
+        onModalCityChange(cSelect.value);
+      }
+    }
+
+    function onModalCityChange(city) {
+      const bSelect = document.getElementById('modalNewAddrBarangay');
+      const zipInp = document.getElementById('modalNewAddrZip');
+      const pSelect = document.getElementById('modalNewAddrProvince');
+      if (!bSelect || !pSelect) return;
+
+      const prov = pSelect.value;
+      const regions = window.PHILIPPINE_LOGISTICS_REGIONS || (typeof PHILIPPINE_LOGISTICS_REGIONS !== 'undefined' ? PHILIPPINE_LOGISTICS_REGIONS : null);
+      if (regions && regions[prov]) {
+        const cities = regions[prov].cities || [];
+        const cityObj = Array.isArray(cities)
+          ? (cities.find(c => c.name === city) || cities[0])
+          : cities[city];
+        if (cityObj) {
+          let opts = '';
+          (cityObj.barangays || []).forEach(b => {
+            opts += `<option value="${b}">${b}</option>`;
+          });
+          bSelect.innerHTML = opts;
+          if (zipInp) zipInp.value = cityObj.defaultZip || cityObj.zipCode || '';
+        }
+      }
+    }
+
+    function saveNewPersonalAddressFromModal() {
+      const label = document.getElementById('modalNewAddrLabel')?.value.trim() || 'Home';
+      const recipient = document.getElementById('modalNewAddrName')?.value.trim();
+      const phone = document.getElementById('modalNewAddrPhone')?.value.trim();
+      const prov = document.getElementById('modalNewAddrProvince')?.value;
+      const city = document.getElementById('modalNewAddrCity')?.value;
+      const brgy = document.getElementById('modalNewAddrBarangay')?.value;
+      const zip = document.getElementById('modalNewAddrZip')?.value.trim();
+      const street = document.getElementById('modalNewAddrStreet')?.value.trim();
+      const isDef = document.getElementById('modalNewAddrDefault')?.checked || false;
+
+      if (!recipient || !phone || !street) {
+        alert("Please provide recipient name, mobile number, and street details.");
+        return;
+      }
+
+      const fullAddr = `${street}, ${brgy}, ${city}, ${prov}, ${zip || ''}, Philippines`;
+
+      const saveFn = window.ecohaven && (window.ecohaven.saveOrUpdateAddress || window.ecohaven.saveAddress);
+      if (typeof saveFn === 'function') {
+        const newId = saveFn.call(window.ecohaven, {
+          label: label,
+          recipientName: recipient,
+          phone: phone,
+          street: street,
+          barangay: brgy,
+          city: city,
+          province: prov,
+          zipCode: zip,
+          address: fullAddr,
+          fullAddress: fullAddr,
+          isDefault: isDef
+        });
+
+        renderSavedAddressesDropdown();
+        renderCheckoutAddressModalList();
+        // Immediately select this address
+        selectCheckoutAddress(newId);
+        toggleAddNewAddressForm(false);
+      }
+    }
+
+    function updateActiveAddressCardDisplay(addr) {
+      const card = document.getElementById('activeAddressCard');
+      const label = document.getElementById('activeAddressLabel');
+      const recipient = document.getElementById('activeAddressRecipient');
+      const text = document.getElementById('activeAddressText');
+      const phone = document.getElementById('activeAddressPhone');
+      const btnManage = document.getElementById('btnManageAddresses');
+      const countSpan = document.getElementById('savedAddressCount');
+
+      if (!card) return;
+
+      const addresses = (window.ecohaven && typeof window.ecohaven.getAddresses === 'function')
+        ? window.ecohaven.getAddresses()
+        : [];
+
+      const isUserLoggedIn = !!localStorage.getItem('ecohaven_user');
+      if (countSpan) countSpan.innerText = addresses.length;
+      if (btnManage) btnManage.classList.toggle('hidden', !isUserLoggedIn);
+
+      if (addr) {
+        card.style.display = 'flex';
+        card.classList.remove('hidden');
+        if (label) label.innerText = addr.label || 'Home';
+        if (recipient) recipient.innerText = addr.recipientName || '';
+        if (text) text.innerText = addr.fullAddress || addr.address || `${addr.street || ''}, ${addr.city || ''}`;
+        if (phone) phone.innerText = addr.phone || '';
+      } else {
+        card.style.display = 'none';
+        card.classList.add('hidden');
+      }
+    }
+
+</script>
+
+<!-- CHECKOUT PERSONAL ADDRESS LIST & MANAGER MODAL (Item #3) -->
+<div id="checkoutAddressListModal" class="fixed inset-0 z-50 bg-black/45 backdrop-blur-[3px] hidden items-center justify-center p-4 transition-all">
+  <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-5 sm:p-6 w-full max-w-lg shadow-2xl relative max-h-[90vh] flex flex-col">
+    <!-- Close Button -->
+    <button type="button" onclick="closeCheckoutAddressListModal()" class="absolute right-4 top-4 p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors">
+      <span class="material-symbols-outlined text-[20px]">close</span>
+    </button>
+
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between border-b border-outline-variant/20 pb-3 mb-4">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[24px]">pin_drop</span>
+        <div>
+          <h3 class="text-base font-bold text-on-surface">My Personal Addresses</h3>
+          <p class="text-xs text-on-surface-variant">Select, add, or delete personal delivery addresses</p>
+        </div>
+      </div>
+      <button type="button" onclick="toggleAddNewAddressForm()" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-container hover:text-on-primary-container transition-all flex items-center gap-1 shadow-xs">
+        <span class="material-symbols-outlined text-[16px]">add</span>
+        <span>Add Address</span>
+      </button>
+    </div>
+
+    <!-- Inline Add New Address Form (Hidden by default) -->
+    <div id="checkoutNewAddressFormContainer" class="hidden mb-4 p-3.5 rounded-xl bg-surface-container-low border border-primary/30 flex-shrink-0 space-y-2.5">
+      <div class="flex items-center justify-between border-b border-outline-variant/20 pb-2">
+        <span class="text-xs font-bold text-primary flex items-center gap-1">
+          <span class="material-symbols-outlined text-[16px]">add_location</span>
+          Add New Personal Address
+        </span>
+        <button type="button" onclick="toggleAddNewAddressForm(false)" class="text-[11px] font-bold text-outline hover:text-on-surface">Cancel</button>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block text-[10px] font-bold text-on-surface mb-0.5">Label (e.g. Home, Office)</label>
+          <input type="text" id="modalNewAddrLabel" placeholder="Home / Work / Condo" class="w-full bg-surface-container-lowest border border-outline-variant/40 p-2 rounded-lg text-xs font-medium text-on-surface outline-none focus:ring-1 focus:ring-primary"/>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-on-surface mb-0.5">Recipient Full Name</label>
+          <input type="text" id="modalNewAddrName" placeholder="Full Name" class="w-full bg-surface-container-lowest border border-outline-variant/40 p-2 rounded-lg text-xs font-medium text-on-surface outline-none focus:ring-1 focus:ring-primary"/>
+        </div>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-on-surface mb-0.5">11-Digit Philippine Mobile</label>
+        <input type="tel" id="modalNewAddrPhone" maxlength="11" placeholder="09XXXXXXXXX" class="w-full bg-surface-container-lowest border border-outline-variant/40 p-2 rounded-lg text-xs font-mono font-medium text-on-surface outline-none focus:ring-1 focus:ring-primary"/>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block text-[10px] font-bold text-on-surface mb-0.5">Province</label>
+          <select id="modalNewAddrProvince" onchange="onModalProvinceChange(this.value)" class="w-full bg-surface-container-lowest border border-outline-variant/40 p-2 rounded-lg text-xs font-medium text-on-surface outline-none cursor-pointer">
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-on-surface mb-0.5">City / Municipality</label>
+          <select id="modalNewAddrCity" onchange="onModalCityChange(this.value)" class="w-full bg-surface-container-lowest border border-outline-variant/40 p-2 rounded-lg text-xs font-medium text-on-surface outline-none cursor-pointer">
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block text-[10px] font-bold text-on-surface mb-0.5">Barangay</label>
+          <select id="modalNewAddrBarangay" class="w-full bg-surface-container-lowest border border-outline-variant/40 p-2 rounded-lg text-xs font-medium text-on-surface outline-none cursor-pointer">
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-on-surface mb-0.5">Postal / ZIP Code</label>
+          <input type="text" id="modalNewAddrZip" placeholder="ZIP Code" class="w-full bg-surface-container-lowest border border-outline-variant/40 p-2 rounded-lg text-xs font-mono font-medium text-on-surface outline-none focus:ring-1 focus:ring-primary"/>
+        </div>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-on-surface mb-0.5">Street Address (House No., Street, Subd.)</label>
+        <input type="text" id="modalNewAddrStreet" placeholder="House/Unit No., Street Name, Subdivision" class="w-full bg-surface-container-lowest border border-outline-variant/40 p-2 rounded-lg text-xs font-medium text-on-surface outline-none focus:ring-1 focus:ring-primary"/>
+      </div>
+      <div class="flex items-center justify-between pt-1">
+        <label class="flex items-center gap-1.5 text-xs text-on-surface cursor-pointer">
+          <input type="checkbox" id="modalNewAddrDefault" class="accent-primary"/>
+          <span>Set as default delivery address</span>
+        </label>
+        <button type="button" onclick="saveNewPersonalAddressFromModal()" class="px-3.5 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-container hover:text-on-primary-container transition-all shadow-sm">
+          Save &amp; Deliver Here
+        </button>
+      </div>
+    </div>
+
+    <!-- Scrollable Address Cards List -->
+    <div id="checkoutSavedAddressesListContainer" class="flex-1 overflow-y-auto space-y-2.5 pr-1">
+      <!-- Dynamically populated via renderCheckoutAddressModalList() -->
+    </div>
+  </div>
+</div>
+
+
+<!-- COURIER UNIFORM & PROOF OF DELIVERY PREVIEW LIGHTBOX -->
+<div id="podPreviewModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-[3px] hidden items-center justify-center p-4 transition-all">
+  <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-5 sm:p-6 w-full max-w-md shadow-2xl relative flex flex-col">
+    <!-- Close Button -->
+    <button type="button" onclick="closePodPreviewModal()" class="absolute right-4 top-4 p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors">
+      <span class="material-symbols-outlined text-[20px]">close</span>
+    </button>
+
+    <!-- Header -->
+    <div class="flex items-center gap-2.5 mb-3 border-b border-outline-variant/20 pb-3">
+      <div id="podModalIconBadge" class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black text-sm">
+        <span class="material-symbols-outlined text-[20px]">badge</span>
+      </div>
+      <div>
+        <h3 id="podModalTitle" class="text-sm font-bold text-on-surface">EcoHaven Workshop White-Glove Fleet</h3>
+        <p id="podModalSubtitle" class="text-[11px] text-on-surface-variant">Uniformed personnel &amp; verified doorstep handover</p>
+      </div>
+    </div>
+
+    <!-- Image Display -->
+    <div class="rounded-xl overflow-hidden border border-outline-variant/30 shadow-inner aspect-[4/3] bg-surface-container mb-3 relative group">
+      <img id="podModalImg" src="../assets/images/pod/pod-workshop-van.jpg" alt="Verified Delivery Personnel" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"/>
+      <div class="absolute bottom-2 left-2 right-2 bg-black/60 backdrop-blur-md rounded-lg p-2 text-white flex items-center justify-between text-[11px]">
+        <span id="podModalBadgeText" class="font-bold flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px] text-emerald-400">verified</span>
+          <span>Verified Personnel in Official Uniform</span>
+        </span>
+        <span id="podModalSerialText" class="font-mono text-[10px] opacity-80">CBD 4821</span>
+      </div>
+    </div>
+
+    <!-- Description & Doorstep Guarantee -->
+    <div class="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/20 text-xs text-on-surface-variant leading-relaxed">
+      <p id="podModalDescription">
+        Our workshop driver <strong>Mang Ronaldo</strong> arrives in our Candaba workshop truck and wearing his artisan canvas apron. He unboxes, inspects, and assembles the solid hardwood piece inside your room before capturing a digital proof of delivery.
+      </p>
+    </div>
+
+    <button type="button" onclick="closePodPreviewModal()" class="mt-4 w-full py-2.5 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary-container hover:text-on-primary-container transition-all shadow-xs">
+      Got It, Continue to Checkout
+    </button>
+  </div>
+</div>
+
 </body>
 </html>

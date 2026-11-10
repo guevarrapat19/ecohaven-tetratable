@@ -64,6 +64,28 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
     </div>
 </div>
 
+<!-- Atelier Hub Navigation Sub-Tabs (media_1794227329507_e1842a9d.jpg & media_1794227306231_784d36fb.jpg) -->
+<div class="flex flex-wrap items-center gap-2 pb-4 mb-6 border-b border-outline-variant/30 overflow-x-auto no-scrollbar">
+    <a href="#pipeline" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-primary text-white shadow-xs flex items-center gap-2 flex-shrink-0 transition-all hover:bg-primary-container">
+        <span class="material-symbols-outlined text-[18px]">view_kanban</span>
+        <span>Order Pipeline &amp; Payment Queue</span>
+    </a>
+    <a href="#inventory" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-surface-container-low hover:bg-surface-container text-on-surface transition-all flex items-center gap-2 flex-shrink-0">
+        <span class="material-symbols-outlined text-[18px]">inventory_2</span>
+        <span>Product Catalog Manager (13)</span>
+    </a>
+    <button type="button" onclick="window.openSellerCommsModal('chat')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-secondary-container text-on-secondary-container hover:bg-secondary-fixed transition-all flex items-center gap-2 flex-shrink-0 shadow-xs active:scale-95">
+        <span class="material-symbols-outlined text-[18px]">chat</span>
+        <span>Live Chat Management</span>
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+    </button>
+    <button type="button" onclick="window.openSellerCommsModal('email')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-surface-container-low hover:bg-surface-container text-on-surface transition-all flex items-center gap-2 flex-shrink-0 shadow-xs active:scale-95">
+        <span class="material-symbols-outlined text-[18px]">mail</span>
+        <span>Customer Email Inbox</span>
+        <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-red-100 text-red-800 font-bold border border-red-200">1</span>
+    </button>
+</div>
+
 <!-- 9-Chip KPI Workshop Telemetry Row -->
 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3 mb-8">
     <div class="bg-surface-container-lowest border border-outline-variant/30 p-3 rounded-xl text-center shadow-xs">
@@ -862,8 +884,10 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
 <script src="../js/firebase-config.js"></script>
 <script src="../js/store.js"></script>
 <script src="../assets/simulated-comms.js"></script>
+<script src="../assets/reviews-modal.js"></script>
 <script src="../assets/notifications.js"></script>
 <script src="../assets/auth-modal.js"></script>
+<script src="../assets/seller-comms-hub.js"></script>
 
 <script>
 let activeVerificationOrderId = null;
@@ -1737,6 +1761,7 @@ function renderKanban() {
                         <span class="text-[10px] font-bold uppercase tracking-wider text-outline block">Delivery Destination:</span>
                         <p class="text-xs text-on-surface font-medium leading-relaxed">${ord.address || 'Candaba Workshop Direct'}</p>
                         ${ord.phone ? `<p class="text-[11px] text-on-surface-variant mt-0.5">📞 ${ord.phone}${ord.email ? ' • ' + ord.email : ''}</p>` : ''}
+                        ${ord.courierName ? `<p class="text-[11px] text-primary font-bold mt-0.5">🚚 ${ord.courierName} • Waybill: <span class="font-mono text-on-surface">${ord.courierTracking || 'N/A'}</span></p>` : ''}
                     </div>
 
                     <div class="bg-surface-container-low p-2 rounded-lg border border-outline-variant/20">
@@ -1985,8 +2010,8 @@ function renderKanban() {
                         ` : `
                             Balance Due: ₱${bal.toLocaleString('en-PH', {minimumFractionDigits: 2})}<br/>
                         `}
-                        Courier: Workshop Fleet (CBD 4821)<br/>
-                        Driver: Mang Ronaldo Santos
+                        Courier: ${ord.courierName || 'Workshop Fleet (CBD 4821)'}<br/>
+                        Waybill: ${ord.courierTracking || 'EH-FLEET-CBD4821'}
                     </div>
                     <div class="flex gap-2 pt-1">
                         <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="flex-1 py-1.5 px-2.5 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all flex items-center justify-center gap-1">
@@ -2004,6 +2029,11 @@ function renderKanban() {
                 <button type="button" onclick="toggleOrderCardDetails('${ord.orderId}', event)" class="w-full text-center py-1 my-2 text-[11px] font-semibold text-primary hover:text-primary-container flex items-center justify-center gap-1 bg-surface hover:bg-surface-container rounded-lg border border-outline-variant/30 transition-all">
                     <span class="material-symbols-outlined text-[15px]" id="toggleIcon-${ord.orderId}">${isExpanded ? 'expand_less' : 'expand_more'}</span>
                     <span id="toggleText-${ord.orderId}">${isExpanded ? 'Hide Details' : 'Show Details'}</span>
+                </button>
+
+                <button type="button" onclick="openPodInspectionModal('${ord.orderId}')" class="w-full mb-2 py-1.5 bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/30 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition-all">
+                    <span class="material-symbols-outlined text-[15px] text-primary">photo_camera</span>
+                    <span>View Courier Proof of Delivery (POD)</span>
                 </button>
 
                 ${!isDone ? `
@@ -2270,8 +2300,9 @@ async function advanceToStage(orderId, nextStage, nextStageName) {
     }
 
     if (nextStage === 5 && typeof window.simulateEmailNotification === 'function') {
+        const recipientEmail = ord.customerEmail || ord.email || 'mariasantos.pampanga@gmail.com';
         window.simulateEmailNotification({
-            to: ord.email || 'mariasantos.pampanga@gmail.com',
+            to: recipientEmail,
             subject: `🎉 Order #${orderId} Delivered — Lifetime Warranty Certificate`,
             body: `Mabuhay ${ord.customerName || 'Customer'}!
 
@@ -2325,8 +2356,9 @@ async function confirmDispatch(event) {
 
     // Dispatch Simulated Email & SMS Dispatch Alert
     if (typeof window.simulateEmailNotification === 'function') {
+        const dispatchEmail = ord.customerEmail || ord.email || 'mariasantos.pampanga@gmail.com';
         window.simulateEmailNotification({
-            to: ord.email || 'mariasantos.pampanga@gmail.com',
+            to: dispatchEmail,
             subject: `🚚 Out for Delivery: Order #${pendingDispatchOrderId} via Workshop Fleet`,
             body: `Mabuhay ${ord.customerName || 'Customer'}!
 
@@ -2339,7 +2371,7 @@ Expected Delivery Window: Today before 5:00 PM PHT. Please prepare the remaining
     }
     if (typeof window.simulateSmsNotification === 'function') {
         window.simulateSmsNotification({
-            to: ord.phone || '09175548921',
+            to: ord.contactPhone || ord.customerPhone || ord.phone || '09175548921',
             message: `[EcoHaven PH] Driver ${driver} (${plate}) is ON THE WAY with Order #${pendingDispatchOrderId}! Please prepare remaining balance upon handover.`,
             orderId: pendingDispatchOrderId,
             category: 'Delivery Dispatch'

@@ -508,6 +508,8 @@
       </div>
     </section>
 
+
+
     <!-- ======================================================== -->
     <!-- SECTION 4: ARTISANAL HERITAGE SNIPPET (CONNECT TO ABOUT) -->
     <!-- ======================================================== -->
@@ -555,12 +557,18 @@
     <!-- SECTION 5: CUSTOMER REVIEWS (AUTHENTIC SOCIAL PROOF) -->
     <!-- ======================================================== -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 py-12">
-      <div class="text-center max-w-xl mx-auto mb-10">
-        <span class="text-xs font-bold uppercase tracking-wider text-primary block mb-1">Real Homeowners</span>
-        <h2 class="font-headline text-2xl sm:text-3xl font-bold text-on-surface">Loved in Condos & Homes</h2>
+      <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-primary block mb-1">Real Homeowners • Central Luzon &amp; NCR</span>
+          <h2 class="font-headline text-2xl sm:text-3xl font-bold text-on-surface">Loved in Condos &amp; Homes</h2>
+        </div>
+        <button type="button" onclick="window.openReviewModal(null, 'TetraTable 4-in-1 Suite', 'Natural Warm Teak')" class="px-4 py-2 rounded-xl bg-primary hover:bg-primary-container text-on-primary text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-95">
+          <span class="material-symbols-outlined text-[16px]">rate_review</span>
+          <span>Share Your Review</span>
+        </button>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div id="homepageReviewsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Review 1 -->
         <div class="p-6 rounded-3xl bg-surface-container-low border border-outline-variant/30 flex flex-col justify-between">
           <div class="space-y-3">
@@ -903,9 +911,52 @@
       }
       openCartDrawer();
     }
+
+    // Dynamic Homepage Reviews Renderer (Panel Suggestion #5)
+    function renderHomepageReviews() {
+      const grid = document.getElementById('homepageReviewsGrid');
+      if (!grid) return;
+      const reviews = (window.ecohaven && typeof window.ecohaven.getReviews === 'function') ? window.ecohaven.getReviews() : [];
+      if (!reviews || reviews.length === 0) return;
+
+      grid.innerHTML = reviews.slice(0, 6).map(rev => {
+        const starCount = Math.min(5, Math.max(1, parseInt(rev.rating, 10) || 5));
+        const stars = Array(starCount).fill('<span class="material-symbols-outlined text-[18px] fill-1">star</span>').join('');
+        const tagsHtml = (rev.tags && rev.tags.length > 0) ? `
+          <div class="flex flex-wrap gap-1 mt-2">
+            ${rev.tags.map(t => `<span class="px-2 py-0.5 rounded-full text-[10px] bg-surface-container font-medium text-on-surface-variant">${t}</span>`).join('')}
+          </div>` : '';
+
+        return `
+          <div class="p-6 rounded-3xl bg-surface-container-low border border-outline-variant/30 flex flex-col justify-between shadow-xs transition-all hover:shadow-md animate-fadeIn">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center text-amber-500">${stars}</div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">VERIFIED HOMEOWNER</span>
+              </div>
+              <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+                "${rev.comment}"
+              </p>
+              ${tagsHtml}
+            </div>
+            <div class="mt-4 pt-4 border-t border-outline-variant/30 flex items-center justify-between text-xs">
+              <div>
+                <span class="font-bold text-on-surface block">${rev.author}</span>
+                <span class="text-[11px] text-outline font-mono">${rev.finish || 'Natural Warm Teak'}</span>
+              </div>
+              <span class="text-on-surface-variant text-[11px]">${rev.location || 'Pampanga'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    window.addEventListener('ecohaven_reviews_updated', renderHomepageReviews);
+    window.addEventListener('DOMContentLoaded', () => setTimeout(renderHomepageReviews, 300));
   </script>
 
   <script src="assets/simulated-comms.js"></script>
+  <script src="assets/chat-widget.js"></script>
+  <script src="assets/reviews-modal.js"></script>
   <script src="assets/notifications.js"></script>
   <script src="assets/auth-modal.js"></script>
   <script src="assets/animations.js"></script>
