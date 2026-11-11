@@ -3,33 +3,9 @@
 // Addresses Thesis Panel Suggestion #4: "Chat with Seller"
 
 (function() {
-  const CHAT_STORAGE_KEY = 'ecohaven_chat_history';
+  const CHAT_STORAGE_KEY_PREFIX = 'ecohaven_chat_history_';
+  const CHAT_GREETED_KEY_PREFIX = 'ecohaven_chat_greeted_';
   let activeOrderContext = null;
-
-  function getChatHistory() {
-    try {
-      const stored = localStorage.getItem(CHAT_STORAGE_KEY);
-      if (stored) return JSON.parse(stored);
-    } catch(e) {}
-    return [
-      {
-        id: 'msg_welcome',
-        sender: 'artisan',
-        name: 'Mang Danilo Santos',
-        role: 'Master Craftsman • Candaba Workshop',
-        avatar: 'carpenter',
-        text: 'Mabuhay! I am Mang Danilo, lead woodturner at our Pasig, Candaba atelier. How can I help you today with our kiln-dried mahogany pieces, custom dimensions, or your delivery schedule?',
-        timestamp: Date.now() - 5 * 60 * 1000
-      }
-    ];
-  }
-
-  function saveChatHistory(history) {
-    try {
-      localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(history));
-      syncChatToFirebase(history);
-    } catch(e) {}
-  }
 
   function getActiveUserObj() {
     try {
@@ -47,10 +23,48 @@
     try {
       const u = getActiveUserObj();
       if (u && u.email) {
-        return 'room_' + u.email.replace(/[^a-zA-Z0-9]/g, '_');
+        return 'room_' + u.email.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, '_');
       }
     } catch(e) {}
     return 'room_live_client';
+  }
+
+  function getStorageKey() {
+    return CHAT_STORAGE_KEY_PREFIX + getCustomerRoomId();
+  }
+
+  function getGreetedKey(roomId) {
+    return CHAT_GREETED_KEY_PREFIX + (roomId || getCustomerRoomId());
+  }
+
+  function getWelcomeMessage() {
+    return {
+      id: 'msg_welcome',
+      sender: 'artisan',
+      name: 'Mang Danilo Santos',
+      role: 'Master Craftsman • Candaba Workshop',
+      avatar: 'carpenter',
+      text: 'Mabuhay! I am Mang Danilo, lead woodturner at our Pasig, Candaba atelier. How can I help you today with our kiln-dried mahogany pieces, custom dimensions, or your delivery schedule?',
+      timestamp: Date.now() - 5 * 60 * 1000
+    };
+  }
+
+  function getChatHistory() {
+    try {
+      const stored = localStorage.getItem(getStorageKey());
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch(e) {}
+    return [getWelcomeMessage()];
+  }
+
+  function saveChatHistory(history) {
+    try {
+      localStorage.setItem(getStorageKey(), JSON.stringify(history));
+      syncChatToFirebase(history);
+    } catch(e) {}
   }
 
   function getCustomerInfo() {
@@ -109,17 +123,11 @@
         const cloudRoom = snap.val();
         if (cloudRoom && Array.isArray(cloudRoom.messages) && cloudRoom.messages.length > 0) {
           const localHistory = getChatHistory();
-          const welcomeMsg = localHistory.find(m => m.id === 'msg_welcome') || {
-            id: 'msg_welcome',
-            sender: 'artisan',
-            name: 'Mang Danilo Santos',
-            role: 'Master Craftsman • Candaba Workshop',
-            avatar: 'carpenter',
-            text: 'Mabuhay! I am Mang Danilo, lead woodturner at our Pasig, Candaba atelier. How can I help you today with our kiln-dried mahogany pieces, custom dimensions, or your delivery schedule?',
-            timestamp: Date.now()
-          };
+          const welcomeMsg = localHistory.find(m => m.id === 'msg_welcome') || getWelcomeMessage();
           const merged = [welcomeMsg];
+          let hasSellerReply = false;
           cloudRoom.messages.forEach(cm => {
+            if (cm.sender === 'seller') hasSellerReply = true;
             merged.push({
               id: cm.id,
               sender: cm.sender === 'customer' ? 'user' : 'artisan',
@@ -130,22 +138,17 @@
               timestamp: cm.timestamp || Date.now()
             });
           });
-          localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(merged));
+          if (hasSellerReply) {
+            try { localStorage.setItem(getGreetedKey(roomId), 'true'); } catch(e) {}
+          }
+          localStorage.setItem(CHAT_STORAGE_KEY_PREFIX + roomId, JSON.stringify(merged));
           renderMessages();
         } else if (cloudRoom === null) {
           // Only reset if local history doesn't have an unsynced message currently being sent
           const localHistory = getChatHistory();
           if (localHistory.length <= 1) {
-            const welcomeMsg = {
-              id: 'msg_welcome',
-              sender: 'artisan',
-              name: 'Mang Danilo Santos',
-              role: 'Master Craftsman • Candaba Workshop',
-              avatar: 'carpenter',
-              text: 'Mabuhay! I am Mang Danilo, lead woodturner at our Pasig, Candaba atelier. How can I help you today with our kiln-dried mahogany pieces, custom dimensions, or your delivery schedule?',
-              timestamp: Date.now()
-            };
-            localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify([welcomeMsg]));
+            try { localStorage.removeItem(getGreetedKey(roomId)); } catch(e) {}
+            localStorage.setItem(CHAT_STORAGE_KEY_PREFIX + roomId, JSON.stringify([getWelcomeMessage()]));
             renderMessages();
           }
         }
@@ -155,6 +158,12 @@
 
   window.addEventListener('ecohaven_auth_state_changed', () => {
     initCustomerChatFirebaseListener();
+    renderMessages();
+  });
+
+  window.addEventListener('ecohaven_user_logged_in', () => {
+    initCustomerChatFirebaseListener();
+    renderMessages();
   });
 
   function injectChatWidget() {
@@ -369,7 +378,7 @@
     if (banner) banner.classList.add('hidden');
   };
 
-  window.handleChatSubmit = function(e) {
+  window.handleChatSubmit = function(e, isQuickPrompt) {
     if (e) e.preventDefault();
     const input = document.getElementById('chatInputMessage');
     if (!input) return;
@@ -377,7 +386,14 @@
     if (!text) return;
     input.value = '';
 
+    const roomId = getCustomerRoomId();
     const history = getChatHistory();
+
+    // Check if this person/room has already received the 1-time initial greeting or any seller reply
+    const nonWelcomeMsgs = history.filter(m => m.id !== 'msg_welcome');
+    const hasExistingSellerReply = nonWelcomeMsgs.some(m => m.sender === 'artisan' || m.sender === 'seller');
+    const alreadyGreeted = hasExistingSellerReply || (localStorage.getItem(getGreetedKey(roomId)) === 'true');
+
     history.push({
       id: 'msg_' + Date.now(),
       sender: 'user',
@@ -387,7 +403,17 @@
     saveChatHistory(history);
     renderMessages();
 
-    // Trigger typing indicator and smart simulated response
+    // Only send the automated greeting ONCE per person/room (or if they explicitly clicked a Quick Inquiry button).
+    // Subsequent typed messages go directly to the live conversation with the Seller without bot interruptions!
+    if (alreadyGreeted && !isQuickPrompt) {
+      return;
+    }
+
+    try {
+      localStorage.setItem(getGreetedKey(roomId), 'true');
+    } catch(err) {}
+
+    // Trigger typing indicator and 1-time initial greeting (or quick inquiry response)
     const typing = document.getElementById('chatTypingIndicator');
     if (typing) typing.classList.remove('hidden');
 
@@ -444,7 +470,7 @@
     const input = document.getElementById('chatInputMessage');
     if (input) {
       input.value = msg;
-      window.handleChatSubmit();
+      window.handleChatSubmit(null, true);
     }
   };
 

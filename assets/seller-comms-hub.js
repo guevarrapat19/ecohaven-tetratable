@@ -729,6 +729,8 @@ ${email.body || ''}
           timestamp: Date.now()
         };
         localStorage.setItem(CUSTOMER_CHAT_STORAGE_KEY, JSON.stringify([welcomeMsg]));
+        localStorage.setItem('ecohaven_chat_history_' + roomId, JSON.stringify([welcomeMsg]));
+        localStorage.removeItem('ecohaven_chat_greeted_' + roomId);
       } catch(e) {}
     }
 
@@ -743,7 +745,7 @@ ${email.body || ''}
   window.resetSellerChatRooms = function() {
     const init = getInitialChatRooms();
     saveChatRooms(init);
-    activeRoomId = init[0].id;
+    activeRoomId = init.length > 0 ? init[0].id : null;
     renderChatRoomsList();
     renderActiveChatPane();
     if (typeof window.showEcoHavenToast === 'function') {
@@ -782,10 +784,11 @@ ${email.body || ''}
       }
     } catch(e) {}
 
-    // Also sync to customer chat history if this is the live client room
-    if (room.id === 'room_live_client') {
+    // Also sync to customer chat history for this room & mark as greeted
+    if (room.id === 'room_live_client' || room.id.startsWith('room_')) {
       try {
-        const custRaw = localStorage.getItem(CUSTOMER_CHAT_STORAGE_KEY);
+        const roomKey = 'ecohaven_chat_history_' + room.id;
+        const custRaw = localStorage.getItem(roomKey) || localStorage.getItem(CUSTOMER_CHAT_STORAGE_KEY);
         let custHistory = custRaw ? JSON.parse(custRaw) : [];
         custHistory.push({
           id: newMsg.id,
@@ -796,7 +799,11 @@ ${email.body || ''}
           text: replyText,
           timestamp: Date.now()
         });
-        localStorage.setItem(CUSTOMER_CHAT_STORAGE_KEY, JSON.stringify(custHistory));
+        localStorage.setItem(roomKey, JSON.stringify(custHistory));
+        localStorage.setItem('ecohaven_chat_greeted_' + room.id, 'true');
+        if (room.id === 'room_live_client') {
+          localStorage.setItem(CUSTOMER_CHAT_STORAGE_KEY, JSON.stringify(custHistory));
+        }
       } catch(e) {}
     }
 
