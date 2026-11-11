@@ -375,11 +375,11 @@ if (document.readyState === 'loading') {
           <!-- Claim & Action Buttons -->
           <div class="space-y-2">
             <button type="button" onclick="claimVoucherAndRedirect()" class="w-full py-3.5 px-4 rounded-2xl bg-primary hover:bg-primary-container text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 active:scale-98">
-              <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
-              <span id="claimVoucherBtnText">Claim 10% Voucher & Shop</span>
+              <span class="material-symbols-outlined text-[18px]">home_pin</span>
+              <span id="claimVoucherBtnText">Claim 10% Voucher &amp; Set Up Profile Address →</span>
             </button>
             <button type="button" onclick="closeWelcomeVoucherModal()" class="w-full py-2.5 text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-all">
-              I'll use it later at Checkout
+              Proceed to My Profile &amp; Add Default Address
             </button>
           </div>
         </div>
@@ -509,6 +509,15 @@ if (document.readyState === 'loading') {
     setTimeout(() => {
       backdrop.classList.add('hidden');
       modal.classList.add('hidden');
+      if (localStorage.getItem('ecohaven_new_user_setup_address') === 'true') {
+        const isPagesDir = window.location.pathname.includes('/pages/');
+        const currentPath = window.location.pathname.toLowerCase();
+        if (!currentPath.includes('dashboard.html')) {
+          window.location.href = isPagesDir ? 'dashboard.html?setupAddress=1' : 'pages/dashboard.html?setupAddress=1';
+        } else if (typeof openAddressModal === 'function') {
+          openAddressModal();
+        }
+      }
     }, 280);
   };
 
@@ -520,31 +529,29 @@ if (document.readyState === 'loading') {
     } catch (e) {}
 
     if (typeof window.showEcoHavenToast === 'function') {
-      window.showEcoHavenToast('🎉 WELCOME10 voucher claimed! 10% discount copied and ready for checkout.', 'success');
+      window.showEcoHavenToast('🎉 WELCOME10 voucher claimed! Proceeding to your Profile to set up your default address.', 'success');
     }
 
-    window.closeWelcomeVoucherModal();
+    const backdrop = document.getElementById('ecohavenVoucherModalBackdrop');
+    const modal = document.getElementById('ecohavenVoucherModal');
+    const card = document.getElementById('ecohavenVoucherCard');
+    if (backdrop && card) {
+      backdrop.classList.add('opacity-0');
+      card.classList.remove('scale-100', 'opacity-100');
+      card.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        backdrop.classList.add('hidden');
+        modal.classList.add('hidden');
+      }, 280);
+    }
 
     setTimeout(() => {
       const isPagesDir = window.location.pathname.includes('/pages/');
       const currentPath = window.location.pathname.toLowerCase();
-      const rawCart = localStorage.getItem('ecohaven_cart');
-      let cartHasItems = false;
-      try {
-        const parsed = JSON.parse(rawCart);
-        if (Array.isArray(parsed) && parsed.length > 0) cartHasItems = true;
-      } catch (e) {}
-
-      if (currentPath.includes('checkout.html')) {
-        if (typeof applyVoucherCode === 'function') {
-          const input = document.getElementById('voucherCodeInput');
-          if (input) input.value = 'WELCOME10';
-          applyVoucherCode();
-        }
-      } else if (cartHasItems) {
-        window.location.href = isPagesDir ? 'checkout.html' : 'pages/checkout.html';
-      } else {
-        window.location.href = isPagesDir ? 'shop.html' : 'pages/shop.html';
+      if (!currentPath.includes('dashboard.html')) {
+        window.location.href = isPagesDir ? 'dashboard.html?setupAddress=1' : 'pages/dashboard.html?setupAddress=1';
+      } else if (typeof openAddressModal === 'function') {
+        openAddressModal();
       }
     }, 320);
   };
@@ -732,12 +739,22 @@ if (document.readyState === 'loading') {
       }
       window.dispatchEvent(new CustomEvent('ecohaven_user_logged_in', { detail: newUser }));
 
-      // 6. SHOW THE 10% WELCOME VOUCHER MODAL
-      setTimeout(() => {
-        if (typeof window.showWelcomeVoucherModal === 'function') {
-          window.showWelcomeVoucherModal({ name: name, code: 'WELCOME10', discount: 10 });
-        }
-      }, 350);
+      // 6. FLAG NEW USER FOR PROFILE ADDRESS SETUP & PROCEED TO PROFILE (dashboard.html)
+      localStorage.setItem('ecohaven_new_user_setup_address', 'true');
+      const isPagesDir = window.location.pathname.includes('/pages/');
+      const currentPath = window.location.pathname.toLowerCase();
+      if (!currentPath.includes('dashboard.html')) {
+        setTimeout(() => {
+          window.location.href = isPagesDir ? 'dashboard.html?setupAddress=1&welcome=1' : 'pages/dashboard.html?setupAddress=1&welcome=1';
+        }, 450);
+      } else {
+        setTimeout(() => {
+          if (typeof openAddressModal === 'function') openAddressModal();
+          if (typeof window.showWelcomeVoucherModal === 'function') {
+            window.showWelcomeVoucherModal({ name: name, code: 'WELCOME10', discount: 10 });
+          }
+        }, 350);
+      }
 
     } catch (err) {
       console.error('Registration error:', err);
@@ -1035,11 +1052,21 @@ if (document.readyState === 'loading') {
     }
 
     if (isNewCustomerVoucher) {
-      setTimeout(() => {
-        if (typeof window.showWelcomeVoucherModal === 'function') {
-          window.showWelcomeVoucherModal({ name: userProfile.displayName, code: 'WELCOME10', discount: 10 });
-        }
-      }, 400);
+      localStorage.setItem('ecohaven_new_user_setup_address', 'true');
+      const isPagesDir = window.location.pathname.includes('/pages/');
+      const currentPath = window.location.pathname.toLowerCase();
+      if (!currentPath.includes('dashboard.html')) {
+        setTimeout(() => {
+          window.location.href = isPagesDir ? 'dashboard.html?setupAddress=1&welcome=1' : 'pages/dashboard.html?setupAddress=1&welcome=1';
+        }, 450);
+      } else {
+        setTimeout(() => {
+          if (typeof openAddressModal === 'function') openAddressModal();
+          if (typeof window.showWelcomeVoucherModal === 'function') {
+            window.showWelcomeVoucherModal({ name: userProfile.displayName, code: 'WELCOME10', discount: 10 });
+          }
+        }, 400);
+      }
     }
   }
   window.finalizeGoogleUser = finalizeGoogleUser;

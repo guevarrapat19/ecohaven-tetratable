@@ -831,32 +831,52 @@ function switchTab(tab) {
                 <p class="text-[11px] text-on-surface-variant mt-1">Used for order tracking SMS, white-glove driver coordination, and GCash wallet binding.</p>
             </div>
 
-            <!-- Street Details & Barangay -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                    <label for="editStreet" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">House / Lot No. &amp; Street</label>
-                    <input type="text" id="editStreet" placeholder="House / Lot No., Street, Subdivision" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
+            <!-- Address Name Tag -->
+            <div>
+                <div class="flex items-center justify-between mb-1.5">
+                    <label for="editAddrLabel" class="block text-xs font-bold uppercase tracking-wider text-on-surface">Address Name Tag (Save As)</label>
+                    <div class="flex items-center gap-1">
+                        <button type="button" onclick="document.getElementById('editAddrLabel').value='Home'" class="px-2 py-0.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold transition-colors">🏠 Home</button>
+                        <button type="button" onclick="document.getElementById('editAddrLabel').value='Office'" class="px-2 py-0.5 rounded-md bg-surface-container hover:bg-surface-container-high text-on-surface text-[10px] font-bold transition-colors">🏢 Office</button>
+                        <button type="button" onclick="document.getElementById('editAddrLabel').value='Condo'" class="px-2 py-0.5 rounded-md bg-surface-container hover:bg-surface-container-high text-on-surface text-[10px] font-bold transition-colors">🏡 Condo</button>
+                    </div>
                 </div>
-                <div>
-                    <label for="editBarangay" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">Barangay</label>
-                    <input type="text" id="editBarangay" placeholder="Barangay" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
-                </div>
+                <input type="text" id="editAddrLabel" value="Home" placeholder="e.g. Home, Office, Parents' House" class="w-full px-4 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
             </div>
 
-            <!-- Location: City, Province & ZIP Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <!-- Location: Province, City, Barangay & ZIP Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label for="editProvince" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">Province</label>
+                    <input type="text" id="editProvince" placeholder="e.g. Pampanga, Bulacan, Metro Manila" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
+                </div>
                 <div>
                     <label for="editCity" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">City / Town</label>
                     <input type="text" id="editCity" placeholder="City / Municipality" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
                 </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                    <label for="editProvince" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">Province</label>
-                    <input type="text" id="editProvince" placeholder="Province" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
+                    <label for="editBarangay" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">Barangay</label>
+                    <input type="text" id="editBarangay" placeholder="Barangay" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
                 </div>
                 <div>
                     <label for="editZip" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">ZIP Code</label>
                     <input type="text" id="editZip" placeholder="ZIP Code" maxlength="6" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
                 </div>
+            </div>
+
+            <!-- Street Details + Direct Save Button Under Street Field -->
+            <div class="space-y-2">
+                <div>
+                    <label for="editStreet" class="block text-xs font-bold uppercase tracking-wider text-on-surface mb-1.5">House / Lot No. &amp; Street</label>
+                    <input type="text" id="editStreet" placeholder="House / Lot No., Street, Subdivision" class="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"/>
+                </div>
+                <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-primary/10 hover:bg-primary hover:text-white text-primary border border-primary/30 text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs active:scale-98">
+                    <span class="material-symbols-outlined text-[16px]">bookmark_add</span>
+                    <span>Save Address &amp; Set as Default First Address</span>
+                </button>
             </div>
 
             <!-- Email Address (Account ID) -->
@@ -1183,6 +1203,7 @@ async function handleSaveProfile(e) {
     const city = document.getElementById('editCity').value.trim();
     const province = document.getElementById('editProvince').value.trim();
     const zipCode = document.getElementById('editZip') ? document.getElementById('editZip').value.trim() : '';
+    const addrLabel = (document.getElementById('editAddrLabel') ? document.getElementById('editAddrLabel').value.trim() : '') || 'Home';
 
     if (!name) {
         if (typeof window.showEcoHavenToast === 'function') {
@@ -1204,6 +1225,15 @@ async function handleSaveProfile(e) {
         return;
     }
 
+    const synthesizedFullAddr = [
+        street,
+        barangay ? ('Brgy. ' + barangay.replace(/^Brgy\.?\s*/i, '')) : '',
+        city,
+        province,
+        zipCode,
+        (province || city) ? 'Philippines' : ''
+    ].filter(Boolean).join(', ');
+
     u.displayName = name;
     u.fullName = name;
     u.phone = phone;
@@ -1212,15 +1242,46 @@ async function handleSaveProfile(e) {
     u.city = city || '';
     u.province = province || '';
     u.zipCode = zipCode;
+    if (synthesizedFullAddr) u.address = synthesizedFullAddr;
 
     // Persist to localStorage
     localStorage.setItem('ecohaven_user', JSON.stringify(u));
     localStorage.setItem('currentUser', JSON.stringify(u));
+    localStorage.removeItem('ecohaven_new_user_setup_address');
+
+    // Sync address into Saved Delivery Addresses book as the Default First Address!
+    if (window.ecohaven && typeof window.ecohaven.saveOrUpdateAddress === 'function' && (street || city || province)) {
+        const regions = window.PHILIPPINE_LOGISTICS_REGIONS || {};
+        const provInfo = regions[province] || null;
+        const zoneCode = provInfo ? (provInfo.zoneCode || '250') : '250';
+        const zoneLabel = provInfo ? (provInfo.zone || 'Zone 1 - Pampanga Local') : 'Zone 1 - Pampanga Local';
+        const existingAddrs = window.ecohaven.getAddresses ? window.ecohaven.getAddresses() : [];
+        const existingDef = existingAddrs.find(a => a.isDefault) || existingAddrs[0];
+
+        window.ecohaven.saveOrUpdateAddress({
+            id: existingDef ? existingDef.id : undefined,
+            label: addrLabel || (existingDef && existingDef.label) || 'Home',
+            recipientName: name,
+            phone: phone,
+            email: u.email || 'customer@ecohaven.ph',
+            address: synthesizedFullAddr,
+            fullAddress: synthesizedFullAddr,
+            street: street,
+            barangay: barangay,
+            city: city,
+            province: province,
+            zipCode: zipCode,
+            zone: zoneLabel,
+            zoneCode: zoneCode,
+            deliveryFee: parseFloat(zoneCode),
+            isDefault: true
+        });
+    }
 
     // Persist to Firebase Realtime Database
     if (window.ecoHavenDb && u.uid) {
         try {
-            await window.ecoHavenDb.ref('users/' + u.uid).update({
+            const payload = {
                 displayName: name,
                 fullName: name,
                 phone: phone,
@@ -1228,8 +1289,11 @@ async function handleSaveProfile(e) {
                 barangay: u.barangay || '',
                 city: u.city,
                 province: u.province,
-                zipCode: u.zipCode || ''
-            });
+                zipCode: u.zipCode || '',
+                address: synthesizedFullAddr || ''
+            };
+            await window.ecoHavenDb.ref('users/' + u.uid).update(payload);
+            await window.ecoHavenDb.ref('ecohaven/users/' + u.uid).update(payload);
             console.log('✅ Firebase user profile updated successfully.');
         } catch(err) {
             console.warn('Firebase user update warning:', err);
@@ -1237,10 +1301,11 @@ async function handleSaveProfile(e) {
     }
 
     populateUserProfile();
+    if (typeof renderDashboardAddresses === 'function') renderDashboardAddresses();
     closeEditProfileModal();
 
     if (typeof window.showEcoHavenToast === 'function') {
-        window.showEcoHavenToast('🌿 Personal information updated successfully!', 'success');
+        window.showEcoHavenToast('🌿 Profile & Default Delivery Address updated successfully!', 'success');
     }
 }
 
@@ -1542,10 +1607,24 @@ function openAddressModal(id = null) {
             document.getElementById('addrIsDefault').checked = !!found.isDefault;
         }
     } else {
-        title.innerText = "Add New Delivery Address";
+        const existingAddrs = (window.ecohaven && window.ecohaven.getAddresses) ? window.ecohaven.getAddresses() : [];
+        const isFirstAddress = existingAddrs.length === 0 || localStorage.getItem('ecohaven_new_user_setup_address') === 'true';
+        title.innerText = isFirstAddress ? "Set Up Your Default Delivery Address" : "Add New Delivery Address";
+
+        const setupBanner = document.getElementById('newAccountAddressSetupBanner');
+        if (setupBanner) {
+            if (isFirstAddress) {
+                setupBanner.classList.remove('hidden');
+            } else {
+                setupBanner.classList.add('hidden');
+            }
+        }
+
         const uStr = localStorage.getItem('ecohaven_user');
         let curU = null;
         try { if (uStr) curU = JSON.parse(uStr); } catch(e){}
+        const lblInput = document.getElementById('addrLabel');
+        if (lblInput && !lblInput.value) lblInput.value = 'Home';
         document.getElementById('addrRecipient').value = (curU && (curU.displayName || curU.fullName)) || '';
         document.getElementById('addrPhone').value = (curU && curU.phone) || '';
         const p2 = document.getElementById('addrPhone');
@@ -1559,11 +1638,19 @@ function openAddressModal(id = null) {
         if (zipInput) zipInput.value = '';
         syncDashFullAddress();
 
-        // Let user check "Set as Primary Default" manually - zero forced default
-        document.getElementById('addrIsDefault').checked = false;
+        // Automatically check "Set as Primary Default" when adding the first address!
+        document.getElementById('addrIsDefault').checked = isFirstAddress;
     }
 
     modal.classList.remove('hidden');
+}
+
+function selectDashAddressTag(tagValue) {
+    const lblInput = document.getElementById('addrLabel');
+    if (lblInput) {
+        lblInput.value = tagValue;
+        lblInput.focus();
+    }
 }
 
 function closeAddressModal() {
@@ -1616,7 +1703,8 @@ function handleAddressFormSubmit(e) {
     const zipVal = document.getElementById('dashAddrZip')?.value?.trim() || '';
     const address = document.getElementById('addrFull').value.trim();
     const zoneCode = document.getElementById('addrZone').value;
-    const isDefault = document.getElementById('addrIsDefault').checked;
+    const existingAddrs = (window.ecohaven && window.ecohaven.getAddresses) ? window.ecohaven.getAddresses() : [];
+    const isDefault = document.getElementById('addrIsDefault').checked || existingAddrs.length === 0;
 
     const zoneLabels = {
         '250': 'Zone 1: Candaba Local & Pampanga',
@@ -1636,6 +1724,7 @@ function handleAddressFormSubmit(e) {
         phone: phone,
         email: (curU && curU.email) || 'customer@ecohaven.ph',
         address: address,
+        fullAddress: address,
         street: streetVal,
         barangay: brgyVal,
         city: cityVal,
@@ -1650,6 +1739,7 @@ function handleAddressFormSubmit(e) {
     if (id) addrData.id = id;
 
     window.ecohaven.saveOrUpdateAddress(addrData);
+    localStorage.removeItem('ecohaven_new_user_setup_address');
 
     // If marked as default (or if user profile doesn't have address yet), sync to user profile!
     if (isDefault || !curU || !curU.street || !curU.barangay) {
@@ -1665,22 +1755,29 @@ function handleAddressFormSubmit(e) {
             curU.city = cityVal;
             curU.province = provVal;
             curU.zipCode = zipVal;
+            curU.address = address;
             localStorage.setItem('ecohaven_user', JSON.stringify(curU));
             localStorage.setItem('currentUser', JSON.stringify(curU));
             if (window.ecoHavenDb && curU.uid) {
-                window.ecoHavenDb.ref('users/' + curU.uid).update({
+                const profUpdate = {
                     street: streetVal,
                     barangay: brgyVal,
                     city: cityVal,
                     province: provVal,
-                    zipCode: zipVal
-                }).catch(() => {});
+                    zipCode: zipVal,
+                    address: address
+                };
+                window.ecoHavenDb.ref('users/' + curU.uid).update(profUpdate).catch(() => {});
+                window.ecoHavenDb.ref('ecohaven/users/' + curU.uid).update(profUpdate).catch(() => {});
             }
         }
     }
     closeAddressModal();
     renderDashboardAddresses();
     populateUserProfile();
+    if (typeof window.showEcoHavenToast === 'function') {
+        window.showEcoHavenToast(`✅ Address "${addrData.label}" saved${isDefault ? ' and set as your Default Delivery Address!' : '!'}`, 'success');
+    }
 }
 
 let pendingDeleteAddressId = null;
@@ -1786,7 +1883,20 @@ document.addEventListener('keydown', (e) => {
 window.addEventListener('ecohaven_addresses_updated', renderDashboardAddresses);
 window.addEventListener('DOMContentLoaded', () => {
     initDashRegionDropdowns();
-    setTimeout(renderDashboardAddresses, 150);
+    setTimeout(() => {
+        renderDashboardAddresses();
+        const params = new URLSearchParams(window.location.search);
+        const shouldSetupAddr = params.get('setupAddress') === '1' || localStorage.getItem('ecohaven_new_user_setup_address') === 'true';
+        const existingAddrs = (window.ecohaven && window.ecohaven.getAddresses) ? window.ecohaven.getAddresses() : [];
+        if (shouldSetupAddr && existingAddrs.length === 0 && localStorage.getItem('ecohaven_user')) {
+            const addrCard = document.getElementById('addresses');
+            if (addrCard) addrCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            openAddressModal();
+            if (typeof window.showEcoHavenToast === 'function') {
+                window.showEcoHavenToast('🎉 Welcome to your Profile! Please save your delivery address below to set your Default First Address.', 'success');
+            }
+        }
+    }, 220);
 });
 
 </script>
@@ -1927,9 +2037,24 @@ function toggleQrZoomMode(event) {
 
         <form id="addressForm" onsubmit="handleAddressFormSubmit(event)" class="space-y-3">
             <input type="hidden" id="editAddressId" value=""/>
+            <div id="newAccountAddressSetupBanner" class="hidden p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-start gap-2">
+                <span class="material-symbols-outlined text-[18px] text-emerald-700 flex-shrink-0 mt-0.5">celebration</span>
+                <div>
+                    <strong class="block font-bold">Welcome to EcoHaven! Set Up Your First Default Address</strong>
+                    <span class="text-[11px] text-emerald-800">Enter your delivery destination below and click Save Address. It will automatically become your default address for 1-click checkout (plus your 10% WELCOME10 voucher is active!).</span>
+                </div>
+            </div>
             <div>
-                <label class="block text-xs font-bold text-on-surface mb-1">Address Label / Tag</label>
-                <input id="addrLabel" type="text" placeholder="Address Label (Home, Office, Studio)" required class="w-full bg-surface-container-low px-3 py-2 rounded-lg text-sm text-on-surface border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary"/>
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-bold text-on-surface">Address Name Tag (Save As) *</label>
+                    <div class="flex items-center gap-1">
+                        <button type="button" onclick="selectDashAddressTag('Home')" class="px-2 py-0.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold transition-colors">🏠 Home</button>
+                        <button type="button" onclick="selectDashAddressTag('Office')" class="px-2 py-0.5 rounded-md bg-surface-container hover:bg-surface-container-high text-on-surface text-[10px] font-bold transition-colors">🏢 Office</button>
+                        <button type="button" onclick="selectDashAddressTag('Condo')" class="px-2 py-0.5 rounded-md bg-surface-container hover:bg-surface-container-high text-on-surface text-[10px] font-bold transition-colors">🏡 Condo</button>
+                        <button type="button" onclick="selectDashAddressTag('Parents House')" class="px-2 py-0.5 rounded-md bg-surface-container hover:bg-surface-container-high text-on-surface text-[10px] font-bold transition-colors">🌿 Family</button>
+                    </div>
+                </div>
+                <input id="addrLabel" type="text" value="Home" placeholder="Address Name Tag (e.g. Home, Office, Condo, Studio)" required class="w-full bg-surface-container-low px-3 py-2 rounded-lg text-sm text-on-surface border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary"/>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
@@ -1981,10 +2106,16 @@ function toggleQrZoomMode(event) {
                 </div>
             </div>
 
-            <!-- One-Row Street Input Details -->
-            <div>
-                <label class="block text-xs font-bold text-on-surface mb-1">Street Details (House / Lot No., Street, Subdivision)</label>
-                <input id="dashAddrStreet" type="text" oninput="syncDashFullAddress()" placeholder="House / Lot No., Street, Subdivision" required class="w-full bg-surface-container-low px-3 py-2.5 rounded-lg text-xs font-medium text-on-surface border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary"/>
+            <!-- One-Row Street Input Details + Direct Save Button Under Street Field -->
+            <div class="space-y-2">
+                <div>
+                    <label class="block text-xs font-bold text-on-surface mb-1">Street Details (House / Lot No., Street, Subdivision)</label>
+                    <input id="dashAddrStreet" type="text" oninput="syncDashFullAddress()" placeholder="House / Lot No., Street, Subdivision" required class="w-full bg-surface-container-low px-3 py-2.5 rounded-lg text-xs font-medium text-on-surface border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary"/>
+                </div>
+                <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-primary hover:bg-on-primary-fixed text-on-primary text-xs font-bold shadow-md transition-all flex items-center justify-center gap-1.5 active:scale-98">
+                    <span class="material-symbols-outlined text-[16px]">bookmark_add</span>
+                    <span>Save Address &amp; Set as Default</span>
+                </button>
             </div>
 
             <!-- Synthesized Full Address Preview -->
