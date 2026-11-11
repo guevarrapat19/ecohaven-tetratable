@@ -308,11 +308,11 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
                         <div class="space-y-1 text-[10px]">
                             <div class="flex justify-between items-start gap-2">
                                 <span class="text-neutral-500">Paid To:</span>
-                                <span class="font-bold text-neutral-900 text-right">EcoHaven Furniture (PA**O M.)</span>
+                                <span id="receiptRecipientName" class="font-bold text-neutral-900 text-right">Paolo Magisa (EcoHaven)</span>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-neutral-500">Merchant Acct:</span>
-                                <span class="font-mono font-semibold text-neutral-800">+63 981 255 8028</span>
+                                <span id="receiptMerchantAcctLabel" class="text-neutral-500">Account No.:</span>
+                                <span id="receiptMerchantAcct" class="font-mono font-semibold text-neutral-800">+63 981 255 8028</span>
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-neutral-500">Sent By:</span>
@@ -458,8 +458,8 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
                     <input type="text" id="driverPlateInput" value="CBD 4821" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-sm font-mono font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
                 </div>
                 <div>
-                    <label class="text-xs font-bold text-on-surface block mb-1">Contact Phone</label>
-                    <input type="tel" id="driverPhoneInput" value="" placeholder="Mobile Number" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-sm font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
+                    <label class="text-xs font-bold text-on-surface block mb-1">Delivery Personnel Contact</label>
+                    <input type="tel" id="driverPhoneInput" value="+63 917 842 4821" placeholder="+63 917 842 4821" class="w-full px-3 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-sm font-mono font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"/>
                 </div>
             </div>
             <div>
@@ -2136,6 +2136,7 @@ function renderKanban() {
                             Balance Due: ₱${bal.toLocaleString('en-PH', {minimumFractionDigits: 2})}<br/>
                         `}
                         Courier: ${ord.courierName || 'Workshop Fleet (CBD 4821)'}<br/>
+                        Driver: ${ord.driverName || 'Mang Ronaldo Santos'} (${ord.driverPhone || '+63 917 842 4821'})<br/>
                         Waybill: ${ord.courierTracking || 'EH-FLEET-CBD4821'}
                     </div>
                     <div class="flex gap-2 pt-1">
@@ -2372,21 +2373,34 @@ function openVerificationModal(orderId) {
         const dateTimeEl = document.getElementById('receiptDateTime');
         const captionEl = document.getElementById('modalReceiptCaption');
 
+        const recipientNameEl = document.getElementById('receiptRecipientName');
+        const merchantAcctLblEl = document.getElementById('receiptMerchantAcctLabel');
+        const merchantAcctEl = document.getElementById('receiptMerchantAcct');
+
         if (method.includes('maya')) {
             if (topBanner) topBanner.className = 'bg-neutral-900 text-white px-3.5 pt-2 pb-3';
             if (walletBadge) { walletBadge.innerText = 'M'; walletBadge.className = 'w-6 h-6 rounded-full bg-emerald-500 text-neutral-950 font-black text-xs flex items-center justify-center shadow-xs'; }
             if (walletTitle) walletTitle.innerText = 'Maya Official Receipt';
             if (walletSub) walletSub.innerText = 'QRPH / BSP Regulated';
+            if (recipientNameEl) recipientNameEl.innerText = 'Paolo Magisa (EcoHaven)';
+            if (merchantAcctLblEl) merchantAcctLblEl.innerText = 'Maya Wallet:';
+            if (merchantAcctEl) merchantAcctEl.innerText = '+63 981 255 8028';
         } else if (method.includes('bank') || method.includes('instapay')) {
             if (topBanner) topBanner.className = 'bg-[#0B2545] text-white px-3.5 pt-2 pb-3';
             if (walletBadge) { walletBadge.innerText = 'IP'; walletBadge.className = 'w-6 h-6 rounded-full bg-amber-400 text-[#0B2545] font-black text-[10px] flex items-center justify-center shadow-xs'; }
-            if (walletTitle) walletTitle.innerText = 'InstaPay Transfer Receipt';
-            if (walletSub) walletSub.innerText = 'PESONet / QRPH Verified';
+            if (walletTitle) walletTitle.innerText = 'Send Money to Bank Receipt';
+            if (walletSub) walletSub.innerText = 'InstaPay • BDO Unibank';
+            if (recipientNameEl) recipientNameEl.innerText = 'Paolo Magisa';
+            if (merchantAcctLblEl) merchantAcctLblEl.innerText = 'Bank Account:';
+            if (merchantAcctEl) merchantAcctEl.innerText = 'BDO • 0049-1823-0828';
         } else {
             if (topBanner) topBanner.className = 'bg-[#005CE6] text-white px-3.5 pt-2 pb-3';
             if (walletBadge) { walletBadge.innerText = 'G'; walletBadge.className = 'w-6 h-6 rounded-full bg-white text-[#005CE6] font-black text-xs flex items-center justify-center shadow-xs'; }
             if (walletTitle) walletTitle.innerText = 'GCash Official Receipt';
             if (walletSub) walletSub.innerText = 'Express Send / Pay QR';
+            if (recipientNameEl) recipientNameEl.innerText = 'Paolo Magisa (PA**O M.)';
+            if (merchantAcctLblEl) merchantAcctLblEl.innerText = 'GCash Acct:';
+            if (merchantAcctEl) merchantAcctEl.innerText = '+63 981 255 8028';
         }
 
         if (tierBadge) {
@@ -2593,7 +2607,31 @@ Your DTI-backed Lifetime Structural Joinery Warranty is registered under certifi
 
 function promptCourierDispatch(orderId) {
     pendingDispatchOrderId = orderId;
-    document.getElementById('dispatchCodeInput').value = 'TRK-CANDABA-' + orderId.replace('EH-2026-', '');
+    const ord = (window.ecohaven && (window.ecohaven.orders[orderId] || (window.ecohaven.getOrder && window.ecohaven.getOrder(orderId)))) || {};
+    const partner = String(ord.courierPartner || ord.courierName || 'van').toLowerCase();
+
+    const driverInput = document.getElementById('driverNameInput');
+    const plateInput = document.getElementById('driverPlateInput');
+    const phoneInput = document.getElementById('driverPhoneInput');
+    const codeInput = document.getElementById('dispatchCodeInput');
+
+    if (partner.includes('jnt') || partner.includes('j&t')) {
+        if (driverInput) driverInput.value = ord.driverName || 'J&T Cargo Rider Marco Reyes';
+        if (plateInput) plateInput.value = ord.driverPlate || 'JNT-TRK-904';
+        if (phoneInput) phoneInput.value = ord.driverPhone || '+63 918 552 9104';
+    } else if (partner.includes('flash')) {
+        if (driverInput) driverInput.value = ord.driverName || 'Flash Express Rider Carlo Dizon';
+        if (plateInput) plateInput.value = ord.driverPlate || 'FEX-VAN-331';
+        if (phoneInput) phoneInput.value = ord.driverPhone || '+63 919 664 3310';
+    } else {
+        if (driverInput) driverInput.value = ord.driverName || 'Mang Ronaldo Santos';
+        if (plateInput) plateInput.value = ord.driverPlate || 'CBD 4821';
+        if (phoneInput) phoneInput.value = ord.driverPhone || '+63 917 842 4821';
+    }
+
+    if (codeInput) {
+        codeInput.value = ord.courierTracking || ('TRK-CANDABA-' + orderId.replace('EH-2026-', ''));
+    }
     document.getElementById('courierModal').classList.remove('hidden');
     document.getElementById('courierModal').classList.add('flex');
 }
@@ -2607,10 +2645,22 @@ async function confirmDispatch(event) {
     if (event) event.preventDefault();
     if (!pendingDispatchOrderId || !window.ecohaven) return;
     
-    const driver = document.getElementById('driverNameInput').value || 'Mang Juan S.';
-    const plate = document.getElementById('driverPlateInput').value || 'CBD-4821';
+    const driver = document.getElementById('driverNameInput').value || 'Mang Ronaldo Santos';
+    const plate = document.getElementById('driverPlateInput').value || 'CBD 4821';
+    const driverPhone = document.getElementById('driverPhoneInput').value || '+63 917 842 4821';
     const ord = window.ecohaven.orders[pendingDispatchOrderId] || window.ecohaven.getOrder(pendingDispatchOrderId) || {};
     
+    ord.driverName = driver;
+    ord.driverPlate = plate;
+    ord.driverPhone = driverPhone;
+    if (window.ecoHavenDb) {
+        window.ecoHavenDb.ref('ecohaven/orders/' + pendingDispatchOrderId).update({
+            driverName: driver,
+            driverPlate: plate,
+            driverPhone: driverPhone
+        }).catch(() => {});
+    }
+
     await window.ecohaven.advanceOrderStage(pendingDispatchOrderId, 4, 'Quality Inspected & Dispatched via Fleet (' + plate + ')');
     
     // Dispatch in-app notification
@@ -2618,7 +2668,7 @@ async function confirmDispatch(event) {
         window.addEcoHavenNotification({
             type: 'order',
             title: `🚚 Order #${pendingDispatchOrderId} Out for Delivery`,
-            body: `Your order has passed white-glove quality inspection and is dispatched with Driver ${driver} (Vehicle Plate: ${plate}). On the way to your delivery address!`,
+            body: `Your order has passed white-glove quality inspection and is dispatched with ${driver} (Plate: ${plate} • Contact: ${driverPhone}). On the way to your delivery address!`,
             orderId: pendingDispatchOrderId,
             icon: 'local_shipping',
             badgeColor: 'bg-amber-100 text-amber-800'
@@ -2631,11 +2681,7 @@ async function confirmDispatch(event) {
         window.simulateEmailNotification({
             to: dispatchEmail,
             subject: `🚚 Out for Delivery: Order #${pendingDispatchOrderId} via Workshop Fleet`,
-            body: `Mabuhay ${ord.customerName || 'Customer'}!
-
-Your order #${pendingDispatchOrderId} has passed white-glove quality control and is now in transit with Driver ${driver} (Fleet Plate: ${plate}).
-
-Expected Delivery Window: Today before 5:00 PM PHT. Please prepare the remaining balance upon handover.`,
+            body: `Mabuhay ${ord.customerName || 'Customer'}!\n\nYour order #${pendingDispatchOrderId} has passed white-glove quality control and is now in transit with ${driver} (Vehicle Plate: ${plate} • Driver Contact: ${driverPhone}).\n\nExpected Delivery Window: Today before 5:00 PM PHT. Please prepare any remaining balance upon handover.`,
             orderId: pendingDispatchOrderId,
             category: 'Delivery Dispatch'
         });
@@ -2643,7 +2689,7 @@ Expected Delivery Window: Today before 5:00 PM PHT. Please prepare the remaining
     if (typeof window.simulateSmsNotification === 'function') {
         window.simulateSmsNotification({
             to: ord.contactPhone || ord.customerPhone || ord.phone || '09175548921',
-            message: `[EcoHaven PH] Driver ${driver} (${plate}) is ON THE WAY with Order #${pendingDispatchOrderId}! Please prepare remaining balance upon handover.`,
+            message: `[EcoHaven PH] ${driver} (${plate} • ${driverPhone}) is ON THE WAY with Order #${pendingDispatchOrderId}!`,
             orderId: pendingDispatchOrderId,
             category: 'Delivery Dispatch'
         });
@@ -2651,7 +2697,7 @@ Expected Delivery Window: Today before 5:00 PM PHT. Please prepare the remaining
 
     closeCourierModal();
     if (typeof window.showEcoHavenToast === 'function') {
-        window.showEcoHavenToast(`🚚 Order #${pendingDispatchOrderId} dispatched! Driver: ${driver} (${plate}) — Customer notified in real-time.`, 'amber');
+        window.showEcoHavenToast(`🚚 Order #${pendingDispatchOrderId} dispatched! Driver: ${driver} (${plate} • ${driverPhone})`, 'amber');
     }
     renderKanban();
 }

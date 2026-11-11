@@ -321,7 +321,12 @@ class EcoHavenStore {
         this.addresses = this.loadAddresses();
         this.inventory = this.loadInitialInventory();
         this.reviews = this.loadInitialReviews();
-        this.drawerPaymentMode = 'fifty'; // 'fifty' or 'full'
+        let savedDrawerMode = 'fifty';
+        try {
+            const m = localStorage.getItem('ecohaven_payment_mode');
+            if (m === 'fifty' || m === 'full' || m === 'cod') savedDrawerMode = m;
+        } catch (e) {}
+        this.drawerPaymentMode = savedDrawerMode;
         this.init();
     }
 
@@ -1250,7 +1255,11 @@ class EcoHavenStore {
 
     setDrawerPaymentMode(mode) {
         this.drawerPaymentMode = mode;
+        try {
+            localStorage.setItem('ecohaven_payment_mode', mode);
+        } catch (e) {}
         this.renderCartDrawer();
+        window.dispatchEvent(new CustomEvent('ecohaven_payment_mode_changed', { detail: { mode } }));
     }
 
     openCartDrawer() {
@@ -1347,8 +1356,10 @@ class EcoHavenStore {
         if (footerNote) footerNote.classList.remove('hidden');
 
         if (drawerBtn) {
-            drawerBtn.href = checkoutUrl;
-            drawerBtn.onclick = null;
+            drawerBtn.href = `${checkoutUrl}?paymentMode=${encodeURIComponent(this.drawerPaymentMode || 'fifty')}`;
+            drawerBtn.onclick = () => {
+                try { localStorage.setItem('ecohaven_payment_mode', this.drawerPaymentMode || 'fifty'); } catch (e) {}
+            };
             drawerBtn.className = "w-full py-3.5 px-4 rounded-xl bg-[#86450d] hover:bg-[#713700] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all active:scale-98";
             drawerBtn.innerHTML = `<span>Proceed to Logistics & Checkout →</span>`;
         }
