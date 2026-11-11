@@ -1859,46 +1859,41 @@ class EcoHavenStore {
 
     async deleteOrder(orderId) {
         if (!orderId) return false;
-        const ord = this.orders ? this.orders[orderId] : null;
-        const custName = ord?.customerName || 'Customer';
-        const custEmail = ord?.email || null;
-        const userId = ord?.userId || null;
-        const total = ord?.totalAmount || (ord?.pricing ? ord.pricing.totalAmount : 0);
+        const cleanOrderId = String(orderId).replace(/^#/, '').trim();
 
         if (window.ecoHavenDb) {
             try {
-                await window.ecoHavenDb.ref('ecohaven/orders/' + orderId).remove();
-                console.log("🗑️ Order", orderId, "permanently removed from Firebase RTDB!");
+                await window.ecoHavenDb.ref('ecohaven/orders/' + cleanOrderId).remove();
+                console.log("🗑️ Order", cleanOrderId, "permanently removed from Firebase RTDB!");
             } catch (err) {
                 console.error("Firebase delete order error:", err.message);
             }
         }
 
-        if (this.orders && this.orders[orderId]) {
-            delete this.orders[orderId];
+        if (this.orders && this.orders[cleanOrderId]) {
+            delete this.orders[cleanOrderId];
         }
+        try {
+            const lastId = localStorage.getItem('ecohaven_last_order_id');
+            if (lastId === cleanOrderId) {
+                localStorage.removeItem('ecohaven_last_order_id');
+            }
+        } catch (e) {}
+
+        // Cascade-delete all related Emails, SMS, Notifications, and Chat Rooms from Firebase & LocalStorage
+        if (typeof window.deleteSimulatedCommsByOrderId === 'function') {
+            try {
+                await window.deleteSimulatedCommsByOrderId(cleanOrderId);
+            } catch (e) {
+                console.warn("Cascade delete comms notice:", e);
+            }
+        }
+
         this.saveLocalBackup('ecohaven_cloud_orders_cache', this.orders);
         window.dispatchEvent(new CustomEvent('ecohaven_orders_updated', { detail: this.orders }));
 
-        // Dispatch alert notification to EcoHaven Notification Center (Bell Alert Drawer)
-        if (typeof window.addEcoHavenNotification === 'function') {
-            window.addEcoHavenNotification({
-                type: 'alert',
-                title: `🗑️ Order #${orderId} Deleted`,
-                body: `Order #${orderId} (${custName} • ₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})}) was permanently removed and board space cleared.`,
-                orderId: orderId,
-                customerName: custName,
-                customerEmail: custEmail,
-                userId: userId,
-                icon: 'delete_forever',
-                badgeColor: 'bg-red-100 text-red-700',
-                isDeleted: true,
-                silentToast: true
-            });
-        }
-
         if (typeof window.showEcoHavenToast === 'function') {
-            window.showEcoHavenToast("Order #" + orderId + " permanently deleted and board space cleared.", "error", "Order Deleted");
+            window.showEcoHavenToast("Order #" + cleanOrderId + " and its related Emails & SMS were permanently deleted from Firebase.", "error", "Order & Comms Deleted");
         }
         return true;
     }

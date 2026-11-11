@@ -1709,25 +1709,11 @@ async function executeDeleteConfirmedOrder() {
         if (window.ecohaven.deleteOrder) {
             await window.ecohaven.deleteOrder(orderToDelete);
         }
+        if (typeof window.deleteSimulatedCommsByOrderId === 'function') {
+            await window.deleteSimulatedCommsByOrderId(orderToDelete);
+        }
     } catch (e) {
         console.error("Error deleting order:", e);
-    }
-
-    // DISPATCH ALERT NOTIFICATION TO ECOHAVEN NOTIFICATION CENTER (BELL ALERT DRAWER)
-    if (typeof window.addEcoHavenNotification === "function") {
-        window.addEcoHavenNotification({
-            type: "alert",
-            title: `🗑️ Order #${orderToDelete} Deleted`,
-            body: `Order #${orderToDelete} (${customerName} • ₱${total.toLocaleString("en-PH", {minimumFractionDigits: 2})}) was permanently removed and board space cleared.`,
-            orderId: orderToDelete,
-            customerName: customerName,
-            customerEmail: ord?.email || null,
-            userId: ord?.userId || null,
-            icon: "delete_forever",
-            badgeColor: "bg-red-100 text-red-700",
-            isDeleted: true,
-            silentToast: true
-        });
     }
 
     if (btn) {
@@ -1778,6 +1764,8 @@ function renderKanban() {
 
     const orderList = Object.values(orders);
     const hideArchived = window.kanbanHideArchived !== false;
+    const col4TransitCards = [];
+    const col4DoneCards = [];
 
     orderList.forEach(ord => {
         if (!ord || !ord.orderId) return;
@@ -2084,104 +2072,162 @@ function renderKanban() {
             `;
             col3.appendChild(card);
         } else {
-            const isDone = stage === 5;
+            const isDone = stage === 5 || ord.orderStatus === 'Delivered & Complete' || ord.orderStatus === 'Customer Confirmed Receipt';
             if (isDone) {
                 countComplete++;
-            } else {
-                countTransit++;
-            }
+                // Super-compact 1-row minimized card for completed transactions
+                card.className = "bg-surface-container-lowest/90 px-2.5 py-2 rounded-xl border border-outline-variant/30 shadow-2xs flex flex-col justify-between transition-all duration-200 hover:border-tertiary/40";
+                const shortId = String(ord.orderId).replace(/^EH-\d{4}-/i, '');
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-1.5">
+                        <div class="flex items-center gap-1.5 min-w-0 flex-1 cursor-pointer" onclick="toggleOrderCardDetails('${ord.orderId}', event)" title="Click to expand/collapse completed order #${ord.orderId}">
+                            <span class="w-4 h-4 rounded-full bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-[11px] font-bold">check</span>
+                            </span>
+                            <span class="text-[11px] font-mono font-bold text-tertiary flex-shrink-0">#${shortId}</span>
+                            <span class="text-xs font-semibold text-on-surface truncate">${ord.customerName}</span>
+                            <span class="text-[10px] font-mono font-bold text-tertiary bg-tertiary-fixed/50 px-1.5 py-0.5 rounded flex-shrink-0">₱${total.toLocaleString('en-PH', {maximumFractionDigits: 0})}</span>
+                        </div>
+                        <div class="flex items-center gap-0.5 flex-shrink-0">
+                            <button type="button" onclick="openPodInspectionModal('${ord.orderId}')" class="px-1.5 py-0.5 rounded bg-surface-container hover:bg-surface-container-high text-primary text-[10px] font-bold flex items-center gap-0.5 border border-outline-variant/30 transition-all" title="View Courier Proof of Delivery (POD)">
+                                <span class="material-symbols-outlined text-[12px]">photo_camera</span>
+                                <span>POD</span>
+                            </button>
+                            <button type="button" onclick="archiveOrderDirect('${ord.orderId}', event)" class="p-1 rounded text-outline hover:text-primary hover:bg-surface-container transition-all" title="Clear / Archive from board">
+                                <span class="material-symbols-outlined text-[14px]">archive</span>
+                            </button>
+                            <button type="button" onclick="promptDeleteOrder('${ord.orderId}', event)" class="p-1 rounded text-outline hover:text-error hover:bg-red-50 transition-all" title="Delete Order &amp; Related Emails/SMS">
+                                <span class="material-symbols-outlined text-[14px]">delete</span>
+                            </button>
+                            <button type="button" onclick="toggleOrderCardDetails('${ord.orderId}', event)" class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-all" title="Show / Hide Details">
+                                <span class="material-symbols-outlined text-[15px]" id="toggleIcon-${ord.orderId}">${isExpanded ? 'expand_less' : 'expand_more'}</span>
+                            </button>
+                        </div>
+                    </div>
 
-            card.innerHTML = `
-                <div class="flex justify-between items-center mb-1.5">
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-xs font-mono font-bold text-tertiary">#${ord.orderId}</span>
-                        ${cardActionBtns}
-                    </div>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isDone ? 'bg-tertiary-fixed text-on-tertiary-fixed' : 'bg-primary-fixed text-on-primary-fixed'}">
-                        ${isDone ? 'Delivered & Complete' : 'In Transit'}
-                    </span>
-                </div>
-                <h4 class="font-title-md text-sm text-on-surface font-semibold truncate">${ord.customerName}</h4>
-                <div class="flex items-center justify-between text-xs text-on-surface-variant mt-0.5 mb-1.5">
-                    ${isDone ? `
-                        <span class="font-mono font-bold text-tertiary flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[14px]">check_circle</span>
-                            <span>Fully Paid (₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})})</span>
-                        </span>
-                    ` : `
-                        <span class="font-mono font-semibold text-primary">Bal: ₱${bal.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>
-                    `}
-                    <span class="text-[11px] text-outline truncate max-w-[120px]">${ord.address ? ord.address.split(',')[1] || ord.address : 'Pampanga'}</span>
-                </div>
-
-                <!-- Collapsible Details Drawer -->
-                <div id="details-${ord.orderId}" class="order-details-drawer space-y-2 pt-2 border-t border-outline-variant/30 text-xs ${isExpanded ? '' : 'hidden'}">
-                    <div>
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-outline block">Destination:</span>
-                        <p class="text-xs text-on-surface font-medium leading-relaxed">${ord.address || 'Pampanga'}</p>
-                        ${ord.phone ? `<p class="text-[11px] text-on-surface-variant mt-0.5">📞 ${ord.phone}</p>` : ''}
-                    </div>
-                    <div class="bg-surface-container-low p-2 rounded-lg border border-outline-variant/20">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-primary block mb-0.5">Ordered Items:</span>
-                        ${itemsSummary}
-                    </div>
-                    <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline">
-                        ${isDone ? `
+                    <!-- Collapsible Details Drawer (Hidden by default so done orders occupy only 1 compact row) -->
+                    <div id="details-${ord.orderId}" class="order-details-drawer space-y-2 pt-2 mt-2 border-t border-outline-variant/30 text-xs ${isExpanded ? '' : 'hidden'}">
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="font-mono font-bold text-tertiary">#${ord.orderId} • Delivered &amp; Complete</span>
+                            <span class="font-mono text-emerald-700 font-bold">✓ Fully Paid (₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})})</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-outline block">Destination:</span>
+                            <p class="text-xs text-on-surface font-medium leading-relaxed">${ord.address || 'Pampanga'}</p>
+                            ${ord.phone ? `<p class="text-[11px] text-on-surface-variant mt-0.5">📞 ${ord.phone}${ord.email ? ' • ' + ord.email : ''}</p>` : ''}
+                        </div>
+                        <div class="bg-surface-container-low p-2 rounded-lg border border-outline-variant/20">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-primary block mb-0.5">Ordered Items:</span>
+                            ${itemsSummary}
+                        </div>
+                        <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline">
                             <span class="text-tertiary font-bold flex items-center gap-1">
                                 <span class="material-symbols-outlined text-[13px]">paid</span>
                                 Settlement: Final Balance Collected (₱0.00 Due)
                             </span>
-                            Total Paid: ₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})}<br/>
-                        ` : `
+                            Courier: ${ord.courierName || 'Workshop Fleet (CBD 4821)'}<br/>
+                            Driver: ${ord.driverName || 'Mang Ronaldo Santos'} (${ord.driverPhone || '+63 917 842 4821'})<br/>
+                            Waybill: ${ord.courierTracking || 'EH-FLEET-CBD4821'}
+                        </div>
+                        <div class="flex gap-1.5 pt-1">
+                            <button type="button" onclick="openPodInspectionModal('${ord.orderId}')" class="flex-1 py-1.5 px-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/30 text-[11px] font-bold flex items-center justify-center gap-1 transition-all">
+                                <span class="material-symbols-outlined text-[14px] text-primary">photo_camera</span>
+                                <span>View POD</span>
+                            </button>
+                            <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="py-1.5 px-2.5 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-[11px] font-bold transition-all flex items-center justify-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">edit_note</span>
+                                <span>Edit</span>
+                            </button>
+                            <button type="button" onclick="archiveOrderDirect('${ord.orderId}', event)" class="py-1.5 px-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant text-[11px] font-bold transition-all flex items-center justify-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">archive</span>
+                                <span>Clear</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                col4DoneCards.push(card);
+            } else {
+                countTransit++;
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-1.5">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-mono font-bold text-tertiary">#${ord.orderId}</span>
+                            ${cardActionBtns}
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-primary-fixed text-on-primary-fixed">
+                            In Transit
+                        </span>
+                    </div>
+                    <h4 class="font-title-md text-sm text-on-surface font-semibold truncate">${ord.customerName}</h4>
+                    <div class="flex items-center justify-between text-xs text-on-surface-variant mt-0.5 mb-1.5">
+                        <span class="font-mono font-semibold text-primary">Bal: ₱${bal.toLocaleString('en-PH', {minimumFractionDigits: 2})}</span>
+                        <span class="text-[11px] text-outline truncate max-w-[120px]">${ord.address ? ord.address.split(',')[1] || ord.address : 'Pampanga'}</span>
+                    </div>
+
+                    <!-- Collapsible Details Drawer -->
+                    <div id="details-${ord.orderId}" class="order-details-drawer space-y-2 pt-2 border-t border-outline-variant/30 text-xs ${isExpanded ? '' : 'hidden'}">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-outline block">Destination:</span>
+                            <p class="text-xs text-on-surface font-medium leading-relaxed">${ord.address || 'Pampanga'}</p>
+                            ${ord.phone ? `<p class="text-[11px] text-on-surface-variant mt-0.5">📞 ${ord.phone}</p>` : ''}
+                        </div>
+                        <div class="bg-surface-container-low p-2 rounded-lg border border-outline-variant/20">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-primary block mb-0.5">Ordered Items:</span>
+                            ${itemsSummary}
+                        </div>
+                        <div class="bg-surface p-2 rounded-lg text-xs font-mono text-outline">
                             Balance Due: ₱${bal.toLocaleString('en-PH', {minimumFractionDigits: 2})}<br/>
-                        `}
-                        Courier: ${ord.courierName || 'Workshop Fleet (CBD 4821)'}<br/>
-                        Driver: ${ord.driverName || 'Mang Ronaldo Santos'} (${ord.driverPhone || '+63 917 842 4821'})<br/>
-                        Waybill: ${ord.courierTracking || 'EH-FLEET-CBD4821'}
+                            Courier: ${ord.courierName || 'Workshop Fleet (CBD 4821)'}<br/>
+                            Driver: ${ord.driverName || 'Mang Ronaldo Santos'} (${ord.driverPhone || '+63 917 842 4821'})<br/>
+                            Waybill: ${ord.courierTracking || 'EH-FLEET-CBD4821'}
+                        </div>
+                        <div class="flex gap-2 pt-1">
+                            <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="flex-1 py-1.5 px-2.5 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all flex items-center justify-center gap-1">
+                                <span class="material-symbols-outlined text-[15px]">edit_note</span>
+                                <span>Edit Order</span>
+                            </button>
+                            <button type="button" onclick="promptDeleteOrder('${ord.orderId}', event)" class="py-1.5 px-3 rounded-lg border border-red-200 bg-red-50/60 hover:bg-red-100 text-red-700 text-xs font-bold transition-all flex items-center justify-center gap-1" title="Delete this order">
+                                <span class="material-symbols-outlined text-[15px]">delete</span>
+                                <span>Delete</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex gap-2 pt-1">
-                        <button type="button" onclick="openEditOrderModal('${ord.orderId}', event)" class="flex-1 py-1.5 px-2.5 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all flex items-center justify-center gap-1">
-                            <span class="material-symbols-outlined text-[15px]">edit_note</span>
-                            <span>Edit Order</span>
-                        </button>
-                        <button type="button" onclick="promptDeleteOrder('${ord.orderId}', event)" class="py-1.5 px-3 rounded-lg border border-red-200 bg-red-50/60 hover:bg-red-100 text-red-700 text-xs font-bold transition-all flex items-center justify-center gap-1" title="Delete this order">
-                            <span class="material-symbols-outlined text-[15px]">delete</span>
-                            <span>Delete</span>
-                        </button>
-                    </div>
-                </div>
 
-                <!-- Show / Hide Details Toggle Button -->
-                <button type="button" onclick="toggleOrderCardDetails('${ord.orderId}', event)" class="w-full text-center py-1 my-2 text-[11px] font-semibold text-primary hover:text-primary-container flex items-center justify-center gap-1 bg-surface hover:bg-surface-container rounded-lg border border-outline-variant/30 transition-all">
-                    <span class="material-symbols-outlined text-[15px]" id="toggleIcon-${ord.orderId}">${isExpanded ? 'expand_less' : 'expand_more'}</span>
-                    <span id="toggleText-${ord.orderId}">${isExpanded ? 'Hide Details' : 'Show Details'}</span>
-                </button>
-
-                ${isDone ? `
-                <button type="button" onclick="openPodInspectionModal('${ord.orderId}')" class="w-full mb-2 py-1.5 bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/30 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition-all">
-                    <span class="material-symbols-outlined text-[15px] text-primary">photo_camera</span>
-                    <span>View Courier Proof of Delivery (POD)</span>
-                </button>
-                ` : ''}
-
-                ${!isDone ? `
-                <button onclick="advanceToStage('${ord.orderId}', 5, 'Delivered & Complete')" 
-                        class="w-full py-2 bg-tertiary text-on-tertiary rounded-lg text-xs font-bold hover:bg-tertiary-container transition-all flex items-center justify-center gap-1 shadow-xs">
-                    <span class="material-symbols-outlined text-sm">check_circle</span>
-                    Confirm Delivery &amp; Collect Balance
-                </button>` : `
-                <div class="flex items-center gap-1.5">
-                    <span class="flex-1 py-1.5 bg-tertiary-fixed text-on-tertiary-fixed text-xs font-bold rounded-lg text-center block">✓ Order Fulfilled</span>
-                    <button type="button" onclick="archiveOrderDirect('${ord.orderId}', event)" class="px-2.5 py-1.5 bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-primary rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1" title="Archive order to clear space in Column 4">
-                        <span class="material-symbols-outlined text-[15px]">archive</span>
-                        <span class="text-[11px]">Clear</span>
+                    <!-- Show / Hide Details Toggle Button -->
+                    <button type="button" onclick="toggleOrderCardDetails('${ord.orderId}', event)" class="w-full text-center py-1 my-2 text-[11px] font-semibold text-primary hover:text-primary-container flex items-center justify-center gap-1 bg-surface hover:bg-surface-container rounded-lg border border-outline-variant/30 transition-all">
+                        <span class="material-symbols-outlined text-[15px]" id="toggleIcon-${ord.orderId}">${isExpanded ? 'expand_less' : 'expand_more'}</span>
+                        <span id="toggleText-${ord.orderId}">${isExpanded ? 'Hide Details' : 'Show Details'}</span>
                     </button>
-                </div>
-                `}
-            `;
-            col4.appendChild(card);
+
+                    <button onclick="advanceToStage('${ord.orderId}', 5, 'Delivered & Complete')" 
+                            class="w-full py-2 bg-tertiary text-on-tertiary rounded-lg text-xs font-bold hover:bg-tertiary-container transition-all flex items-center justify-center gap-1 shadow-xs">
+                        <span class="material-symbols-outlined text-sm">check_circle</span>
+                        Confirm Delivery &amp; Collect Balance
+                    </button>
+                `;
+                col4TransitCards.push(card);
+            }
         }
     });
+
+    // Render Column 4: Active In-Transit orders at top, Minimized Completed orders below
+    col4TransitCards.forEach(c => col4.appendChild(c));
+    if (col4DoneCards.length > 0) {
+        const doneHeader = document.createElement('div');
+        doneHeader.className = "pt-2 pb-1 px-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-outline border-t border-outline-variant/30 mt-1";
+        doneHeader.innerHTML = `
+            <span class="flex items-center gap-1 text-tertiary">
+                <span class="material-symbols-outlined text-[13px]">task_alt</span>
+                <span>Completed (${col4DoneCards.length})</span>
+            </span>
+            <button type="button" onclick="handleArchiveAllCompleted()" class="text-[10px] text-primary hover:underline font-bold flex items-center gap-0.5" title="Archive all completed orders">
+                <span class="material-symbols-outlined text-[12px]">done_all</span>
+                <span>Clear All Done</span>
+            </button>
+        `;
+        col4.appendChild(doneHeader);
+        col4DoneCards.forEach(c => col4.appendChild(c));
+    }
 
     // Handle empty states in columns
     if ((countPending + countRejected) === 0) {

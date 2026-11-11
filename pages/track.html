@@ -812,6 +812,8 @@
     function renderOrder(order) {
       if (!order) return;
       currentActiveOrderId = order.orderId;
+      window.currentActiveOrderId = order.orderId;
+      window.currentActiveTrackedOrder = order;
 
       // Auto-clear Order Queue if user just placed this order or if queue still holds items from this order
       try {
@@ -980,7 +982,7 @@
               <span class="material-symbols-outlined text-[16px]">stars</span>
               <span>Leave 5-Star Review</span>
             </button>
-            <button type="button" onclick="window.filterSimulatedComms && window.filterSimulatedComms('email'); window.openSimulatedCommsModal && window.openSimulatedCommsModal();" class="flex-1 sm:flex-initial px-3 py-2 rounded-xl bg-sky-500/15 text-sky-800 hover:bg-sky-500/25 text-xs font-bold transition-all flex items-center justify-center gap-1">
+            <button type="button" onclick="window.filterSimulatedComms && window.filterSimulatedComms('email'); window.openSimulatedCommsModal && window.openSimulatedCommsModal(null, { orderId: '${order.orderId}' });" class="flex-1 sm:flex-initial px-3 py-2 rounded-xl bg-sky-500/15 text-sky-800 hover:bg-sky-500/25 text-xs font-bold transition-all flex items-center justify-center gap-1">
               <span class="material-symbols-outlined text-[15px]">mail</span>
               <span>Email Inbox</span>
             </button>
@@ -1008,7 +1010,7 @@
               <span class="material-symbols-outlined text-[17px]">inventory</span>
               <span>Order Received &amp; View POD</span>
             </button>
-            <button type="button" onclick="window.filterSimulatedComms && window.filterSimulatedComms('email'); window.openSimulatedCommsModal && window.openSimulatedCommsModal();" class="px-3.5 py-2.5 rounded-xl bg-sky-500/15 text-sky-800 hover:bg-sky-500/25 text-xs font-bold transition-all flex items-center justify-center gap-1">
+            <button type="button" onclick="window.filterSimulatedComms && window.filterSimulatedComms('email'); window.openSimulatedCommsModal && window.openSimulatedCommsModal(null, { orderId: '${order.orderId}' });" class="px-3.5 py-2.5 rounded-xl bg-sky-500/15 text-sky-800 hover:bg-sky-500/25 text-xs font-bold transition-all flex items-center justify-center gap-1">
               <span class="material-symbols-outlined text-[16px]">mail</span>
               <span>Email Inbox</span>
             </button>
@@ -1032,7 +1034,7 @@
             <span class="text-on-surface">${statusMsg}</span>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <button type="button" onclick="window.filterSimulatedComms && window.filterSimulatedComms('email'); window.openSimulatedCommsModal && window.openSimulatedCommsModal();" class="px-3.5 py-1.5 rounded-xl bg-sky-500/15 text-sky-800 hover:bg-sky-500/25 font-bold text-xs transition-all flex items-center gap-1 flex-shrink-0">
+            <button type="button" onclick="window.filterSimulatedComms && window.filterSimulatedComms('email'); window.openSimulatedCommsModal && window.openSimulatedCommsModal(null, { orderId: '${order.orderId}' });" class="px-3.5 py-1.5 rounded-xl bg-sky-500/15 text-sky-800 hover:bg-sky-500/25 font-bold text-xs transition-all flex items-center gap-1 flex-shrink-0">
               <span class="material-symbols-outlined text-sm">mail</span>
               <span>Email Inbox</span>
             </button>
@@ -1258,6 +1260,9 @@
     }
 
     function resetTrackSearch() {
+      currentActiveOrderId = null;
+      window.currentActiveOrderId = null;
+      window.currentActiveTrackedOrder = null;
       document.getElementById('trackInput').value = '';
       document.getElementById('trackInput').focus();
       document.getElementById('trackResult').classList.add('hidden');

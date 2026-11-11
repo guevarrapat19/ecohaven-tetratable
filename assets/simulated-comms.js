@@ -194,30 +194,330 @@
     return entry;
   };
 
-  // Retrieve log
-  window.getSimulatedCommsLog = getCommsLog;
+  // Retrieve raw log
+  window.getAllRawSimulatedCommsLog = getCommsLog;
 
-  // Clear log
-  window.clearSimulatedCommsLog = function() {
-    localStorage.removeItem(COMMS_STORAGE_KEY);
-    saveCommsLog([]);
+  function extractOrderIdFromCommsItem(item) {
+    if (!item) return null;
+    if (item.orderId && String(item.orderId).toUpperCase().startsWith('EH-')) {
+      return String(item.orderId).replace(/^#/, '').trim();
+    }
+    const text = `${item.subject || ''} ${item.body || ''} ${item.message || ''}`;
+    const m = text.match(/#?(EH-\d{4}-\d{4,6})/i);
+    return m ? m[1].toUpperCase() : (item.orderId ? String(item.orderId).replace(/^#/, '').trim() : null);
+  }
+
+  function itemMatchesOrderId(item, targetOrderId) {
+    if (!item || !targetOrderId) return false;
+    const cleanTarget = String(targetOrderId).replace(/^#/, '').trim().toUpperCase();
+    if (!cleanTarget) return false;
+    const itemOrd = extractOrderIdFromCommsItem(item);
+    if (itemOrd && itemOrd.toUpperCase() === cleanTarget) return true;
+    const text = `${item.orderId || ''} ${item.subject || ''} ${item.body || ''} ${item.message || ''}`.toUpperCase();
+    return text.includes(cleanTarget);
+  }
+
+  // Cascade-delete all Emails, SMS, and Notifications for a deleted orderId from Firebase & LocalStorage
+  window.deleteSimulatedCommsByOrderId = async function(orderId) {
+    if (!orderId) return;
+    const cleanOrderId = String(orderId).replace(/^#/, '').trim().toUpperCase();
+    if (!cleanOrderId) return;
+
+    // 1. Filter local simulated comms
+    const currentLog = getCommsLog();
+    const removedItems = currentLog.filter(item => itemMatchesOrderId(item, cleanOrderId));
+    const remainingLog = currentLog.filter(item => !itemMatchesOrderId(item, cleanOrderId));
+    _cloudEmailsSnapshot = (_cloudEmailsSnapshot || []).filter(item => !itemMatchesOrderId(item, cleanOrderId));
+    _cloudSmsSnapshot = (_cloudSmsSnapshot || []).filter(item => !itemMatchesOrderId(item, cleanOrderId));
+    saveCommsLog(remainingLog);
+
+    // 2. Filter seller emails cache
+    try {
+      const sellerEmailsRaw = localStorage.getItem('ecohaven_seller_emails');
+      if (sellerEmailsRaw) {
+        const parsed = JSON.parse(sellerEmailsRaw);
+        if (Array.isArray(parsed)) {
+          const kept = parsed.filter(e => !itemMatchesOrderId(e, cleanOrderId));
+          localStorage.setItem('ecohaven_seller_emails', JSON.stringify(kept));
+          window.dispatchEvent(new CustomEvent('ecohaven_seller_emails_updated', { detail: kept }));
+        }
+      }
+    } catch (e) {}
+
+    // 3. Filter notifications cache
+    try {
+      const notifsRaw = localStorage.getItem('ecohaven_notifications');
+      if (notifsRaw) {
+        const parsedN = JSON.parse(notifsRaw);
+        if (Array.isArray(parsedN)) {
+          const keptN = parsedN.filter(n => !itemMatchesOrderId(n, cleanOrderId));
+          localStorage.setItem('ecohaven_notifications', JSON.stringify(keptN));
+          window.dispatchEvent(new CustomEvent('ecohaven_notifications_updated', { detail: keptN }));
+        }
+      }
+    } catch (e) {}
+
+    // 4. Delete matching Emails, SMS, Notifications, and Chat Rooms from Firebase RTDB
     if (window.ecoHavenDb) {
-      try {
-        window.ecoHavenDb.ref('ecohaven/emails').remove();
-        window.ecoHavenDb.ref('ecohaven/sms').remove();
-      } catch (e) {}
+      const deletePromises = [];
+
+      // Remove already-known IDs immediately
+      removedItems.forEach(item => {
+        if (item && item.id) {
+          const path = item.type === 'sms' ? ('ecohaven/sms/' + item.id) : ('ecohaven/emails/' + item.id);
+          deletePromises.push(window.ecoHavenDb.ref(path).remove().catch(() => {}));
+        }
+      });
+
+      // Scan ecohaven/emails in Firebase to catch any cloud records matching cleanOrderId
+      deletePromises.push(
+        window.ecoHavenDb.ref('ecohaven/emails').once('value').then(snap => {
+          const val = snap.val();
+          if (!val) return;
+          const p = [];
+          Object.keys(val).forEach(key => {
+            if (itemMatchesOrderId(val[key], cleanOrderId)) {
+              p.push(window.ecoHavenDb.ref('ecohaven/emails/' + key).remove().catch(() => {}));
+            }
+          });
+          return Promise.all(p);
+        }).catch(() => {})
+      );
+
+      // Scan ecohaven/sms in Firebase to catch any cloud records matching cleanOrderId
+      deletePromises.push(
+        window.ecoHavenDb.ref('ecohaven/sms').once('value').then(snap => {
+          const val = snap.val();
+          if (!val) return;
+          const p = [];
+          Object.keys(val).forEach(key => {
+            if (itemMatchesOrderId(val[key], cleanOrderId)) {
+              p.push(window.ecoHavenDb.ref('ecohaven/sms/' + key).remove().catch(() => {}));
+            }
+          });
+          return Promise.all(p);
+        }).catch(() => {})
+      );
+
+      // Scan ecohaven/notifications in Firebase to remove notifications for deleted orderId
+      deletePromises.push(
+        window.ecoHavenDb.ref('ecohaven/notifications').once('value').then(snap => {
+          const val = snap.val();
+          if (!val) return;
+          const p = [];
+          Object.keys(val).forEach(key => {
+            const n = val[key];
+            if (n && (String(n.orderId || '').toUpperCase() === cleanOrderId || String(n.title || '').toUpperCase().includes(cleanOrderId))) {
+              p.push(window.ecoHavenDb.ref('ecohaven/notifications/' + key).remove().catch(() => {}));
+            }
+          });
+          return Promise.all(p);
+        }).catch(() => {})
+      );
+
+      // Scan ecohaven/chats in Firebase to remove chat rooms tied to deleted orderId
+      deletePromises.push(
+        window.ecoHavenDb.ref('ecohaven/chats').once('value').then(snap => {
+          const val = snap.val();
+          if (!val) return;
+          const p = [];
+          Object.keys(val).forEach(key => {
+            const c = val[key];
+            if (c && String(c.orderId || '').toUpperCase() === cleanOrderId) {
+              p.push(window.ecoHavenDb.ref('ecohaven/chats/' + key).remove().catch(() => {}));
+            }
+          });
+          return Promise.all(p);
+        }).catch(() => {})
+      );
+
+      await Promise.all(deletePromises);
+      console.log(`🗑️ Purged all related Emails, SMS, and Notifications in Firebase for deleted Order #${cleanOrderId}`);
+    }
+
+    renderCommsModalContent();
+  };
+
+  // Automatically purge orphan emails/SMS in Firebase whose EH-2026-XXXXX orderId was previously deleted
+  let _orphanPurgeInProgress = false;
+  window.purgeOrphanOrderCommsFromFirebase = function() {
+    if (_orphanPurgeInProgress) return;
+    if (!window.ecohaven || !window.ecohaven.cloudSynced) return;
+    const activeOrdersMap = window.ecohaven.orders || {};
+    const activeOrderIds = new Set(Object.keys(activeOrdersMap).map(k => k.toUpperCase()));
+
+    const allItems = getCommsLog();
+    const orphanIds = new Set();
+
+    allItems.forEach(item => {
+      const ordId = extractOrderIdFromCommsItem(item);
+      if (ordId && /^EH-\d{4}-\d{4,6}$/i.test(ordId)) {
+        if (!activeOrderIds.has(ordId.toUpperCase())) {
+          orphanIds.add(ordId.toUpperCase());
+        }
+      }
+    });
+
+    if (orphanIds.size > 0) {
+      _orphanPurgeInProgress = true;
+      Promise.all(Array.from(orphanIds).map(oid => window.deleteSimulatedCommsByOrderId(oid)))
+        .finally(() => { _orphanPurgeInProgress = false; });
+    }
+  };
+
+  // Helper to get current logged-in user
+  function getActiveViewerUser() {
+    try {
+      const raw = localStorage.getItem('ecohaven_user') || localStorage.getItem('currentUser');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function isViewerSeller(user) {
+    const path = (window.location && window.location.pathname) ? window.location.pathname.toLowerCase() : '';
+    if (path.includes('seller.html') || path.endsWith('/seller')) return true;
+    if (!user) return false;
+    const role = String(user.role || '').toLowerCase();
+    const email = String(user.email || '').toLowerCase();
+    return role === 'seller' || role === 'admin' || email === 'artisan@ecohaven.ph' || email === 'admin@ecohaven.ph' || email === 'seller@ecohaven.ph';
+  }
+
+  let activeModalFilter = 'all';
+  let activeSelectedEntryId = null;
+  let activeModalOrderFilter = null;
+
+  // Recipient-Scoped Comms Log:
+  // - On track.html when tracking an order (or when activeModalOrderFilter is set): shows ONLY that order's emails & SMS
+  // - Seller on seller.html: shows all active orders' emails & SMS
+  // - Logged-in Customer: shows ONLY emails & SMS addressed to their email/phone or belonging to their active orders
+  // - Guest not tracking an order: shows only their current session's last placed order (if active), never other customers' logs
+  function getScopedCommsLog() {
+    let list = getCommsLog();
+    const activeOrdersMap = (window.ecohaven && window.ecohaven.orders) ? window.ecohaven.orders : null;
+    const cloudSynced = !!(window.ecohaven && window.ecohaven.cloudSynced);
+
+    // 1. Exclude any comms from deleted orders
+    if (activeOrdersMap && (cloudSynced || Object.keys(activeOrdersMap).length > 0)) {
+      const validIds = new Set(Object.keys(activeOrdersMap).map(k => k.toUpperCase()));
+      list = list.filter(item => {
+        const ordId = extractOrderIdFromCommsItem(item);
+        if (ordId && /^EH-\d{4}-\d{4,6}$/i.test(ordId)) {
+          return validIds.has(ordId.toUpperCase());
+        }
+        return true;
+      });
+    }
+
+    const path = (window.location && window.location.pathname) ? window.location.pathname.toLowerCase() : '';
+    const isTrackPage = path.includes('track.html') || path.endsWith('/track');
+    const trackedOrderId = activeModalOrderFilter || (isTrackPage && window.currentActiveOrderId ? window.currentActiveOrderId : null);
+
+    // 2. If tracking a specific order on track.html (Guest or Customer), scope strictly to that tracked order!
+    if (trackedOrderId) {
+      return list.filter(item => itemMatchesOrderId(item, trackedOrderId));
+    }
+
+    const user = getActiveViewerUser();
+
+    // 3. Seller / Admin sees all non-deleted workshop dispatches
+    if (isViewerSeller(user)) {
+      return list;
+    }
+
+    // 4. Logged-in Customer Account: scope strictly to receiver email, phone, or customer's own active orders
+    if (user && (user.email || user.phone || user.uid)) {
+      const uEmail = String(user.email || '').trim().toLowerCase();
+      const uPhoneTail = String(user.phone || '').replace(/[^0-9]/g, '').slice(-10);
+      const uUid = user.uid || user.id || '';
+      const myOrderIds = new Set();
+
+      if (activeOrdersMap) {
+        Object.values(activeOrdersMap).forEach(ord => {
+          if (!ord || !ord.orderId) return;
+          const oEmail = String(ord.email || ord.customerEmail || '').trim().toLowerCase();
+          const oPhoneTail = String(ord.phone || ord.contactPhone || '').replace(/[^0-9]/g, '').slice(-10);
+          if (
+            (uUid && ord.userId === uUid) ||
+            (uEmail && oEmail && oEmail === uEmail) ||
+            (uPhoneTail.length >= 10 && oPhoneTail === uPhoneTail)
+          ) {
+            myOrderIds.add(String(ord.orderId).toUpperCase());
+          }
+        });
+      }
+
+      return list.filter(item => {
+        const itemOrd = extractOrderIdFromCommsItem(item);
+        // If item belongs to a specific EH order and we know the orders, check if it's the user's order or addressed to the user
+        if (itemOrd && myOrderIds.has(itemOrd.toUpperCase())) return true;
+        const toRaw = String(item.to || '').trim().toLowerCase();
+        const toPhoneTail = String(item.to || '').replace(/[^0-9]/g, '').slice(-10);
+        if (uEmail && toRaw === uEmail) return true;
+        if (uPhoneTail.length >= 10 && toPhoneTail === uPhoneTail) return true;
+        return false;
+      });
+    }
+
+    // 5. Guest Customer not currently tracking an order on track.html:
+    // Only show dispatches for their own session's last placed order (if any)
+    try {
+      const lastOrderId = localStorage.getItem('ecohaven_last_order_id');
+      if (lastOrderId && (!activeOrdersMap || activeOrdersMap[lastOrderId])) {
+        return list.filter(item => itemMatchesOrderId(item, lastOrderId));
+      }
+    } catch (e) {}
+
+    return [];
+  }
+
+  window.getSimulatedCommsLog = getScopedCommsLog;
+  window.getScopedSimulatedCommsLog = getScopedCommsLog;
+
+  // Clear log (clears scoped items for customer/tracked order, or all for seller)
+  window.clearSimulatedCommsLog = function() {
+    const user = getActiveViewerUser();
+    const isSeller = isViewerSeller(user) && !activeModalOrderFilter;
+
+    if (isSeller) {
+      localStorage.removeItem(COMMS_STORAGE_KEY);
+      _cloudEmailsSnapshot = [];
+      _cloudSmsSnapshot = [];
+      saveCommsLog([]);
+      if (window.ecoHavenDb) {
+        try {
+          window.ecoHavenDb.ref('ecohaven/emails').remove();
+          window.ecoHavenDb.ref('ecohaven/sms').remove();
+        } catch (e) {}
+      }
+    } else {
+      const scopedItems = getScopedCommsLog();
+      const scopedIds = new Set(scopedItems.map(x => x.id));
+      const remaining = getCommsLog().filter(x => !scopedIds.has(x.id));
+      _cloudEmailsSnapshot = (_cloudEmailsSnapshot || []).filter(x => !scopedIds.has(x.id));
+      _cloudSmsSnapshot = (_cloudSmsSnapshot || []).filter(x => !scopedIds.has(x.id));
+      saveCommsLog(remaining);
+      if (window.ecoHavenDb) {
+        scopedItems.forEach(item => {
+          if (item && item.id) {
+            const path = item.type === 'sms' ? ('ecohaven/sms/' + item.id) : ('ecohaven/emails/' + item.id);
+            try { window.ecoHavenDb.ref(path).remove(); } catch (e) {}
+          }
+        });
+      }
     }
     renderCommsModalContent();
     if (typeof window.showEcoHavenToast === 'function') {
-      window.showEcoHavenToast('Simulated notification outbox cleared.', 'info');
+      window.showEcoHavenToast('Inbox notifications cleared.', 'info');
     }
   };
 
   // ==============================================================================
   // SIMULATED OUTBOX & GATEWAY VIEWER MODAL
   // ==============================================================================
-  let activeModalFilter = 'all';
-  let activeSelectedEntryId = null;
 
   function injectCommsModal() {
     if (document.getElementById('ecohavenCommsModal')) return;
@@ -298,7 +598,7 @@
     const statsBadge = document.getElementById('commsStatsBadge');
     if (!listContainer || !previewContainer) return;
 
-    const log = getCommsLog();
+    const log = getScopedCommsLog();
     let filtered = log;
     if (activeModalFilter === 'email') filtered = log.filter(x => x.type === 'email');
     if (activeModalFilter === 'sms') filtered = log.filter(x => x.type === 'sms');
@@ -306,15 +606,27 @@
     const emailCount = log.filter(x => x.type === 'email').length;
     const smsCount = log.filter(x => x.type === 'sms').length;
     if (statsBadge) {
-      statsBadge.innerText = `${emailCount} Emails • ${smsCount} SMS Dispatched (100% Simulated Delivery)`;
+      const path = (window.location && window.location.pathname) ? window.location.pathname.toLowerCase() : '';
+      const isTrackPage = path.includes('track.html') || path.endsWith('/track');
+      const trackedOrderId = activeModalOrderFilter || (isTrackPage && window.currentActiveOrderId ? window.currentActiveOrderId : null);
+      const user = getActiveViewerUser();
+      let scopeLabel = '100% Simulated Delivery';
+      if (trackedOrderId) {
+        scopeLabel = `Order #${String(trackedOrderId).replace(/^#/, '')}`;
+      } else if (user && !isViewerSeller(user) && user.email) {
+        scopeLabel = `Receiver: ${user.email}`;
+      } else if (isViewerSeller(user)) {
+        scopeLabel = 'All Active Workshop Orders';
+      }
+      statsBadge.innerText = `${emailCount} Emails • ${smsCount} SMS (${scopeLabel})`;
     }
 
     if (filtered.length === 0) {
       listContainer.innerHTML = `
         <div class="py-12 text-center text-on-surface-variant">
           <span class="material-symbols-outlined text-4xl text-outline-variant mb-2 block">outgoing_mail</span>
-          <p class="text-xs font-bold text-on-surface">No simulated dispatches yet</p>
-          <p class="text-[11px] text-on-surface-variant mt-1">Place an order, register an account, or advance a seller order to trigger outbound alerts.</p>
+          <p class="text-xs font-bold text-on-surface">No incoming emails or SMS for this recipient yet</p>
+          <p class="text-[11px] text-on-surface-variant mt-1">Updates for your active order or registered account will appear here in real time.</p>
         </div>
       `;
       previewContainer.innerHTML = `
@@ -463,8 +775,13 @@
     renderCommsModalContent();
   };
 
-  window.openSimulatedCommsModal = function(highlightId) {
+  window.openSimulatedCommsModal = function(highlightId, scopeOpts) {
     injectCommsModal();
+    if (scopeOpts && typeof scopeOpts === 'object' && scopeOpts.orderId) {
+      activeModalOrderFilter = scopeOpts.orderId;
+    } else {
+      activeModalOrderFilter = null;
+    }
     if (highlightId) activeSelectedEntryId = highlightId;
     renderCommsModalContent();
 
@@ -505,6 +822,9 @@
   function syncCloudCommsToLocal() {
     const merged = [..._cloudEmailsSnapshot, ..._cloudSmsSnapshot].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     saveCommsLog(merged);
+    if (typeof window.purgeOrphanOrderCommsFromFirebase === 'function') {
+      window.purgeOrphanOrderCommsFromFirebase();
+    }
     if (document.getElementById('ecohavenCommsModal') && !document.getElementById('ecohavenCommsModal').classList.contains('hidden')) {
       renderCommsModalContent();
     }
@@ -557,6 +877,15 @@
       });
     } catch (e) {}
   }
+
+  window.addEventListener('ecohaven_orders_updated', () => {
+    if (typeof window.purgeOrphanOrderCommsFromFirebase === 'function') {
+      window.purgeOrphanOrderCommsFromFirebase();
+    }
+    if (document.getElementById('ecohavenCommsModal') && !document.getElementById('ecohavenCommsModal').classList.contains('hidden')) {
+      renderCommsModalContent();
+    }
+  });
 
   // Auto initialize on DOM ready
   if (document.readyState === 'loading') {
