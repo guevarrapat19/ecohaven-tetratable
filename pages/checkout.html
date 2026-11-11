@@ -837,14 +837,22 @@
     </div>
   </div>
 
+  <!-- Mandatory Order & Escrow Agreement Checkbox -->
+  <div class="p-3.5 rounded-xl bg-surface-container-low border border-primary/25 flex items-start gap-3 transition-all hover:bg-surface-container hover:border-primary/45" id="orderAgreementContainer">
+    <input type="checkbox" id="orderAgreementCheckbox" onchange="toggleAgreementValidation()" class="mt-1 accent-primary h-4 w-4 rounded flex-shrink-0 cursor-pointer" />
+    <label for="orderAgreementCheckbox" id="agreementTermsText" class="text-xs text-on-surface leading-relaxed select-none cursor-pointer">
+      I confirm that I have reviewed and agree to the <a href="legal.html#terms" target="_blank" class="underline text-primary font-bold hover:text-primary-container">Terms and Conditions</a>, acknowledging that custom furniture orders require a 50% non-refundable earnest deposit to secure timber allocation in Pampanga under RA 8792.
+    </label>
+  </div>
+
   <!-- Primary Call to Action Button: Dynamic Gateway Trigger -->
   <div class="space-y-1.5 pt-1">
-    <button id="primaryPaymentBtn" class="w-full bg-[#005CE6] hover:bg-[#0047b3] text-white py-4 px-6 rounded-xl font-title-md text-title-md font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group active:scale-[0.99]" onclick="handlePrimaryPaymentClick()">
+    <button id="primaryPaymentBtn" class="w-full bg-[#005CE6] hover:bg-[#0047b3] text-white py-4 px-6 rounded-xl font-title-md text-title-md font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group active:scale-[0.99] opacity-60" onclick="handlePrimaryPaymentClick()">
       <span id="primaryPaymentBtnIcon" class="material-symbols-outlined text-[22px] group-hover:rotate-12 transition-transform">bolt</span>
       <span id="primaryPaymentBtnText">Launch GCash App-to-App Payment →</span>
     </button>
     <p class="text-center font-caption text-caption text-outline">
-      By completing your order, you agree to EcoHaven's <a href="legal.html#terms" target="_blank" class="underline text-primary font-semibold hover:text-primary-container">Terms and Conditions</a> under RA 8792.
+      Please check the agreement box above to proceed under <a href="legal.html#terms" target="_blank" class="underline text-primary font-semibold hover:text-primary-container">Terms and Conditions (RA 8792)</a>.
     </p>
   </div>
 </section>
@@ -2542,12 +2550,20 @@
     // Agreement Checkbox Validation Controller
     function toggleAgreementValidation() {
       const checkbox = document.getElementById('orderAgreementCheckbox');
+      const container = document.getElementById('orderAgreementContainer');
       const btn = document.getElementById('primaryPaymentBtn');
       if (!checkbox || !btn) return;
       if (!checkbox.checked) {
-        btn.classList.add('opacity-50');
+        btn.classList.add('opacity-60');
+        if (container) {
+          container.classList.remove('border-emerald-600/60', 'bg-emerald-50/40');
+        }
       } else {
-        btn.classList.remove('opacity-50');
+        btn.classList.remove('opacity-60', 'opacity-50');
+        if (container) {
+          container.classList.remove('ring-2', 'ring-red-500', 'bg-red-500/10');
+          container.classList.add('border-emerald-600/60', 'bg-emerald-50/40');
+        }
       }
     }
 
@@ -2674,6 +2690,7 @@
         icon.innerText = "local_shipping";
         text.innerText = "Proceed to Purchase (Cash on Delivery) →";
       }
+      toggleAgreementValidation();
     }
 
     function handlePrimaryPaymentClick() {
