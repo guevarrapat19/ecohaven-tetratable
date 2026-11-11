@@ -1595,6 +1595,7 @@
 
     function parseAddressToFields(addrStr) {
       if (!addrStr) return;
+      initRegionDropdowns();
       const streetInput = document.getElementById('addrStreetInput');
       const provSelect = document.getElementById('addrProvinceSelect');
       const citySelect = document.getElementById('addrCitySelect');
@@ -1761,6 +1762,7 @@
         }
 
         if (select) {
+          const prevSelectVal = select.value;
           let optionsHtml = '';
           addresses.forEach(addr => {
             const isDef = addr.isDefault ? ' [Default]' : '';
@@ -1769,15 +1771,22 @@
           });
           optionsHtml += `<option value="new">➕ + Use / Enter a New Delivery Address...</option>`;
           select.innerHTML = optionsHtml;
+          if (prevSelectVal === 'new' || addresses.some(a => a.id === prevSelectVal)) {
+            select.value = prevSelectVal;
+          }
         }
 
         if (regSection) regSection.style.display = 'flex';
-        if (defaultAddr) {
-          applyAddressToInputs(defaultAddr);
-          updateActiveAddressCardDisplay(defaultAddr);
-        } else if (addresses.length > 0) {
-          applyAddressToInputs(addresses[0]);
-          updateActiveAddressCardDisplay(addresses[0]);
+        const provSelectEl = document.getElementById('addrProvinceSelect');
+        const shouldAutoApply = userChanged || !provSelectEl || !provSelectEl.value;
+        if (shouldAutoApply && (!select || select.value !== 'new')) {
+          if (defaultAddr) {
+            applyAddressToInputs(defaultAddr);
+            if (typeof updateActiveAddressCardDisplay === 'function') updateActiveAddressCardDisplay(defaultAddr);
+          } else if (addresses.length > 0) {
+            applyAddressToInputs(addresses[0]);
+            if (typeof updateActiveAddressCardDisplay === 'function') updateActiveAddressCardDisplay(addresses[0]);
+          }
         }
       } else {
         // Registered user without any saved addresses yet — still show My Address List button so they can add addresses!
@@ -1787,12 +1796,13 @@
         if (regSection) regSection.style.display = 'none';
         if (selectContainer) selectContainer.classList.add('hidden');
         if (badge) badge.innerText = 'New Address';
-        updateActiveAddressCardDisplay(null);
+        if (typeof updateActiveAddressCardDisplay === 'function') updateActiveAddressCardDisplay(null);
       }
     }
 
     function applyAddressToInputs(addr) {
       if (!addr) return;
+      initRegionDropdowns();
       if (document.getElementById('customerNameInput') && addr.recipientName) {
         document.getElementById('customerNameInput').value = addr.recipientName;
       }
@@ -1802,19 +1812,45 @@
       if (document.getElementById('customerEmailInput') && addr.email) {
         document.getElementById('customerEmailInput').value = addr.email;
       }
-      const fullAddrStr = addr.fullAddress || addr.address || `${addr.street || ''}, ${addr.barangay || ''}, ${addr.city || ''}, ${addr.province || ''} ${addr.zipCode || ''}`;
-      if (fullAddrStr) {
-        parseAddressToFields(fullAddrStr);
-        const hiddenInput = document.getElementById('customerAddressInput');
-        const preview = document.getElementById('fullAddressPreview');
-        if (hiddenInput && !hiddenInput.value) hiddenInput.value = fullAddrStr;
-        if (preview) preview.innerText = fullAddrStr;
+      const regions = window.PHILIPPINE_LOGISTICS_REGIONS || {};
+      const provSelect = document.getElementById('addrProvinceSelect');
+      const citySelect = document.getElementById('addrCitySelect');
+      const brgySelect = document.getElementById('addrBarangaySelect');
+      const zipInput = document.getElementById('addrZipInput');
+      const streetInput = document.getElementById('addrStreetInput');
+
+      if (addr.province && regions[addr.province] && provSelect) {
+        provSelect.value = addr.province;
+        onProvinceChange(addr.province, true);
+        if (addr.city && citySelect) {
+          citySelect.value = addr.city;
+          onCityChange(addr.city, true);
+        }
+        if (addr.barangay && brgySelect) {
+          brgySelect.value = addr.barangay;
+        }
+        if (zipInput && addr.zipCode) {
+          zipInput.value = addr.zipCode;
+        }
+        if (streetInput && addr.street !== undefined) {
+          streetInput.value = addr.street;
+        }
+        syncSynthesizedAddress();
+      } else {
+        const fullAddrStr = addr.fullAddress || addr.address || `${addr.street || ''}, ${addr.barangay || ''}, ${addr.city || ''}, ${addr.province || ''} ${addr.zipCode || ''}`;
+        if (fullAddrStr) {
+          parseAddressToFields(fullAddrStr);
+          const hiddenInput = document.getElementById('customerAddressInput');
+          const preview = document.getElementById('fullAddressPreview');
+          if (hiddenInput && !hiddenInput.value) hiddenInput.value = fullAddrStr;
+          if (preview) preview.innerText = fullAddrStr;
+        }
       }
 
       // Update badge
       const badge = document.getElementById('selectedAddressBadge');
       if (badge) {
-        badge.innerText = addr.isDefault ? 'Default Address' : addr.label;
+        badge.innerText = addr.isDefault ? 'Default Address' : (addr.label || 'Saved Address');
       }
 
       // Automatically match and select freight zone
@@ -1833,20 +1869,34 @@
 
     function onSavedAddressSelect(val) {
       if (val === 'new') {
+        const provSelect = document.getElementById('addrProvinceSelect');
+        const citySelect = document.getElementById('addrCitySelect');
+        const brgySelect = document.getElementById('addrBarangaySelect');
+        const zipInput = document.getElementById('addrZipInput');
+        const streetInput = document.getElementById('addrStreetInput');
         const addrInput = document.getElementById('customerAddressInput');
-        if (addrInput) {
-          addrInput.value = '';
-          addrInput.focus();
-        }
+        const preview = document.getElementById('fullAddressPreview');
+
+        if (provSelect) provSelect.selectedIndex = 0;
+        if (citySelect) citySelect.innerHTML = '<option value="" disabled selected>Select City / Municipality</option>';
+        if (brgySelect) brgySelect.innerHTML = '<option value="" disabled selected>Select Barangay</option>';
+        if (zipInput) zipInput.value = '';
+        if (streetInput) streetInput.value = '';
+        if (addrInput) addrInput.value = '';
+        if (preview) preview.innerText = 'Please complete your delivery address (Province, City, Street)';
+        if (typeof updateActiveAddressCardDisplay === 'function') updateActiveAddressCardDisplay(null);
+
         const badge = document.getElementById('selectedAddressBadge');
         if (badge) badge.innerText = 'New Custom Address';
         const checkboxRow = document.getElementById('saveAsDefaultRow');
         if (checkboxRow) checkboxRow.classList.remove('hidden');
+        if (provSelect) provSelect.focus();
       } else {
-        const addresses = window.ecohaven.getAddresses ? window.ecohaven.getAddresses() : [];
+        const addresses = (window.ecohaven && window.ecohaven.getAddresses) ? window.ecohaven.getAddresses() : [];
         const chosen = addresses.find(a => a.id === val);
         if (chosen) {
           applyAddressToInputs(chosen);
+          if (typeof updateActiveAddressCardDisplay === 'function') updateActiveAddressCardDisplay(chosen);
         }
       }
     }
@@ -3435,16 +3485,18 @@
 
     function populateModalProvinceDropdown() {
       const pSelect = document.getElementById('modalNewAddrProvince');
-      if (!pSelect || pSelect.options.length > 0) return;
+      if (!pSelect) return;
 
       const regions = window.PHILIPPINE_LOGISTICS_REGIONS || (typeof PHILIPPINE_LOGISTICS_REGIONS !== 'undefined' ? PHILIPPINE_LOGISTICS_REGIONS : null);
-      if (regions) {
-        let opts = '';
-        Object.keys(regions).forEach(prov => {
-          opts += `<option value="${prov}">${prov}</option>`;
-        });
-        pSelect.innerHTML = opts;
-        onModalProvinceChange(pSelect.value);
+      if (regions && Object.keys(regions).length > 0) {
+        if (pSelect.options.length < Object.keys(regions).length) {
+          let opts = '';
+          Object.keys(regions).forEach(prov => {
+            opts += `<option value="${prov}">${prov}</option>`;
+          });
+          pSelect.innerHTML = opts;
+        }
+        onModalProvinceChange(pSelect.value || Object.keys(regions)[0]);
       }
     }
 

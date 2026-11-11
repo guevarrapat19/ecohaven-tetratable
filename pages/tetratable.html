@@ -748,6 +748,162 @@
 <script src="../js/firebase-config.js"></script>
 <script src="../js/store.js"></script>
 <script>
+    // =========================================================================
+    // TETRATABLE 4-IN-1 CONFIGURATOR & RESERVATION ENGINE
+    // =========================================================================
+    let currentMode = 'A';
+    let currentFinish = 'Natural Polished Mahogany';
+    const basePrice = 6934.00;
+    const cushionPrice = 1250.00;
+    const waxPrice = 580.00;
+
+    function selectStain(stainName, el) {
+      currentFinish = stainName;
+      const finishEl = document.getElementById('selected-finish-name');
+      if (finishEl) finishEl.textContent = stainName;
+      const queueFinishEl = document.getElementById('queue-selected-finish');
+      if (queueFinishEl) queueFinishEl.textContent = 'Stain: ' + stainName;
+
+      const allSwatches = document.querySelectorAll('.swatch-btn');
+      allSwatches.forEach(btn => {
+        btn.classList.remove('ring-2', 'ring-primary');
+        btn.classList.add('ring-0');
+        btn.innerHTML = '';
+      });
+
+      if (el) {
+        el.classList.remove('ring-0');
+        el.classList.add('ring-2', 'ring-primary');
+        el.innerHTML = '<span class="material-symbols-outlined text-[14px] text-on-primary flex items-center justify-center">check</span>';
+      }
+    }
+
+    function setPreview(idx) {
+      const thumbs = document.querySelectorAll('.thumb-btn');
+      const mainImg = document.getElementById('main-product-img');
+      const hotspotsLayer = document.getElementById('hotspots-layer');
+      thumbs.forEach((t, i) => {
+        if (i === idx) {
+          t.classList.remove('ring-0');
+          t.classList.add('ring-2', 'ring-primary');
+          const thumbImg = t.querySelector('img');
+          if (thumbImg && mainImg) {
+            mainImg.src = thumbImg.src;
+          }
+        } else {
+          t.classList.remove('ring-2', 'ring-primary');
+          t.classList.add('ring-0');
+        }
+      });
+      if (hotspotsLayer) {
+        if (idx === 0) {
+          hotspotsLayer.classList.remove('opacity-0', 'pointer-events-none');
+          hotspotsLayer.classList.add('opacity-100');
+        } else {
+          hotspotsLayer.classList.add('opacity-0', 'pointer-events-none');
+          hotspotsLayer.classList.remove('opacity-100');
+        }
+      }
+    }
+
+    function recalculatePrice() {
+      let total = basePrice;
+      const cushionsChecked = !!document.getElementById('addon-cushions')?.checked;
+      const waxChecked = !!document.getElementById('addon-wax')?.checked;
+
+      if (cushionsChecked) total += cushionPrice;
+      if (waxChecked) total += waxPrice;
+
+      const deposit = total / 2;
+
+      const formattedTotal = '₱' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const formattedDeposit = '₱' + deposit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      const fullPriceEl = document.getElementById('full-settled-price');
+      const depositPriceEl = document.getElementById('deposit-price');
+      const ctaTextEl = document.getElementById('cta-button-text');
+      const queueFullEl = document.getElementById('queue-full-total');
+      const queueDepositEl = document.getElementById('queue-deposit-total');
+
+      if (fullPriceEl) fullPriceEl.textContent = formattedTotal;
+      if (depositPriceEl) depositPriceEl.textContent = formattedDeposit;
+      if (ctaTextEl) ctaTextEl.textContent = 'Reserve Unit with 50% Deposit (' + formattedDeposit + ')';
+      if (queueFullEl) queueFullEl.textContent = formattedTotal;
+      if (queueDepositEl) queueDepositEl.textContent = formattedDeposit;
+
+      const addonsContainer = document.getElementById('queue-addons-container');
+      if (addonsContainer) {
+        addonsContainer.innerHTML = '';
+        if (cushionsChecked) {
+          addonsContainer.innerHTML += `
+            <div class="flex items-center justify-between p-2 rounded bg-surface-container text-xs text-on-surface">
+              <span>+ Orthopedic Linen Cushions (x4)</span>
+              <span class="font-semibold">₱1,250.00</span>
+            </div>`;
+        }
+        if (waxChecked) {
+          addonsContainer.innerHTML += `
+            <div class="flex items-center justify-between p-2 rounded bg-surface-container text-xs text-on-surface">
+              <span>+ Mt. Arayat Beeswax Care Kit</span>
+              <span class="font-semibold">₱580.00</span>
+            </div>`;
+        }
+      }
+    }
+
+    function addTetraTableToCart() {
+      const cushions = document.getElementById('addon-cushions')?.checked;
+      const wax = document.getElementById('addon-wax')?.checked;
+
+      if (window.ecohaven) {
+        window.ecohaven.cart = []; // Fresh configuration
+        window.ecohaven.addToCart({
+          id: 'tetratable-configured',
+          name: 'TetraTable 4-in-1 Suite',
+          price: 6934,
+          finish: currentFinish || 'Natural Polished Mahogany',
+          wood: '100% Solid Philippine Mahogany',
+          image: '../assets/images/tetratable-luxury-living-room.jpg'
+        });
+
+        if (cushions) {
+          window.ecohaven.addToCart({
+            id: 'addon-cushions',
+            name: 'Orthopedic Linen Cushions (Set of 4)',
+            price: 1250,
+            finish: 'Water-Repellent Philippine Weave Linen',
+            wood: 'High-Density Foam & Linen',
+            image: '../assets/images/tetracushion-linen.jpg'
+          });
+        }
+
+        if (wax) {
+          window.ecohaven.addToCart({
+            id: 'addon-wax',
+            name: 'Mt. Arayat Beeswax Care Kit',
+            price: 580,
+            finish: 'Organic Beeswax & Virgin Coconut Oil Balm',
+            wood: 'Candaba Workshop Care',
+            image: '../assets/images/candaba-wood-care-kit.jpg'
+          });
+        }
+      }
+      openCartDrawer();
+    }
+
+    function openCartDrawer() {
+      recalculatePrice();
+      if (window.ecohaven && typeof window.ecohaven.openCartDrawer === 'function') {
+        window.ecohaven.openCartDrawer();
+      }
+    }
+
+    function closeCartDrawer() {
+      if (window.ecohaven && typeof window.ecohaven.closeCartDrawer === 'function') {
+        window.ecohaven.closeCartDrawer();
+      }
+    }
+
     function renderTetratableReviews() {
       const grid = document.getElementById('tetratableReviewsGrid');
       if (!grid) return;
