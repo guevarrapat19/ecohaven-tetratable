@@ -255,20 +255,55 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
     <div id="rawMaterialsContainer" class="grid grid-cols-2 md:grid-cols-5 gap-4"></div>
 </div>
 
-<!-- Modal: GCash Receipt Screenshot Verification Lightbox -->
+<!-- Modal: Payment Receipt / COD Order Verification Lightbox -->
 <div id="verifyModal" class="fixed inset-0 z-50 bg-black/25 backdrop-blur-[3px] hidden items-center justify-center p-4">
     <div class="bg-surface-container-lowest border border-outline-variant/40 rounded-[24px] max-w-2xl w-full p-6 md:p-8 shadow-2xl relative">
         <button onclick="closeVerificationModal()" class="absolute right-5 top-5 p-2 rounded-full hover:bg-surface-container text-on-surface transition-colors">
             <span class="material-symbols-outlined">close</span>
         </button>
-        <span class="text-xs font-bold uppercase tracking-wider text-primary mb-1 block">Payment Audit Lightbox</span>
-        <h3 class="font-headline-sm text-2xl text-on-surface mb-4">Verify Customer GCash Screenshot</h3>
+        <span id="verifyModalBadge" class="text-xs font-bold uppercase tracking-wider text-primary mb-1 block">Payment Audit Lightbox</span>
+        <h3 id="verifyModalTitle" class="font-headline-sm text-2xl text-on-surface mb-4">Verify Customer GCash Screenshot</h3>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <!-- Screenshot Preview Box -->
-            <div class="rounded-xl overflow-hidden border border-outline-variant/40 bg-surface p-2 text-center">
+            <!-- Screenshot Preview Box (Shown only for E-Wallet / Bank Transfer orders) -->
+            <div id="modalReceiptProofBox" class="rounded-xl overflow-hidden border border-outline-variant/40 bg-surface p-2 text-center">
                 <img id="modalReceiptImg" src="../assets/images/Screenshot_2026-07-30-16-10-31-954_com.globe.gcash.android.jpg" alt="GCash Screenshot" class="max-h-64 mx-auto rounded-lg object-contain"/>
                 <span class="text-[11px] text-outline mt-2 block">Customer Attached Proof</span>
+            </div>
+
+            <!-- COD Order Verification Box (Shown instead of screenshot for Cash on Delivery orders) -->
+            <div id="modalCodSummaryBox" class="hidden rounded-xl border-2 border-blue-200 bg-blue-50/60 p-4 flex flex-col justify-between text-left">
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-700 text-white">
+                            <span class="material-symbols-outlined text-[14px]">local_shipping</span>
+                            Cash on Delivery (COD)
+                        </span>
+                        <span class="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">₱0.00 Upfront</span>
+                    </div>
+                    <h4 class="font-bold text-sm text-on-surface pt-1">No Downpayment Screenshot Required</h4>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">
+                        This order was placed under <strong>Cash on Delivery (COD)</strong>. Zero advance payment is collected online; 100% of the order total will be collected at the customer's doorstep upon delivery and inspection.
+                    </p>
+                    <div class="p-3 rounded-xl bg-white/90 border border-blue-200/80 space-y-1.5 text-xs">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-outline block">Delivery Address:</span>
+                            <span id="modalCodAddress" class="font-semibold text-on-surface leading-snug block">Candaba, Pampanga</span>
+                        </div>
+                        <div class="flex items-center justify-between pt-1 border-t border-outline-variant/20">
+                            <span class="text-outline">Customer Phone:</span>
+                            <span id="modalCodPhone" class="font-mono font-bold text-on-surface">09171234567</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-outline">Assigned Courier:</span>
+                            <span id="modalCodCourier" class="font-semibold text-primary">Workshop Van</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 pt-2 border-t border-blue-200/60 flex items-center justify-between text-xs">
+                    <span class="font-semibold text-blue-900">Collect on Doorstep Handover:</span>
+                    <span id="modalCodCollectTotal" class="font-mono font-bold text-sm text-blue-900">₱7,184.00</span>
+                </div>
             </div>
 
             <!-- Details Comparison -->
@@ -282,11 +317,11 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
                     <span id="modalCustomerName" class="font-bold text-on-surface">Juan Dela Cruz</span>
                 </div>
                 <div class="p-3 rounded-xl bg-surface border border-outline-variant/30">
-                    <span class="text-xs text-outline block">Expected 50% Down Payment</span>
+                    <span id="modalAmountLabel" class="text-xs text-outline block">Expected 50% Down Payment</span>
                     <span id="modalAmount" class="font-bold text-primary text-base">₱3,467.00</span>
                 </div>
                 <div class="p-3 rounded-xl bg-surface border border-outline-variant/30">
-                    <span class="text-xs text-outline block">Submitted Reference</span>
+                    <span id="modalRefLabel" class="text-xs text-outline block">Submitted Reference</span>
                     <span id="modalRef" class="font-mono font-bold text-on-surface">9021-8841-2910</span>
                 </div>
             </div>
@@ -295,11 +330,11 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
         <div class="flex gap-3">
             <button type="button" onclick="openRejectReasonModal(activeVerificationOrderId)" class="w-1/2 py-3 rounded-xl border border-red-300 text-red-700 hover:bg-red-50 text-sm font-bold transition-all flex items-center justify-center gap-1.5">
                 <span class="material-symbols-outlined text-sm">block</span>
-                Reject / Select Reason
+                <span id="rejectModalBtnText">Reject / Select Reason</span>
             </button>
             <button onclick="approvePayment()" class="w-1/2 py-3 bg-tertiary hover:bg-tertiary-container text-on-tertiary rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm">
                 <span class="material-symbols-outlined text-sm">check</span>
-                Approve &amp; Start Cutting
+                <span id="approveModalBtnText">Approve &amp; Start Cutting</span>
             </button>
         </div>
     </div>
@@ -1823,8 +1858,8 @@ function renderKanban() {
                     ${isRejected ? `
                     <button onclick="openVerificationModal('${ord.orderId}')" 
                             class="flex-1 py-2 bg-surface-container border border-outline-variant/40 text-on-surface rounded-lg text-xs font-bold hover:bg-surface-container-high transition-all flex items-center justify-center gap-1 shadow-xs">
-                        <span class="material-symbols-outlined text-sm">receipt_long</span>
-                        <span>View Refund Details</span>
+                        <span class="material-symbols-outlined text-sm">${isCod ? 'local_shipping' : 'receipt_long'}</span>
+                        <span>${isCod ? 'View COD Details' : 'View Refund Details'}</span>
                     </button>
                     <button onclick="openRejectReasonModal('${ord.orderId}')" 
                             class="px-2.5 py-2 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg text-xs font-bold transition-all" title="Edit Rejection Reason & Guidance">
@@ -1833,8 +1868,8 @@ function renderKanban() {
                     ` : `
                     <button onclick="openVerificationModal('${ord.orderId}')" 
                             class="flex-1 py-2 bg-primary text-on-primary rounded-lg text-xs font-bold hover:bg-primary-container transition-all flex items-center justify-center gap-1 shadow-xs">
-                        <span class="material-symbols-outlined text-sm">verified_user</span>
-                        <span>${isFlagged ? 'Re-Audit Proof' : 'Audit Proof'}</span>
+                        <span class="material-symbols-outlined text-sm">${isCod ? 'fact_check' : 'verified_user'}</span>
+                        <span>${isCod ? 'Review COD Order' : (isFlagged ? 'Re-Audit Proof' : 'Audit Proof')}</span>
                     </button>
                     <button onclick="openRejectReasonModal('${ord.orderId}')" 
                             class="px-2.5 py-2 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg text-xs font-bold transition-all" title="Select Rejection Reason & Guidance">
@@ -2151,14 +2186,62 @@ function openVerificationModal(orderId) {
     if (!ord) return;
 
     activeVerificationOrderId = ord.orderId;
-    document.getElementById('modalOrderId').innerText = '#' + ord.orderId;
-    document.getElementById('modalCustomerName').innerText = ord.customerName;
-    const paid = ord.downPaymentPaid || (ord.pricing ? ord.pricing.downPaymentPaid : 3467.00);
-    document.getElementById('modalAmount').innerText = `₱${paid.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
-    document.getElementById('modalRef').innerText = ord.gcashRef || (ord.payment && ord.payment.reference) || '9021-8841-2910';
+    const isCod = ord.paymentMode === 'cod' || ord.paymentMethod === 'cod' || (ord.gcashRef && String(ord.gcashRef).startsWith('COD-'));
+    const isFull = !isCod && (ord.paymentMode === 'full' || (ord.pricing && !ord.pricing.isDownPayment));
+    const total = parseFloat(ord.totalAmount || (ord.pricing && ord.pricing.totalAmount) || 7184.00) || 0;
+    const paid = isCod
+        ? 0
+        : (ord.downPaymentPaid !== undefined ? parseFloat(ord.downPaymentPaid) : (ord.pricing && ord.pricing.downPaymentPaid !== undefined ? parseFloat(ord.pricing.downPaymentPaid) : (isFull ? total : 3467.00)));
 
-    if (ord.receiptFile && ord.receiptFile.startsWith('.')) {
-        document.getElementById('modalReceiptImg').src = ord.receiptFile;
+    const badgeEl = document.getElementById('verifyModalBadge');
+    const titleEl = document.getElementById('verifyModalTitle');
+    const proofBox = document.getElementById('modalReceiptProofBox');
+    const codBox = document.getElementById('modalCodSummaryBox');
+    const amountLabelEl = document.getElementById('modalAmountLabel');
+    const amountEl = document.getElementById('modalAmount');
+    const refLabelEl = document.getElementById('modalRefLabel');
+    const refEl = document.getElementById('modalRef');
+    const approveBtnTextEl = document.getElementById('approveModalBtnText');
+
+    document.getElementById('modalOrderId').innerText = '#' + ord.orderId;
+    document.getElementById('modalCustomerName').innerText = ord.customerName || 'Customer';
+
+    if (isCod) {
+        if (badgeEl) badgeEl.innerText = 'COD Order Review Lightbox';
+        if (titleEl) titleEl.innerText = 'Verify Cash on Delivery (COD) Order';
+        if (proofBox) proofBox.classList.add('hidden');
+        if (codBox) {
+            codBox.classList.remove('hidden');
+            const codAddr = document.getElementById('modalCodAddress');
+            const codPhone = document.getElementById('modalCodPhone');
+            const codCourier = document.getElementById('modalCodCourier');
+            const codTotal = document.getElementById('modalCodCollectTotal');
+            if (codAddr) codAddr.innerText = ord.address || 'Candaba, Pampanga';
+            if (codPhone) codPhone.innerText = ord.phone || 'N/A';
+            if (codCourier) codCourier.innerText = ord.courierName || 'EcoHaven Workshop Van';
+            if (codTotal) codTotal.innerText = `₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
+        }
+        if (amountLabelEl) amountLabelEl.innerText = 'Upfront Payment / COD Balance Due';
+        if (amountEl) amountEl.innerText = `₱0.00 Today (₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})} on Delivery)`;
+        if (refLabelEl) refLabelEl.innerText = 'COD Dispatch Reference';
+        if (refEl) refEl.innerText = ord.gcashRef || 'COD-CONFIRMED';
+        if (approveBtnTextEl) approveBtnTextEl.innerText = 'Confirm COD & Start Cutting';
+    } else {
+        if (badgeEl) badgeEl.innerText = 'Payment Audit Lightbox';
+        if (titleEl) titleEl.innerText = isFull ? 'Verify 100% Full Payment Screenshot' : 'Verify Customer GCash Screenshot';
+        if (proofBox) proofBox.classList.remove('hidden');
+        if (codBox) codBox.classList.add('hidden');
+        if (amountLabelEl) amountLabelEl.innerText = isFull ? 'Expected 100% Full Payment' : 'Expected 50% Down Payment';
+        if (amountEl) amountEl.innerText = `₱${paid.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
+        if (refLabelEl) refLabelEl.innerText = 'Submitted Reference';
+        if (refEl) refEl.innerText = ord.gcashRef || (ord.payment && ord.payment.reference) || '9021-8841-2910';
+        if (approveBtnTextEl) approveBtnTextEl.innerText = 'Approve & Start Cutting';
+
+        if (ord.receiptFile && ord.receiptFile.startsWith('.')) {
+            document.getElementById('modalReceiptImg').src = ord.receiptFile;
+        } else {
+            document.getElementById('modalReceiptImg').src = '../assets/images/Screenshot_2026-07-30-16-10-31-954_com.globe.gcash.android.jpg';
+        }
     }
 
     document.getElementById('verifyModal').classList.remove('hidden');
@@ -2173,14 +2256,17 @@ function closeVerificationModal() {
 async function approvePayment() {
     if (!activeVerificationOrderId || !window.ecohaven) return;
     const ord = window.ecohaven.orders[activeVerificationOrderId] || window.ecohaven.getOrder(activeVerificationOrderId) || {};
+    const isCod = ord.paymentMode === 'cod' || ord.paymentMethod === 'cod' || (ord.gcashRef && String(ord.gcashRef).startsWith('COD-'));
     await window.ecohaven.approveOrderPayment(activeVerificationOrderId);
     
     // Dispatch natural in-app customer notification
     if (typeof window.addEcoHavenNotification === 'function') {
         window.addEcoHavenNotification({
-            type: 'payment',
-            title: `✅ Down Payment Approved for #${activeVerificationOrderId}`,
-            body: `Your payment has been verified by our Candaba workshop team. Solid Philippine mahogany lumber has been allocated and Solignum anti-termite treated.`,
+            type: isCod ? 'order' : 'payment',
+            title: isCod ? `✅ COD Order #${activeVerificationOrderId} Confirmed` : `✅ Down Payment Approved for #${activeVerificationOrderId}`,
+            body: isCod
+                ? `Your Cash on Delivery (COD) order has been confirmed by our Candaba workshop team. Solid Philippine mahogany lumber has been allocated and Solignum anti-termite treated.`
+                : `Your payment has been verified by our Candaba workshop team. Solid Philippine mahogany lumber has been allocated and Solignum anti-termite treated.`,
             orderId: activeVerificationOrderId,
             icon: 'verified',
             badgeColor: 'bg-emerald-100 text-emerald-800'
@@ -2191,27 +2277,25 @@ async function approvePayment() {
     if (typeof window.simulateEmailNotification === 'function') {
         window.simulateEmailNotification({
             to: ord.email || 'mariasantos.pampanga@gmail.com',
-            subject: `✅ Down Payment Verified for Order #${activeVerificationOrderId}`,
-            body: `Mabuhay ${ord.customerName || 'Customer'}!
-
-Your payment for Order #${activeVerificationOrderId} has been verified by the Candaba workshop.
-
-Solid Philippine Mahogany batch #PMP-2026-ND-491 (11.4% moisture content) has been allocated and Solignum anti-termite treated. Cutting and joinery are underway.`,
+            subject: isCod ? `✅ COD Order Confirmed for #${activeVerificationOrderId}` : `✅ Down Payment Verified for Order #${activeVerificationOrderId}`,
+            body: `Mabuhay ${ord.customerName || 'Customer'}!\n\n${isCod ? `Your Cash on Delivery (COD) order #${activeVerificationOrderId} has been confirmed by the Candaba workshop.` : `Your payment for Order #${activeVerificationOrderId} has been verified by the Candaba workshop.`}\n\nSolid Philippine Mahogany batch #PMP-2026-ND-491 (11.4% moisture content) has been allocated and Solignum anti-termite treated. Cutting and joinery are underway.`,
             orderId: activeVerificationOrderId,
-            category: 'Payment Verified'
+            category: isCod ? 'Order Confirmed' : 'Payment Verified'
         });
     }
     if (typeof window.simulateSmsNotification === 'function') {
         window.simulateSmsNotification({
             to: ord.phone || '09175548921',
-            message: `[EcoHaven PH] Payment verified for #${activeVerificationOrderId}! Solid Philippine Mahogany cutting has started in Candaba. Live tracking: ecohaven.ph/track?orderId=${activeVerificationOrderId}`,
+            message: isCod
+                ? `[EcoHaven PH] COD Order #${activeVerificationOrderId} confirmed! Solid Philippine Mahogany cutting has started in Candaba. Live tracking: ecohaven.ph/track?orderId=${activeVerificationOrderId}`
+                : `[EcoHaven PH] Payment verified for #${activeVerificationOrderId}! Solid Philippine Mahogany cutting has started in Candaba. Live tracking: ecohaven.ph/track?orderId=${activeVerificationOrderId}`,
             orderId: activeVerificationOrderId,
-            category: 'Payment Verified'
+            category: isCod ? 'Order Confirmed' : 'Payment Verified'
         });
     }
 
     if (typeof window.showEcoHavenToast === 'function') {
-        window.showEcoHavenToast(`✅ Payment approved for #${activeVerificationOrderId}! Customer notified.`, 'success');
+        window.showEcoHavenToast(isCod ? `✅ COD Order #${activeVerificationOrderId} confirmed! Customer notified.` : `✅ Payment approved for #${activeVerificationOrderId}! Customer notified.`, 'success');
     }
     closeVerificationModal();
     renderKanban();
