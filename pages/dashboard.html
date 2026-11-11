@@ -627,7 +627,8 @@ function updateCustomerDashboard() {
     const actionHub = document.getElementById('dashOrderActionHub');
     if (actionHub && ord) {
         const stageNum = parseInt(ord.stage, 10) || 1;
-        const isConfirmed = ord.orderStatus === 'Customer Confirmed Receipt' || (stageNum === 5 && ord.warrantyCode);
+        const isDelivered = stageNum >= 5 || ord.orderStatus === 'Delivered & Complete' || ord.orderStatus === 'Customer Confirmed Receipt' || Boolean(ord.deliveredAt);
+        const isConfirmed = ord.orderStatus === 'Customer Confirmed Receipt' || Boolean(ord.confirmedReceivedAt) || (isDelivered && Boolean(ord.warrantyCode));
         const courierLabel = ord.courierName || 'EcoHaven Workshop Van';
         const waybillCode = ord.courierTracking || 'EH-FLEET-CBD4821';
         const pName = ord.productName || (ord.items && ord.items[0] && ord.items[0].name) || 'TetraTable 4-in-1 Suite';
@@ -642,7 +643,11 @@ function updateCustomerDashboard() {
 
         if (isConfirmed) {
             actionButtonsHtml += `
-                <button type="button" onclick="window.openWarrantyModal('${ord.orderId}')" class="px-4 py-2.5 rounded-xl bg-tertiary text-on-tertiary text-xs font-bold hover:bg-tertiary-container transition-all flex items-center gap-1.5 shadow-xs">
+                <button type="button" onclick="window.openPodInspectionModal('${ord.orderId}')" class="px-4 py-2.5 rounded-xl bg-tertiary text-on-tertiary text-xs font-bold hover:bg-tertiary-container transition-all flex items-center gap-1.5 shadow-xs">
+                    <span class="material-symbols-outlined text-sm">inventory</span>
+                    Order Received &amp; View POD
+                </button>
+                <button type="button" onclick="window.openWarrantyModal('${ord.orderId}')" class="px-4 py-2.5 rounded-xl border border-tertiary text-tertiary text-xs font-bold hover:bg-tertiary/10 transition-all flex items-center gap-1.5 shadow-xs">
                     <span class="material-symbols-outlined text-sm">verified_user</span>
                     5-Year Warranty
                 </button>
@@ -650,16 +655,12 @@ function updateCustomerDashboard() {
                     <span class="material-symbols-outlined text-sm">stars</span>
                     Rate &amp; Review
                 </button>
-                <button type="button" onclick="window.openPodInspectionModal('${ord.orderId}')" class="px-3.5 py-2.5 rounded-xl border border-outline-variant text-xs font-semibold text-on-surface hover:bg-surface-container transition-all flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-sm">photo_camera</span>
-                    Proof of Delivery
-                </button>
                 <button type="button" onclick="window.openEcoHavenChat({ orderId: '${ord.orderId}', courierName: '${courierLabel}', courierTracking: '${waybillCode}' })" class="px-3.5 py-2.5 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold transition-all flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-sm">chat</span>
                     Chat with Seller
                 </button>
             `;
-        } else if (stageNum >= 4) {
+        } else if (isDelivered) {
             actionButtonsHtml += `
                 <button type="button" onclick="window.openPodInspectionModal('${ord.orderId}')" class="px-5 py-2.5 rounded-xl bg-tertiary hover:bg-tertiary-container text-on-tertiary text-xs font-bold transition-all shadow-md flex items-center gap-1.5 active:scale-95">
                     <span class="material-symbols-outlined text-sm">inventory</span>
@@ -672,10 +673,6 @@ function updateCustomerDashboard() {
             `;
         } else {
             actionButtonsHtml += `
-                <button type="button" onclick="window.openPodInspectionModal('${ord.orderId}')" class="px-4 py-2.5 rounded-xl bg-tertiary hover:bg-tertiary-container text-on-tertiary text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 active:scale-95">
-                    <span class="material-symbols-outlined text-sm">inventory</span>
-                    Order Received &amp; View POD
-                </button>
                 <button type="button" onclick="window.openEcoHavenChat({ orderId: '${ord.orderId}', courierName: '${courierLabel}', courierTracking: '${waybillCode}' })" class="px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 text-xs font-bold text-on-surface flex items-center gap-1.5 transition-all">
                     <span class="material-symbols-outlined text-sm text-primary">chat</span>
                     Chat with Craftsman Danilo

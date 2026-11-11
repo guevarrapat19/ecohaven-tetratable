@@ -358,6 +358,16 @@
     if (window.ecohaven && typeof window.ecohaven.getOrder === 'function') {
       order = window.ecohaven.getOrder(orderId);
     }
+    if (order) {
+      const stageNum = parseInt(order.stage, 10) || 1;
+      const isDelivered = stageNum >= 5 || order.orderStatus === 'Delivered & Complete' || order.orderStatus === 'Customer Confirmed Receipt' || Boolean(order.deliveredAt);
+      if (!isDelivered) {
+        if (typeof window.showEcoHavenToast === 'function') {
+          window.showEcoHavenToast('📦 Order Received & Proof of Delivery (POD) will be available once your order is delivered.', 'info');
+        }
+        return;
+      }
+    }
     activeModalOrder = order;
 
     const imgEl = document.getElementById('podModalImage');
