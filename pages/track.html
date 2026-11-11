@@ -823,7 +823,8 @@
             const cartNames = parsedCart.map(i => (i.name || i.title || '').trim().toLowerCase()).sort().join('|');
             const orderNames = (order.items || []).map(i => (i.name || i.title || '').trim().toLowerCase()).sort().join('|');
 
-            if (lastPlaced === order.orderId || cartNames === orderNames) {
+            if (lastPlaced === order.orderId) {
+              localStorage.removeItem('ecohaven_last_order_id');
               if (window.ecohaven && typeof window.ecohaven.clearCart === 'function') {
                 window.ecohaven.clearCart();
               } else {

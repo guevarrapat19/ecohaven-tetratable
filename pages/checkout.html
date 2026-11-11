@@ -680,7 +680,7 @@
     </div>
 
     <!-- Interactive Workshop Payment Standee Banner (Tap for Mobile Mockup) -->
-    <div onclick="openQrLightbox()" class="p-3 rounded-xl bg-surface-container-low hover:bg-surface-container border border-primary/25 hover:border-primary/50 transition-all cursor-pointer flex items-center justify-between group shadow-xs hover:shadow-sm" title="Tap to view official payment QR in mobile view">
+    <div id="qrStandeeBanner" onclick="openQrLightbox()" class="p-3 rounded-xl bg-surface-container-low hover:bg-surface-container border border-primary/25 hover:border-primary/50 transition-all cursor-pointer flex items-center justify-between group shadow-xs hover:shadow-sm" title="Tap to view official payment QR in mobile view">
       <div class="flex items-center gap-3">
         <div class="relative w-11 h-11 rounded-xl bg-white p-0.5 border border-outline-variant/30 overflow-hidden flex items-center justify-center flex-shrink-0 shadow-xs group-hover:scale-105 transition-transform">
           <img src="../assets/images/QR.jpg" alt="Official InstaPay QR" class="w-full h-full object-cover rounded-lg"/>
@@ -700,6 +700,24 @@
         <span class="material-symbols-outlined text-[16px]">smartphone</span>
         <span class="hidden sm:inline">Mobile QR View</span>
       </div>
+    </div>
+
+    <!-- Cash on Delivery (COD) Direct Purchase Action Card (Shown when COD is selected) -->
+    <div id="codDirectPurchaseBanner" class="hidden p-3.5 rounded-xl bg-emerald-50/90 border-2 border-tertiary/40 flex flex-col gap-2.5 shadow-xs transition-all">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-tertiary text-[20px]">local_shipping</span>
+          <span class="font-label-md text-xs sm:text-sm font-bold text-on-surface">Cash on Delivery (COD) Ready</span>
+        </div>
+        <span class="bg-tertiary text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">₱0.00 Due Today</span>
+      </div>
+      <p class="text-[11px] text-on-surface-variant leading-relaxed">
+        No QR scan or advance e-wallet payment needed. Your full balance will be collected at your doorstep upon physical inspection of your furniture.
+      </p>
+      <button type="button" onclick="handlePrimaryPaymentClick()" class="w-full py-2.5 px-4 rounded-xl bg-tertiary hover:bg-tertiary-container text-white text-xs sm:text-sm font-bold shadow-sm hover:shadow transition-all flex items-center justify-center gap-1.5 active:scale-[0.99]">
+        <span class="material-symbols-outlined text-[18px]">check_circle</span>
+        <span>Proceed to Purchase (Cash on Delivery) →</span>
+      </button>
     </div>
   </div>
 
@@ -1797,6 +1815,23 @@
         if (selectContainer) selectContainer.classList.add('hidden');
         if (badge) badge.innerText = 'New Address';
         if (typeof updateActiveAddressCardDisplay === 'function') updateActiveAddressCardDisplay(null);
+
+        // If user profile itself has province/city/street from Dashboard Edit Info, prefill on initial load
+        const provSelectEl = document.getElementById('addrProvinceSelect');
+        if ((userChanged || !provSelectEl || !provSelectEl.value) && (currentUser.province || currentUser.city || currentUser.street || currentUser.address)) {
+          applyAddressToInputs({
+            label: 'Account Profile',
+            recipientName: currentUser.displayName || currentUser.fullName || '',
+            phone: currentUser.phone || '',
+            email: currentUser.email || '',
+            province: currentUser.province || '',
+            city: currentUser.city || '',
+            barangay: currentUser.barangay || '',
+            zipCode: currentUser.zipCode || '',
+            street: currentUser.street || '',
+            address: currentUser.address || ''
+          });
+        }
       }
     }
 
@@ -1832,8 +1867,12 @@
         if (zipInput && addr.zipCode) {
           zipInput.value = addr.zipCode;
         }
-        if (streetInput && addr.street !== undefined) {
-          streetInput.value = addr.street;
+        if (streetInput) {
+          if (addr.street) {
+            streetInput.value = addr.street;
+          } else if (addr.fullAddress || addr.address) {
+            streetInput.value = (addr.fullAddress || addr.address).split(',')[0].trim();
+          }
         }
         syncSynthesizedAddress();
       } else {
@@ -1902,23 +1941,40 @@
     }
 
     function getActiveCartItems() {
+      const defaultCheckoutItem = {
+        id: 'tetratable-mahogany',
+        name: 'TetraTable 4-in-1 Suite',
+        price: 6934.00,
+        downPaymentPrice: 3467.00,
+        wood: '100% Solid Philippine Mahogany',
+        finish: 'Natural Polished Mahogany',
+        location: 'Candaba, Pampanga',
+        quantity: 1,
+        image: 'tetratable_luxury_living_room_1793454407629.jpg'
+      };
       try {
         const saved = localStorage.getItem('ecohaven_cart');
         if (saved !== null) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed)) {
+          if (Array.isArray(parsed) && parsed.length > 0) {
             if (window.ecohaven) window.ecohaven.cart = parsed;
             return parsed;
           }
-        } else if (window.ecohaven) {
-          window.ecohaven.cart = [];
-          return [];
         }
       } catch (e) {}
-      if (window.ecohaven && Array.isArray(window.ecohaven.cart)) {
+      if (window.ecohaven && Array.isArray(window.ecohaven.cart) && window.ecohaven.cart.length > 0) {
         return window.ecohaven.cart;
       }
-      return [];
+      // Ensure checkout page always has the flagship suite queued if opened directly or after cart reset
+      const fallbackCart = [defaultCheckoutItem];
+      try {
+        localStorage.setItem('ecohaven_cart', JSON.stringify(fallbackCart));
+        if (window.ecohaven) {
+          window.ecohaven.cart = fallbackCart;
+          if (typeof window.ecohaven.updateCartBadge === 'function') window.ecohaven.updateCartBadge();
+        }
+      } catch (e) {}
+      return fallbackCart;
     }
 
     function renderCheckoutItems() {
@@ -2373,6 +2429,16 @@
         }
       });
 
+      const qrStandee = document.getElementById('qrStandeeBanner');
+      const codBanner = document.getElementById('codDirectPurchaseBanner');
+      if (val === 'cod') {
+        if (qrStandee) qrStandee.classList.add('hidden');
+        if (codBanner) codBanner.classList.remove('hidden');
+      } else {
+        if (qrStandee) qrStandee.classList.remove('hidden');
+        if (codBanner) codBanner.classList.add('hidden');
+      }
+
       if (val === 'cod') {
         if (paymentMode !== 'cod') {
           paymentMode = 'cod';
@@ -2404,7 +2470,7 @@
       } else if (val === 'cod') {
         btn.className = "w-full bg-tertiary hover:bg-tertiary-container text-white py-4 px-6 rounded-xl font-title-md text-title-md font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group active:scale-[0.99]";
         icon.innerText = "local_shipping";
-        text.innerText = "Confirm Order (Cash on Delivery) →";
+        text.innerText = "Proceed to Purchase (Cash on Delivery) →";
       }
     }
 
@@ -2418,6 +2484,11 @@
           alert("⚠️ Cannot proceed: Your Order Queue has 0 products (₱0.00). Please add a piece from our catalog.");
         }
         return false;
+      }
+
+      // Ensure synthesized address is synced from current dropdowns & inputs
+      if (typeof syncSynthesizedAddress === 'function') {
+        syncSynthesizedAddress();
       }
 
       // 0.5. Validate Customer Details & Delivery Destination

@@ -874,9 +874,19 @@ if (document.readyState === 'loading') {
         }, 500);
       } else {
         notify(`Welcome back, ${matchedUser.displayName || 'Valued Customer'}!`, 'success');
-        setTimeout(() => {
-          window.location.href = isPagesDir ? 'dashboard.html' : 'pages/dashboard.html';
-        }, 500);
+        if (typeof window.syncHeaderUserNavigation === 'function') {
+          window.syncHeaderUserNavigation();
+        }
+        window.dispatchEvent(new CustomEvent('ecohaven_auth_state_changed', { detail: matchedUser }));
+        window.dispatchEvent(new CustomEvent('ecohaven_user_logged_in', { detail: matchedUser }));
+        const currentPath = window.location.pathname.toLowerCase();
+        if (currentPath.includes('checkout')) {
+          if (typeof initCheckoutCalculations === 'function') initCheckoutCalculations();
+        } else {
+          setTimeout(() => {
+            window.location.href = isPagesDir ? 'dashboard.html' : 'pages/dashboard.html';
+          }, 500);
+        }
       }
 
     } catch (err) {
