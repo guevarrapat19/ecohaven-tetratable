@@ -265,10 +265,93 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
         <h3 id="verifyModalTitle" class="font-headline-sm text-2xl text-on-surface mb-4">Verify Customer GCash Screenshot</h3>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <!-- Screenshot Preview Box (Shown only for E-Wallet / Bank Transfer orders) -->
-            <div id="modalReceiptProofBox" class="rounded-xl overflow-hidden border border-outline-variant/40 bg-surface p-2 text-center">
-                <img id="modalReceiptImg" src="../assets/images/Screenshot_2026-07-30-16-10-31-954_com.globe.gcash.android.jpg" alt="GCash Screenshot" class="max-h-64 mx-auto rounded-lg object-contain"/>
-                <span class="text-[11px] text-outline mt-2 block">Customer Attached Proof</span>
+            <!-- Official Payment Receipt Screenshot Preview Box (Shown for E-Wallet / Bank Transfer orders) -->
+            <div id="modalReceiptProofBox" class="rounded-xl overflow-hidden border border-outline-variant/40 bg-surface p-2.5 text-center flex flex-col items-center justify-between">
+                <!-- Custom Uploaded Image (only shown if customer uploaded a real data:image screenshot) -->
+                <img id="modalReceiptImg" src="" alt="Uploaded Payment Receipt Screenshot" class="hidden max-h-72 mx-auto rounded-lg object-contain mb-2"/>
+
+                <!-- Dynamic Authentic Mobile Official Payment Receipt Screenshot -->
+                <div id="modalOfficialReceiptCard" class="w-full max-w-[265px] mx-auto rounded-[22px] border-[3px] border-neutral-800 bg-white shadow-xl overflow-hidden text-left select-none">
+                    <!-- Phone Status Bar & E-Wallet Header -->
+                    <div id="receiptTopBanner" class="bg-[#005CE6] text-white px-3.5 pt-2 pb-3">
+                        <div class="flex items-center justify-between text-[9px] font-mono opacity-90 mb-1.5">
+                            <span id="receiptPhoneClock">9:41</span>
+                            <span class="px-2 py-0.2 rounded-full bg-black/30 text-[8px] font-sans font-bold tracking-wider">OFFICIAL RECEIPT</span>
+                            <span>5G • 100%</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div id="receiptWalletBadge" class="w-6 h-6 rounded-full bg-white text-[#005CE6] font-black text-xs flex items-center justify-center shadow-xs">G</div>
+                                <div class="leading-tight">
+                                    <span id="receiptWalletTitle" class="font-bold text-[11px] block">GCash Express Send</span>
+                                    <span id="receiptWalletSub" class="text-[9px] text-white/80 block">InstaPay / BSP Verified</span>
+                                </div>
+                            </div>
+                            <span class="inline-flex items-center gap-0.5 bg-emerald-400/20 border border-emerald-300/40 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                                ✓ Paid
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Receipt Body -->
+                    <div class="p-3 bg-white space-y-2">
+                        <!-- Payment Tier Pill & Amount Paid -->
+                        <div class="text-center pb-2 border-b border-dashed border-neutral-200">
+                            <span id="receiptTierBadge" class="inline-block text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 mb-1">
+                                50% DOWN PAYMENT — OFFICIAL RECEIPT
+                            </span>
+                            <div id="receiptAmountPaid" class="text-xl font-black font-mono text-neutral-900 tracking-tight">₱3,917.00</div>
+                            <span class="text-[9px] text-emerald-700 font-bold block">✓ Transaction Successful • Confirmed</span>
+                        </div>
+
+                        <!-- Line Items inside Official Receipt -->
+                        <div class="space-y-1 text-[10px]">
+                            <div class="flex justify-between items-start gap-2">
+                                <span class="text-neutral-500">Paid To:</span>
+                                <span class="font-bold text-neutral-900 text-right">EcoHaven Furniture (PA**O M.)</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-neutral-500">Merchant Acct:</span>
+                                <span class="font-mono font-semibold text-neutral-800">+63 981 255 8028</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-neutral-500">Sent By:</span>
+                                <span id="receiptSenderInfo" class="font-semibold text-neutral-900 truncate max-w-[150px] text-right">Luis Damez</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-1 border-t border-neutral-100">
+                                <span class="text-neutral-500">Payment Type:</span>
+                                <span id="receiptPaymentTypeLabel" class="font-bold text-primary">50% Earnest Down Payment</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-neutral-500">Order Total:</span>
+                                <span id="receiptOrderTotal" class="font-mono font-semibold text-neutral-800">₱7,834.00</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-neutral-500">Balance Due:</span>
+                                <span id="receiptBalanceDue" class="font-mono font-bold text-amber-800">₱3,917.00 (On Delivery)</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-1 border-t border-dashed border-neutral-200">
+                                <span class="text-neutral-500">Ref. No.:</span>
+                                <span id="receiptRefNo" class="font-mono font-bold text-neutral-900">9021-4612-2910</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-neutral-500">Order / Token:</span>
+                                <span id="receiptOrderToken" class="font-mono text-[9px] font-semibold text-emerald-800">#EH-2026-10429</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-neutral-500">Date &amp; Time:</span>
+                                <span id="receiptDateTime" class="font-medium text-neutral-700 text-[9px]">11 Nov 2026, 02:01 PM</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phone Bottom Home Bar -->
+                    <div class="bg-neutral-50 py-1.5 flex justify-center border-t border-neutral-100">
+                        <div class="w-16 h-1 bg-neutral-300 rounded-full"></div>
+                    </div>
+                </div>
+
+                <span id="modalReceiptCaption" class="text-[11px] font-semibold text-outline mt-2 block">Official 50% Down Payment Receipt Screenshot</span>
             </div>
 
             <!-- COD Order Verification Box (Shown instead of screenshot for Cash on Delivery orders) -->
@@ -307,21 +390,28 @@ tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primar
             </div>
 
             <!-- Details Comparison -->
-            <div class="space-y-3 text-sm">
-                <div class="p-3 rounded-xl bg-surface border border-outline-variant/30">
-                    <span class="text-xs text-outline block">Order Number</span>
-                    <span id="modalOrderId" class="font-bold text-on-surface">#EH-2026-88123</span>
+            <div class="space-y-2.5 text-sm flex flex-col justify-between">
+                <div class="p-3 rounded-xl bg-surface border border-outline-variant/30 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-outline block">Order Number</span>
+                        <span id="modalOrderId" class="font-bold text-on-surface">#EH-2026-88123</span>
+                    </div>
+                    <span id="modalPaymentTierPill" class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200">50% Down Payment</span>
                 </div>
                 <div class="p-3 rounded-xl bg-surface border border-outline-variant/30">
                     <span class="text-xs text-outline block">Customer Name</span>
                     <span id="modalCustomerName" class="font-bold text-on-surface">Juan Dela Cruz</span>
                 </div>
                 <div class="p-3 rounded-xl bg-surface border border-outline-variant/30">
-                    <span id="modalAmountLabel" class="text-xs text-outline block">Expected 50% Down Payment</span>
-                    <span id="modalAmount" class="font-bold text-primary text-base">₱3,467.00</span>
+                    <span id="modalAmountLabel" class="text-xs text-outline block">Official Receipt Amount (50% Down Payment)</span>
+                    <span id="modalAmount" class="font-bold text-primary text-base block">₱3,467.00</span>
+                    <span id="modalBalanceSubtext" class="text-[11px] text-on-surface-variant block mt-0.5">Order Total: ₱6,934.00 • Remaining Balance: ₱3,467.00</span>
                 </div>
                 <div class="p-3 rounded-xl bg-surface border border-outline-variant/30">
-                    <span id="modalRefLabel" class="text-xs text-outline block">Submitted Reference</span>
+                    <div class="flex items-center justify-between">
+                        <span id="modalRefLabel" class="text-xs text-outline block">Submitted Reference</span>
+                        <span id="modalRefMatchBadge" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">✓ Matches Official Receipt</span>
+                    </div>
                     <span id="modalRef" class="font-mono font-bold text-on-surface">9021-8841-2910</span>
                 </div>
             </div>
@@ -2191,15 +2281,19 @@ function openVerificationModal(orderId) {
     const total = parseFloat(ord.totalAmount || (ord.pricing && ord.pricing.totalAmount) || 7184.00) || 0;
     const paid = isCod
         ? 0
-        : (ord.downPaymentPaid !== undefined ? parseFloat(ord.downPaymentPaid) : (ord.pricing && ord.pricing.downPaymentPaid !== undefined ? parseFloat(ord.pricing.downPaymentPaid) : (isFull ? total : 3467.00)));
+        : (ord.downPaymentPaid !== undefined ? parseFloat(ord.downPaymentPaid) : (ord.pricing && ord.pricing.downPaymentPaid !== undefined ? parseFloat(ord.pricing.downPaymentPaid) : (isFull ? total : total / 2)));
+    const bal = isCod ? total : (isFull ? 0 : Math.max(0, total - paid));
 
     const badgeEl = document.getElementById('verifyModalBadge');
     const titleEl = document.getElementById('verifyModalTitle');
     const proofBox = document.getElementById('modalReceiptProofBox');
     const codBox = document.getElementById('modalCodSummaryBox');
+    const tierPillEl = document.getElementById('modalPaymentTierPill');
     const amountLabelEl = document.getElementById('modalAmountLabel');
     const amountEl = document.getElementById('modalAmount');
+    const balanceSubEl = document.getElementById('modalBalanceSubtext');
     const refLabelEl = document.getElementById('modalRefLabel');
+    const refMatchBadgeEl = document.getElementById('modalRefMatchBadge');
     const refEl = document.getElementById('modalRef');
     const approveBtnTextEl = document.getElementById('approveModalBtnText');
 
@@ -2221,26 +2315,117 @@ function openVerificationModal(orderId) {
             if (codCourier) codCourier.innerText = ord.courierName || 'EcoHaven Workshop Van';
             if (codTotal) codTotal.innerText = `₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
         }
+        if (tierPillEl) {
+            tierPillEl.innerText = 'Cash on Delivery (COD)';
+            tierPillEl.className = 'text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 border border-blue-200';
+        }
         if (amountLabelEl) amountLabelEl.innerText = 'Upfront Payment / COD Balance Due';
-        if (amountEl) amountEl.innerText = `₱0.00 Today (₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})} on Delivery)`;
+        if (amountEl) amountEl.innerText = `₱0.00 Today`;
+        if (balanceSubEl) balanceSubEl.innerText = `Order Total: ₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})} • Collect 100% on Delivery`;
         if (refLabelEl) refLabelEl.innerText = 'COD Dispatch Reference';
+        if (refMatchBadgeEl) refMatchBadgeEl.classList.add('hidden');
         if (refEl) refEl.innerText = ord.gcashRef || 'COD-CONFIRMED';
         if (approveBtnTextEl) approveBtnTextEl.innerText = 'Confirm COD & Start Cutting';
     } else {
-        if (badgeEl) badgeEl.innerText = 'Payment Audit Lightbox';
-        if (titleEl) titleEl.innerText = isFull ? 'Verify 100% Full Payment Screenshot' : 'Verify Customer GCash Screenshot';
+        const refVal = ord.gcashRef || (ord.payment && ord.payment.reference) || '9021-8841-2910';
+        const method = String(ord.paymentMethod || 'gcash').toLowerCase();
+
+        if (badgeEl) badgeEl.innerText = 'Official Payment Audit Lightbox';
+        if (titleEl) titleEl.innerText = isFull ? 'Verify 100% Full Paid Official Receipt' : 'Verify 50% Down Payment Official Receipt';
         if (proofBox) proofBox.classList.remove('hidden');
         if (codBox) codBox.classList.add('hidden');
-        if (amountLabelEl) amountLabelEl.innerText = isFull ? 'Expected 100% Full Payment' : 'Expected 50% Down Payment';
+
+        if (tierPillEl) {
+            tierPillEl.innerText = isFull ? '100% Full Paid' : '50% Down Payment';
+            tierPillEl.className = isFull
+                ? 'text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200'
+                : 'text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200';
+        }
+
+        if (amountLabelEl) amountLabelEl.innerText = isFull ? 'Official Receipt Amount (100% Full Paid)' : 'Official Receipt Amount (50% Down Payment)';
         if (amountEl) amountEl.innerText = `₱${paid.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
-        if (refLabelEl) refLabelEl.innerText = 'Submitted Reference';
-        if (refEl) refEl.innerText = ord.gcashRef || (ord.payment && ord.payment.reference) || '9021-8841-2910';
+        if (balanceSubEl) {
+            balanceSubEl.innerText = isFull
+                ? `Order Total: ₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})} • Remaining Balance: ₱0.00 (Fully Settled)`
+                : `Order Total: ₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})} • Remaining Balance: ₱${bal.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
+        }
+        if (refLabelEl) refLabelEl.innerText = 'Submitted Official Reference';
+        if (refMatchBadgeEl) refMatchBadgeEl.classList.remove('hidden');
+        if (refEl) refEl.innerText = refVal;
         if (approveBtnTextEl) approveBtnTextEl.innerText = 'Approve & Start Cutting';
 
-        if (ord.receiptFile && ord.receiptFile.startsWith('.')) {
-            document.getElementById('modalReceiptImg').src = ord.receiptFile;
+        // Populate Dynamic Official Mobile Payment Receipt Screenshot
+        const topBanner = document.getElementById('receiptTopBanner');
+        const walletBadge = document.getElementById('receiptWalletBadge');
+        const walletTitle = document.getElementById('receiptWalletTitle');
+        const walletSub = document.getElementById('receiptWalletSub');
+        const tierBadge = document.getElementById('receiptTierBadge');
+        const amountPaidEl = document.getElementById('receiptAmountPaid');
+        const senderInfoEl = document.getElementById('receiptSenderInfo');
+        const payTypeLabelEl = document.getElementById('receiptPaymentTypeLabel');
+        const orderTotalEl = document.getElementById('receiptOrderTotal');
+        const balanceDueEl = document.getElementById('receiptBalanceDue');
+        const receiptRefEl = document.getElementById('receiptRefNo');
+        const orderTokenEl = document.getElementById('receiptOrderToken');
+        const dateTimeEl = document.getElementById('receiptDateTime');
+        const captionEl = document.getElementById('modalReceiptCaption');
+
+        if (method.includes('maya')) {
+            if (topBanner) topBanner.className = 'bg-neutral-900 text-white px-3.5 pt-2 pb-3';
+            if (walletBadge) { walletBadge.innerText = 'M'; walletBadge.className = 'w-6 h-6 rounded-full bg-emerald-500 text-neutral-950 font-black text-xs flex items-center justify-center shadow-xs'; }
+            if (walletTitle) walletTitle.innerText = 'Maya Official Receipt';
+            if (walletSub) walletSub.innerText = 'QRPH / BSP Regulated';
+        } else if (method.includes('bank') || method.includes('instapay')) {
+            if (topBanner) topBanner.className = 'bg-[#0B2545] text-white px-3.5 pt-2 pb-3';
+            if (walletBadge) { walletBadge.innerText = 'IP'; walletBadge.className = 'w-6 h-6 rounded-full bg-amber-400 text-[#0B2545] font-black text-[10px] flex items-center justify-center shadow-xs'; }
+            if (walletTitle) walletTitle.innerText = 'InstaPay Transfer Receipt';
+            if (walletSub) walletSub.innerText = 'PESONet / QRPH Verified';
         } else {
-            document.getElementById('modalReceiptImg').src = '../assets/images/Screenshot_2026-07-30-16-10-31-954_com.globe.gcash.android.jpg';
+            if (topBanner) topBanner.className = 'bg-[#005CE6] text-white px-3.5 pt-2 pb-3';
+            if (walletBadge) { walletBadge.innerText = 'G'; walletBadge.className = 'w-6 h-6 rounded-full bg-white text-[#005CE6] font-black text-xs flex items-center justify-center shadow-xs'; }
+            if (walletTitle) walletTitle.innerText = 'GCash Official Receipt';
+            if (walletSub) walletSub.innerText = 'Express Send / Pay QR';
+        }
+
+        if (tierBadge) {
+            tierBadge.innerText = isFull ? '100% FULL PAID — OFFICIAL RECEIPT' : '50% DOWN PAYMENT — OFFICIAL RECEIPT';
+            tierBadge.className = isFull
+                ? 'inline-block text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 mb-1'
+                : 'inline-block text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 mb-1';
+        }
+        if (amountPaidEl) amountPaidEl.innerText = `₱${paid.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
+        if (senderInfoEl) senderInfoEl.innerText = `${ord.customerName || 'Customer'}${ord.phone ? ' (' + ord.phone + ')' : ''}`;
+        if (payTypeLabelEl) {
+            payTypeLabelEl.innerText = isFull ? '100% Full Paid Settlement' : '50% Earnest Down Payment';
+            payTypeLabelEl.className = isFull ? 'font-bold text-emerald-700' : 'font-bold text-primary';
+        }
+        if (orderTotalEl) orderTotalEl.innerText = `₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
+        if (balanceDueEl) {
+            balanceDueEl.innerText = isFull ? '₱0.00 (100% Fully Paid)' : `₱${bal.toLocaleString('en-PH', {minimumFractionDigits: 2})} (On Delivery)`;
+            balanceDueEl.className = isFull ? 'font-mono font-bold text-emerald-700' : 'font-mono font-bold text-amber-800';
+        }
+        if (receiptRefEl) receiptRefEl.innerText = refVal;
+        if (orderTokenEl) orderTokenEl.innerText = `#${ord.orderId}`;
+
+        let formattedDate = '11 Nov 2026, 02:01 PM';
+        try {
+            const d = ord.createdAt ? new Date(ord.createdAt) : new Date();
+            if (!isNaN(d.getTime())) {
+                formattedDate = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            }
+        } catch (e) {}
+        if (dateTimeEl) dateTimeEl.innerText = formattedDate;
+        if (captionEl) captionEl.innerText = isFull ? 'Official 100% Full Paid Receipt Screenshot' : 'Official 50% Down Payment Receipt Screenshot';
+
+        const imgEl = document.getElementById('modalReceiptImg');
+        const officialCardEl = document.getElementById('modalOfficialReceiptCard');
+        const hasCustomImage = ord.receiptFile && String(ord.receiptFile).startsWith('data:image/');
+        if (hasCustomImage) {
+            if (imgEl) { imgEl.src = ord.receiptFile; imgEl.classList.remove('hidden'); }
+            if (officialCardEl) officialCardEl.classList.add('hidden');
+        } else {
+            if (imgEl) imgEl.classList.add('hidden');
+            if (officialCardEl) officialCardEl.classList.remove('hidden');
         }
     }
 
