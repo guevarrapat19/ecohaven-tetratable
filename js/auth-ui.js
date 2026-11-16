@@ -277,6 +277,10 @@ function showLoginModal() {
           <button type="submit" class="w-full py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary-container transition-all">
             Login
           </button>
+
+          <p class="text-center text-xs text-gray-500">
+            By signing in, you agree to our <a href="/pages/legal.html#terms" target="_blank" class="text-primary font-semibold underline">Terms &amp; Conditions</a> and <a href="/pages/legal.html#privacy" target="_blank" class="text-primary font-semibold underline">Privacy Policy</a>.
+          </p>
         </form>
         
         <!-- Signup Form -->
@@ -322,6 +326,11 @@ function showLoginModal() {
               class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
               placeholder="Confirm Password">
           </div>
+
+          <label for="signupAgreeTerms" class="flex items-start gap-2 text-xs text-gray-600 cursor-pointer">
+            <input type="checkbox" id="signupAgreeTerms" required class="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary">
+            <span>I agree to the <a href="/pages/legal.html#terms" target="_blank" class="text-primary font-semibold underline">Terms &amp; Conditions</a>, <a href="/pages/legal.html#privacy" target="_blank" class="text-primary font-semibold underline">Privacy Policy (RA 10173)</a>, and <a href="/pages/legal.html#returns" target="_blank" class="text-primary font-semibold underline">Return Policy</a>.</span>
+          </label>
           
           <button type="submit" class="w-full py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary-container transition-all">
             Create Account

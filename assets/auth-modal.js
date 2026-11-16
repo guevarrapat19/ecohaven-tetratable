@@ -216,6 +216,9 @@ if (document.readyState === 'loading') {
               <div class="relative">
                 <input type="password" id="regPassword" required minlength="6" placeholder="Password" oninput="checkPasswordStrength(this.value)" 
                        class="w-full px-4 py-2.5 pr-10 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm text-on-surface"/>
+                <button type="button" onclick="togglePasswordVisibility('regPassword')" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface text-sm">
+                  <span class="material-symbols-outlined text-[18px]">visibility</span>
+                </button>
               </div>
               <!-- Real-time Password Security Meter -->
               <div class="mt-2 space-y-1" id="regPasswordStrengthBox">
@@ -228,10 +231,17 @@ if (document.readyState === 'loading') {
                   <div id="pwdBar2" class="h-full w-1/3 bg-transparent rounded-full transition-all duration-300"></div>
                   <div id="pwdBar3" class="h-full w-1/3 bg-transparent rounded-full transition-all duration-300"></div>
                 </div>
-                <button type="button" onclick="togglePasswordVisibility('regPassword')" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface text-sm">
-                  <span class="material-symbols-outlined text-[18px]">visibility</span>
-                </button>
               </div>
+            </div>
+
+            <!-- Terms & Conditions + Privacy Policy Consent Checkbox -->
+            <div class="p-3 rounded-2xl bg-surface-container-low border border-outline-variant/40">
+              <label for="regAgreeTerms" class="flex items-start gap-2.5 cursor-pointer select-none">
+                <input type="checkbox" id="regAgreeTerms" required class="mt-0.5 w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary accent-[#86450d] cursor-pointer flex-shrink-0"/>
+                <span class="text-[11px] text-on-surface-variant leading-relaxed">
+                  I agree to the <button type="button" onclick="openLegalQuickModal('terms')" class="text-primary font-bold underline hover:text-primary-container">Terms &amp; Conditions</button>, <button type="button" onclick="openLegalQuickModal('privacy')" class="text-primary font-bold underline hover:text-primary-container">Privacy Policy (RA 10173)</button>, and <button type="button" onclick="openLegalQuickModal('returns')" class="text-primary font-bold underline hover:text-primary-container">Return Policy</button>.
+                </span>
+              </label>
             </div>
 
             <button type="submit" id="regSubmitBtn" class="w-full py-3 rounded-full bg-primary text-white font-bold hover:bg-primary-container transition-all shadow-md flex items-center justify-center gap-1.5 text-sm active:scale-95 mt-2">
@@ -278,7 +288,11 @@ if (document.readyState === 'loading') {
               <span class="material-symbols-outlined text-[18px]">login</span>
             </button>
 
-            <p class="text-center text-xs text-on-surface-variant pt-2">
+            <p class="text-center text-[11px] text-on-surface-variant leading-relaxed">
+              By signing in, you agree to EcoHaven's <button type="button" onclick="openLegalQuickModal('terms')" class="text-primary font-semibold underline hover:text-primary-container">Terms &amp; Conditions</button>, <button type="button" onclick="openLegalQuickModal('privacy')" class="text-primary font-semibold underline hover:text-primary-container">Privacy Policy</button>, and <button type="button" onclick="openLegalQuickModal('returns')" class="text-primary font-semibold underline hover:text-primary-container">Return Policy</button>.
+            </p>
+
+            <p class="text-center text-xs text-on-surface-variant pt-1">
               New to EcoHaven? 
               <button type="button" onclick="switchAuthTab('register')" class="text-primary font-bold hover:underline">
                 Create an Account
@@ -586,6 +600,151 @@ if (document.readyState === 'loading') {
     }
   }
 
+  // ==========================================================
+  // IN-MODAL LEGAL POLICIES QUICK-READER (TERMS / PRIVACY / RETURNS)
+  // ==========================================================
+  window.openLegalQuickModal = function (section = 'terms') {
+    let quickModal = document.getElementById('ecohavenLegalQuickModal');
+    const isPagesDir = window.location.pathname.includes('/pages/');
+    const legalBaseHref = isPagesDir ? 'legal.html' : 'pages/legal.html';
+
+    if (!quickModal) {
+      const html = `
+        <div id="ecohavenLegalQuickModal" class="fixed inset-0 z-[70] bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+          <div class="relative w-full max-w-2xl bg-surface rounded-3xl shadow-2xl border border-outline-variant/50 flex flex-col max-h-[88vh] overflow-hidden">
+            <!-- Header -->
+            <div class="p-5 sm:px-6 border-b border-outline-variant/30 flex items-center justify-between bg-surface-container-low">
+              <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-primary text-[22px]">gavel</span>
+                <div>
+                  <h4 class="font-headline text-lg font-bold text-on-surface leading-tight">EcoHaven Legal &amp; Customer Policies</h4>
+                  <p class="text-[11px] text-on-surface-variant">Effective Date: November 16, 2026 • DTI &amp; RA 10173 Compliant</p>
+                </div>
+              </div>
+              <button type="button" onclick="closeLegalQuickModal()" class="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant flex items-center justify-center transition-all">
+                <span class="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="grid grid-cols-3 gap-1 p-2 bg-surface-container-lowest border-b border-outline-variant/30">
+              <button type="button" id="legalTab_terms" onclick="switchLegalQuickTab('terms')" class="py-2 px-3 rounded-xl text-xs font-bold transition-all bg-primary text-white">
+                1. Terms &amp; Conditions
+              </button>
+              <button type="button" id="legalTab_privacy" onclick="switchLegalQuickTab('privacy')" class="py-2 px-3 rounded-xl text-xs font-medium transition-all text-on-surface-variant hover:text-on-surface">
+                2. Privacy Policy
+              </button>
+              <button type="button" id="legalTab_returns" onclick="switchLegalQuickTab('returns')" class="py-2 px-3 rounded-xl text-xs font-medium transition-all text-on-surface-variant hover:text-on-surface">
+                3. Return Policy
+              </button>
+            </div>
+
+            <!-- Scrollable Policy Body -->
+            <div class="p-5 sm:p-6 overflow-y-auto text-xs sm:text-sm text-on-surface-variant space-y-4 leading-relaxed flex-1">
+              
+              <!-- Panel: Terms & Conditions (Sign In) -->
+              <div id="legalPanel_terms" class="space-y-3">
+                <p class="font-semibold text-on-surface">Terms and Conditions — EcoHaven Furniture (Effective: November 16, 2026)</p>
+                <p>Welcome to EcoHaven Furniture Company. By creating an account, accessing our website, or purchasing our products—including the TetraTable—you agree to be bound by these Terms and Conditions. If you do not agree with any part of these Terms, please do not register for an account or use our services.</p>
+                <p><strong class="text-on-surface">1. Account Registration &amp; Eligibility:</strong> You must be at least 18 years old to create an account and place orders. You agree to provide true, accurate, current, and complete information (full name, email, shipping address, contact number). You are responsible for safeguarding your password; notify us immediately at <span class="text-primary font-semibold">ecohavenfurnitureph@gmail.com</span> of any unauthorized access. Creating multiple accounts to abuse promotional discounts or vouchers is prohibited.</p>
+                <p><strong class="text-on-surface">2. Use of Website &amp; Prohibited Conduct:</strong> You agree not to use our website or products for unlawful/fraudulent purposes, interfere with platform security, or reproduce/exploit our website content or TetraTable designs without written permission.</p>
+                <p><strong class="text-on-surface">3. Products, Pricing &amp; Orders:</strong> Natural variations in sustainable wood grains and screen settings may cause slight visual differences. All prices are listed in Philippine Pesos (PHP / ₱) and are subject to change without notice. We reserve the right to cancel or refuse orders due to stock limitations, pricing errors, or suspected fraud.</p>
+                <p><strong class="text-on-surface">4. Payments, Shipping &amp; Returns:</strong> Valid payment details are required for all purchases. Delivery timelines are estimates and risk of loss passes to you upon delivery. All returns, exchanges, and refunds are governed by our Return &amp; Refund Policy.</p>
+                <p><strong class="text-on-surface">5. Intellectual Property:</strong> All content—including the EcoHaven Furniture name, TetraTable product designs, blueprints, logos, graphics, text, and photographs—is the exclusive property of EcoHaven Furniture.</p>
+                <p><strong class="text-on-surface">6. Privacy &amp; Communications:</strong> Personal data collected during sign-up is handled under our Privacy Policy and the Philippine Data Privacy Act of 2012 (RA 10173). By creating an account, you consent to receive essential transactional emails (order confirmations, shipping updates, password resets).</p>
+                <p><strong class="text-on-surface">7. Account Suspension &amp; Termination:</strong> We reserve the right to suspend or terminate accounts that violate these Terms or engage in fraud. You may request account deletion anytime.</p>
+                <p><strong class="text-on-surface">8. Limitation of Liability:</strong> EcoHaven Furniture shall not be liable for indirect, incidental, or consequential damages arising from website use or improper furniture assembly/use. Total liability shall not exceed the amount paid for the specific product.</p>
+                <p><strong class="text-on-surface">9. Changes to Terms:</strong> Updates will be posted with a revised effective date. Continued account use constitutes acceptance.</p>
+                <p><strong class="text-on-surface">10. Governing Law &amp; Contact:</strong> Governed by the laws of the Republic of the Philippines. Contact: EcoHaven Furniture • Email: <span class="text-primary font-semibold">ecohavenfurnitureph@gmail.com</span> • Phone: +63 981 255 8028 • Address: #34, Dalan Batu, Pasig, Candaba, Pampanga.</p>
+              </div>
+
+              <!-- Panel: Privacy Policy -->
+              <div id="legalPanel_privacy" class="space-y-3 hidden">
+                <p class="font-semibold text-on-surface">Privacy Policy — EcoHaven Furniture (RA 10173 • Effective: November 16, 2026)</p>
+                <p>At EcoHaven Furniture Company, we respect your privacy and safeguard your personal data in compliance with the Philippine Data Privacy Act of 2012 (Republic Act No. 10173).</p>
+                <p><strong class="text-on-surface">1. Information We Collect:</strong> Personal &amp; Account Details (full name, email, encrypted password); Contact &amp; Delivery Info (shipping/billing address, contact number, delivery notes); Transaction &amp; Order Info (products ordered, finishes, order history, payment method, reference numbers—we do not store card details or e-wallet PINs); Device &amp; Browsing Data (IP, browser, cookies to keep you signed in and save cart items).</p>
+                <p><strong class="text-on-surface">2. How We Use Your Information:</strong> Order processing &amp; delivery; account management; customer service &amp; warranty claims; order updates &amp; opt-in promotions; website improvement &amp; security.</p>
+                <p><strong class="text-on-surface">3. Sharing Your Information:</strong> We never sell, rent, or trade your personal data. We only share necessary details with Courier &amp; Delivery Partners, Payment Gateways (GCash, Maya, bank/card processors), encrypted Website Hosting &amp; IT Providers, and Legal Authorities when required by Philippine law.</p>
+                <p><strong class="text-on-surface">4. Data Security &amp; Retention:</strong> Protected via SSL/HTTPS encryption, encrypted passwords, and restricted staff access. Retained while your account is active and up to 5–10 years for tax/accounting compliance, then safely deleted or anonymized.</p>
+                <p><strong class="text-on-surface">5. Cookies:</strong> Used to remember preferences and shopping cart items.</p>
+                <p><strong class="text-on-surface">6. Your Privacy Rights (RA 10173):</strong> You have the right to Be Informed, Access your data, Correct/Rectify inaccuracies, Erase/Block data, Object/Opt Out of marketing, Data Portability, and File a Complaint with the National Privacy Commission (NPC).</p>
+                <p><strong class="text-on-surface">7–8. Third-Party Links &amp; Policy Updates:</strong> External links follow their own privacy policies. Any updates will be posted with a revised Effective Date.</p>
+              </div>
+
+              <!-- Panel: Return & Refund Policy -->
+              <div id="legalPanel_returns" class="space-y-3 hidden">
+                <p class="font-semibold text-on-surface">Return &amp; Refund Policy — EcoHaven Furniture (Effective: November 16, 2026)</p>
+                <p><strong class="text-on-surface">1. Return Window (7 Calendar Days):</strong> You have 7 calendar days from the date your TetraTable is delivered to initiate a return or exchange. The item must be unused, unassembled (or neatly disassembled without damage), free of scratches/stains, and in its original packaging with all modular components, hardware, and manuals.</p>
+                <p><strong class="text-on-surface">2. Non-Returnable Items:</strong> Custom-finished, personalized, or made-to-order TetraTable units; Final Sale/Clearance items; products damaged due to improper assembly, misuse, accidents, or normal wear and tear.</p>
+                <p><strong class="text-on-surface">3. Damaged or Defective Items:</strong> Inspect your TetraTable upon delivery. Contact us within 7 days of delivery at <span class="text-primary font-semibold">ecohavenfurnitureph@gmail.com</span> with your order number and clear photos/videos. We will arrange free replacement parts, a full replacement unit, or a complete refund at no shipping cost to you.</p>
+                <p><strong class="text-on-surface">4. How to Initiate a Return:</strong> (1) Email <span class="text-primary font-semibold">ecohavenfurnitureph@gmail.com</span> with your Order Number, Full Name, and Reason for Return. (2) Receive review &amp; RMA number within 1–2 business days (do not ship back without authorization). (3) Securely pack all components in the original box.</p>
+                <p><strong class="text-on-surface">5. Return Shipping Costs:</strong> EcoHaven covers 100% of return shipping for defective, damaged, or incorrect items. For change-of-mind returns, the customer covers return shipping, original shipping is non-refundable, and a 5% restocking fee may apply if original packaging is missing/damaged.</p>
+                <p><strong class="text-on-surface">6–8. Refunds, Exchanges &amp; Support:</strong> Inspected within 3–5 business days of arrival; approved refunds are issued to your original payment method within 5–10 business days. Support: <span class="text-primary font-semibold">ecohavenfurnitureph@gmail.com</span> • +63 981 255 8028 (Mon–Sat, 9:00 AM – 6:00 PM).</p>
+              </div>
+
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="p-4 sm:px-6 border-t border-outline-variant/30 bg-surface-container-low flex flex-wrap items-center justify-between gap-2">
+              <a id="legalFullPageLink" href="${legalBaseHref}#terms" target="_blank" class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                <span>Open Full Legal Page</span>
+                <span class="material-symbols-outlined text-[15px]">open_in_new</span>
+              </a>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="closeLegalQuickModal()" class="px-4 py-2 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-all">
+                  Close
+                </button>
+                <button type="button" onclick="acceptLegalQuickModal()" class="px-5 py-2 rounded-full bg-primary hover:bg-primary-container text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[15px]">check_circle</span>
+                  <span>I Agree &amp; Continue</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', html);
+      quickModal = document.getElementById('ecohavenLegalQuickModal');
+    }
+
+    window.switchLegalQuickTab(section);
+    quickModal.classList.remove('hidden');
+  };
+
+  window.switchLegalQuickTab = function (section) {
+    const sections = ['terms', 'privacy', 'returns'];
+    const isPagesDir = window.location.pathname.includes('/pages/');
+    const legalBaseHref = isPagesDir ? 'legal.html' : 'pages/legal.html';
+    const fullLink = document.getElementById('legalFullPageLink');
+    if (fullLink) fullLink.href = `${legalBaseHref}#${section}`;
+
+    sections.forEach(s => {
+      const tab = document.getElementById('legalTab_' + s);
+      const panel = document.getElementById('legalPanel_' + s);
+      if (!tab || !panel) return;
+      if (s === section) {
+        tab.className = 'py-2 px-3 rounded-xl text-xs font-bold transition-all bg-primary text-white shadow-xs';
+        panel.classList.remove('hidden');
+      } else {
+        tab.className = 'py-2 px-3 rounded-xl text-xs font-medium transition-all text-on-surface-variant hover:text-on-surface';
+        panel.classList.add('hidden');
+      }
+    });
+  };
+
+  window.closeLegalQuickModal = function () {
+    const quickModal = document.getElementById('ecohavenLegalQuickModal');
+    if (quickModal) quickModal.classList.add('hidden');
+  };
+
+  window.acceptLegalQuickModal = function () {
+    const agreeBox = document.getElementById('regAgreeTerms');
+    if (agreeBox) agreeBox.checked = true;
+    const signupAgreeBox = document.getElementById('signupAgreeTerms');
+    if (signupAgreeBox) signupAgreeBox.checked = true;
+    window.closeLegalQuickModal();
+  };
+
   // REGISTER ACCOUNT HANDLER
   window.handleAuthRegister = async function (e) {
     e.preventDefault();
@@ -593,6 +752,7 @@ if (document.readyState === 'loading') {
     const phoneInput = document.getElementById('regPhone');
     const emailInput = document.getElementById('regEmail');
     const pwdInput = document.getElementById('regPassword');
+    const agreeInput = document.getElementById('regAgreeTerms');
     const submitBtn = document.getElementById('regSubmitBtn');
     const btnText = document.getElementById('regBtnText');
 
@@ -603,6 +763,12 @@ if (document.readyState === 'loading') {
 
     if (!name || !phone || !email || !password) {
       notify('Please fill out all required fields.', 'warning');
+      return;
+    }
+
+    if (agreeInput && !agreeInput.checked) {
+      notify('Please agree to the Terms & Conditions and Privacy Policy to register.', 'warning');
+      agreeInput.focus();
       return;
     }
 
