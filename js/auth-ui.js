@@ -50,6 +50,15 @@ async function handleLogin(event) {
 async function handleSignup(event) {
   event.preventDefault();
   
+  const agreeBox = document.getElementById('signupAgreeTerms');
+  if (!agreeBox || !agreeBox.checked) {
+    if (typeof window.syncSignupAgreementState === 'function') {
+      window.syncSignupAgreementState();
+    }
+    showAlert('warning', 'Agreement Required', 'Please agree to the Terms & Conditions, Privacy Policy (RA 10173), and Return Policy to register.');
+    return;
+  }
+
   const name = document.getElementById('signupName').value.trim();
   const email = document.getElementById('signupEmail').value.trim();
   const phone = document.getElementById('signupPhone').value.trim();
@@ -328,11 +337,11 @@ function showLoginModal() {
           </div>
 
           <label for="signupAgreeTerms" class="flex items-start gap-2 text-xs text-gray-600 cursor-pointer">
-            <input type="checkbox" id="signupAgreeTerms" required class="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary">
+            <input type="checkbox" id="signupAgreeTerms" required onchange="window.syncSignupAgreementState()" class="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary">
             <span>I agree to the <a href="/pages/legal.html#terms" target="_blank" class="text-primary font-semibold underline">Terms &amp; Conditions</a>, <a href="/pages/legal.html#privacy" target="_blank" class="text-primary font-semibold underline">Privacy Policy (RA 10173)</a>, and <a href="/pages/legal.html#returns" target="_blank" class="text-primary font-semibold underline">Return Policy</a>.</span>
           </label>
           
-          <button type="submit" class="w-full py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary-container transition-all">
+          <button type="submit" id="signupSubmitBtn" disabled style="background-color: #d9c3b3; opacity: 0.6; cursor: not-allowed;" class="w-full py-3 rounded-lg text-white font-bold transition-all cursor-not-allowed">
             Create Account
           </button>
         </form>
@@ -350,12 +359,36 @@ function showLoginModal() {
   });
 }
 
+window.syncSignupAgreementState = function() {
+  const agreeBox = document.getElementById('signupAgreeTerms');
+  const submitBtn = document.getElementById('signupSubmitBtn');
+  if (!submitBtn) return;
+  if (agreeBox && agreeBox.checked) {
+    submitBtn.disabled = false;
+    submitBtn.removeAttribute('disabled');
+    submitBtn.style.backgroundColor = '#8B4513';
+    submitBtn.style.opacity = '1';
+    submitBtn.style.cursor = 'pointer';
+    submitBtn.className = 'w-full py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary-container transition-all cursor-pointer';
+  } else {
+    submitBtn.disabled = true;
+    submitBtn.setAttribute('disabled', 'disabled');
+    submitBtn.style.backgroundColor = '#d9c3b3';
+    submitBtn.style.opacity = '0.6';
+    submitBtn.style.cursor = 'not-allowed';
+    submitBtn.className = 'w-full py-3 rounded-lg text-white font-bold transition-all cursor-not-allowed';
+  }
+};
+
 // Switch between login and signup tabs
 function switchAuthTab(tab) {
   const loginForm = document.getElementById('loginForm');
   const signupForm = document.getElementById('signupForm');
   const loginTab = document.getElementById('loginTab');
   const signupTab = document.getElementById('signupTab');
+  const agreeBox = document.getElementById('signupAgreeTerms');
+  if (agreeBox) agreeBox.checked = false;
+  window.syncSignupAgreementState();
   
   if (tab === 'login') {
     loginForm.classList.remove('hidden');

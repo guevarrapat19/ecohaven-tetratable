@@ -237,14 +237,14 @@ if (document.readyState === 'loading') {
             <!-- Terms & Conditions + Privacy Policy Consent Checkbox -->
             <div class="p-3 rounded-2xl bg-surface-container-low border border-outline-variant/40">
               <label for="regAgreeTerms" class="flex items-start gap-2.5 cursor-pointer select-none">
-                <input type="checkbox" id="regAgreeTerms" required class="mt-0.5 w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary accent-[#86450d] cursor-pointer flex-shrink-0"/>
+                <input type="checkbox" id="regAgreeTerms" required onchange="window.syncRegisterAgreementState()" class="mt-0.5 w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary accent-[#86450d] cursor-pointer flex-shrink-0"/>
                 <span class="text-[11px] text-on-surface-variant leading-relaxed">
                   I agree to the <button type="button" onclick="openLegalQuickModal('terms')" class="text-primary font-bold underline hover:text-primary-container">Terms &amp; Conditions</button>, <button type="button" onclick="openLegalQuickModal('privacy')" class="text-primary font-bold underline hover:text-primary-container">Privacy Policy (RA 10173)</button>, and <button type="button" onclick="openLegalQuickModal('returns')" class="text-primary font-bold underline hover:text-primary-container">Return Policy</button>.
                 </span>
               </label>
             </div>
 
-            <button type="submit" id="regSubmitBtn" class="w-full py-3 rounded-full bg-primary text-white font-bold hover:bg-primary-container transition-all shadow-md flex items-center justify-center gap-1.5 text-sm active:scale-95 mt-2">
+            <button type="submit" id="regSubmitBtn" disabled style="background-color: #d9c3b3; opacity: 0.6; cursor: not-allowed;" class="w-full py-3 rounded-full text-white font-bold transition-all flex items-center justify-center gap-1.5 text-sm mt-2 cursor-not-allowed select-none">
               <span id="regBtnText">Register Account</span>
               <span class="material-symbols-outlined text-[18px]">how_to_reg</span>
             </button>
@@ -451,9 +451,39 @@ if (document.readyState === 'loading') {
     el.type = el.type === 'password' ? 'text' : 'password';
   };
 
+  window.syncRegisterAgreementState = function () {
+    const agreeBox = document.getElementById('regAgreeTerms');
+    const submitBtn = document.getElementById('regSubmitBtn');
+    if (!submitBtn) return;
+
+    const isChecked = Boolean(agreeBox && agreeBox.checked);
+    if (isChecked) {
+      submitBtn.disabled = false;
+      submitBtn.removeAttribute('disabled');
+      submitBtn.style.backgroundColor = '#8B4513';
+      submitBtn.style.opacity = '1';
+      submitBtn.style.cursor = 'pointer';
+      submitBtn.className = 'w-full py-3 rounded-full bg-primary text-white font-bold hover:bg-primary-container transition-all shadow-md flex items-center justify-center gap-1.5 text-sm active:scale-95 mt-2 cursor-pointer';
+    } else {
+      submitBtn.disabled = true;
+      submitBtn.setAttribute('disabled', 'disabled');
+      submitBtn.style.backgroundColor = '#d9c3b3';
+      submitBtn.style.opacity = '0.6';
+      submitBtn.style.cursor = 'not-allowed';
+      submitBtn.className = 'w-full py-3 rounded-full text-white font-bold transition-all flex items-center justify-center gap-1.5 text-sm mt-2 cursor-not-allowed select-none';
+    }
+  };
+
+  window.resetRegisterAgreementState = function () {
+    const agreeBox = document.getElementById('regAgreeTerms');
+    if (agreeBox) agreeBox.checked = false;
+    window.syncRegisterAgreementState();
+  };
+
   window.openAuthModal = function (tab) {
     injectAuthModal();
     window.syncHeaderUserNavigation();
+    window.resetRegisterAgreementState();
     const backdrop = document.getElementById('ecohavenAuthModalBackdrop');
     const modal = document.getElementById('ecohavenAuthModal');
     const card = document.getElementById('ecohavenAuthCard');
@@ -475,6 +505,8 @@ if (document.readyState === 'loading') {
     const card = document.getElementById('ecohavenAuthCard');
 
     if (!backdrop || !card) return;
+
+    window.resetRegisterAgreementState();
 
     backdrop.classList.add('opacity-0');
     card.classList.remove('scale-100', 'opacity-100');
@@ -577,6 +609,8 @@ if (document.readyState === 'loading') {
     const loginForm = document.getElementById('authLoginForm');
 
     if (!regBtn || !loginBtn || !regForm || !loginForm) return;
+
+    window.resetRegisterAgreementState();
 
     if (tab === 'register') {
       regBtn.className = 'py-2 rounded-xl text-xs font-bold transition-all bg-primary text-white shadow-sm';
@@ -742,6 +776,12 @@ if (document.readyState === 'loading') {
     if (agreeBox) agreeBox.checked = true;
     const signupAgreeBox = document.getElementById('signupAgreeTerms');
     if (signupAgreeBox) signupAgreeBox.checked = true;
+    if (typeof window.syncRegisterAgreementState === 'function') {
+      window.syncRegisterAgreementState();
+    }
+    if (typeof window.syncSignupAgreementState === 'function') {
+      window.syncSignupAgreementState();
+    }
     window.closeLegalQuickModal();
   };
 
@@ -756,6 +796,16 @@ if (document.readyState === 'loading') {
     const submitBtn = document.getElementById('regSubmitBtn');
     const btnText = document.getElementById('regBtnText');
 
+    // DevTools bypass protection: strictly block if checkbox is missing or unchecked
+    if (!agreeInput || !agreeInput.checked) {
+      if (typeof window.syncRegisterAgreementState === 'function') {
+        window.syncRegisterAgreementState();
+      }
+      notify('Please agree to the Terms & Conditions, Privacy Policy (RA 10173), and Return Policy to register.', 'warning');
+      if (agreeInput) agreeInput.focus();
+      return;
+    }
+
     const name = nameInput.value.trim();
     const phone = phoneInput.value.trim();
     const email = emailInput.value.trim().toLowerCase();
@@ -763,12 +813,6 @@ if (document.readyState === 'loading') {
 
     if (!name || !phone || !email || !password) {
       notify('Please fill out all required fields.', 'warning');
-      return;
-    }
-
-    if (agreeInput && !agreeInput.checked) {
-      notify('Please agree to the Terms & Conditions and Privacy Policy to register.', 'warning');
-      agreeInput.focus();
       return;
     }
 
@@ -807,8 +851,8 @@ if (document.readyState === 'loading') {
           notify('An account with this email already exists. Please Sign In.', 'warning');
           switchAuthTab('login');
           document.getElementById('loginIdentifier').value = email;
-          if (submitBtn) submitBtn.disabled = false;
           if (btnText) btnText.textContent = 'Register Account';
+          window.syncRegisterAgreementState();
           return;
         }
         const existingPhone = (u.phone || '').replace(/[^0-9]/g, '');
@@ -816,8 +860,8 @@ if (document.readyState === 'loading') {
           notify('An account with this mobile number already exists. Please Sign In.', 'warning');
           switchAuthTab('login');
           document.getElementById('loginIdentifier').value = phone;
-          if (submitBtn) submitBtn.disabled = false;
           if (btnText) btnText.textContent = 'Register Account';
+          window.syncRegisterAgreementState();
           return;
         }
       }
@@ -926,8 +970,8 @@ if (document.readyState === 'loading') {
       console.error('Registration error:', err);
       notify('Registration failed. Please check your connection and try again.', 'error');
     } finally {
-      if (submitBtn) submitBtn.disabled = false;
       if (btnText) btnText.textContent = 'Register Account';
+      window.syncRegisterAgreementState();
     }
   };
 
